@@ -14,4 +14,10 @@ public class BinaryExpression extends Expression
         this.left = left;
         this.right = right;
     }
+    
+    @Override
+    public String codegen()
+    {
+        return null;
+    }
 }

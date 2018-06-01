@@ -12,4 +12,10 @@ public class CallExpression extends Expression
         this.caller = caller;
         this.arguments = arguments;
     }
+    
+    @Override
+    public String codegen()
+    {
+        return null;
+    }
 }

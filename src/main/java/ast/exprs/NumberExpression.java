@@ -8,4 +8,10 @@ public class NumberExpression extends Expression
     {
         this.val = val;
     }
+    
+    @Override
+    public String codegen()
+    {
+        return null;
+    }
 }
