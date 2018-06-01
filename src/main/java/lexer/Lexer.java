@@ -1,3 +1,5 @@
+package lexer;
+
 import java.util.*;
 import java.util.regex.*;
 
@@ -65,15 +67,26 @@ public class Lexer
             
             // Allow _ in numbers
             String type = it.next();
-            if (isDigit(type) || type.equals("_"))
+            if (isDigit(type) || type.equals("_") || type.equals("."))
             {
                 num.append(type);
-                while (isDigit(it.next()) || it.current().equals("_"))
+                while (isDigit(it.next()) || it.current().equals("_") || it.current().equals("."))
                 {
                     num.append(it.current());
                 }
                 
-                return new Token(num.toString().replace("_", ""), TokenType.INT);
+                String numb = num.toString().replace("_", "");
+                if (numb.contains("."))
+                {
+                    while (numb.replace(".", "").length() + 1 != numb.length())
+                    {
+                        numb = numb.replaceFirst(".", "");
+                    }
+                    
+                    return new Token(numb, TokenType.FLOAT);
+                }
+                
+                return new Token(numb, TokenType.INT);
             }
             
             // allow binary digits

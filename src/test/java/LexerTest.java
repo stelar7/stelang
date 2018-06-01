@@ -1,3 +1,4 @@
+import lexer.Lexer;
 import org.junit.Test;
 
 public class LexerTest

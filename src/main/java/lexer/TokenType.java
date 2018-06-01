@@ -1,3 +1,5 @@
+package lexer;
+
 import java.util.stream.Stream;
 
 public enum TokenType

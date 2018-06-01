@@ -1,3 +1,5 @@
+package lexer;
+
 public class TextIterator
 {
     private int    current;
