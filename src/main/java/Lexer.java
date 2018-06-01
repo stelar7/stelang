@@ -98,6 +98,17 @@ public class Lexer
                 return new Token(String.valueOf(Long.parseUnsignedLong(num.toString(), 16)), TokenType.INT);
             }
             
+            // allow octal digits
+            if (num.toString().equals("0") && type.equals("o"))
+            {
+                while (isOctal(it.next()))
+                {
+                    num.append(it.current());
+                }
+                
+                return new Token(String.valueOf(Long.parseUnsignedLong(num.toString(), 8)), TokenType.INT);
+            }
+            
             return new Token(num.toString(), TokenType.INT);
         }
         
@@ -118,6 +129,13 @@ public class Lexer
         String val = it.current();
         it.next();
         return new Token(val, TokenType.from(val));
+    }
+    
+    private boolean isOctal(String str)
+    {
+        Pattern pattern = Pattern.compile("[0-7]");
+        Matcher matcher = pattern.matcher(str);
+        return matcher.matches();
     }
     
     private boolean isComment(String str)
