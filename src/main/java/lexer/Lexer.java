@@ -80,7 +80,7 @@ public class Lexer
                 {
                     while (numb.replace(".", "").length() + 1 != numb.length())
                     {
-                        numb = numb.replaceFirst(".", "");
+                        numb = numb.replaceFirst("\\.", "");
                     }
                     
                     return new Token(numb, TokenType.FLOAT);
