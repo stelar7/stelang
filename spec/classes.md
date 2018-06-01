@@ -26,6 +26,12 @@ enum MyEnum3 {
     MyEnum2(RegEx:value);
 }
 
+enum MyEnum4 {
+    A(2), B(5), C(8), D(2);
+    MyEnum4(Int:value);
+}
+
+
 
 class UseEnum {
     function test() {
@@ -39,9 +45,10 @@ class UseEnum {
         
         
         // Create a reference from a value
-        MyEnum.from(2); returns MyEnum.C;
-        MyEnum2.from(8); retuns MyEnum2.C;
-        MyEnum3.from("test"); retuns MyEnum3.C;
+        MyEnum.from(2);         //returns MyEnum.C;
+        MyEnum2.from(8);        //retunrs MyEnum2.C;
+        MyEnum3.from("test");   //retunrs MyEnum3.C;
+        MyEnum4.from(2);        //retunrs MyEnum4.A; because it matches by param, then ordinal
     }
 }
 ```

@@ -1,3 +1,5 @@
+import java.util.stream.Stream;
+
 public enum TokenType
 {
     // braces
@@ -43,5 +45,10 @@ public enum TokenType
     TokenType(String token)
     {
         this.token = token;
+    }
+    
+    public static TokenType from(String val)
+    {
+        return Stream.of(values()).filter(t -> t.token.equals(val)).findFirst().orElse(TokenType.UNKNOWN);
     }
 }

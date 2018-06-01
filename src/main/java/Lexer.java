@@ -8,13 +8,20 @@ public class Lexer
         Lexer l = new Lexer();
         // List<Token> oktokens = l.parse("this is some text 0x00 0xf 0xffff 0 15 65535 0b0 0b1111 0b1111111111111111");
 //        List<Token> tokens = l.parse("// nt\nmore content starts here");
-    
-        List<Token> tokens = l.parse("class myclass {" +
-                                     "function add(int:a, int:b):int {" +
-                                     "return a + b;" +
-                                     "}" +
-                                     "}");
-        System.out.println(tokens);
+        
+        List<Token> tokens = l.parse(
+                "" +
+                "class myclass {" +
+                "    function add(int:a, int:b):int {" +
+                "        return a + b;" +
+                "    }" +
+                
+                "    operator¤(myclass:self,otherclass:other):myclass {" +
+                "        return myclass();" +
+                "    }" +
+                "}");
+        
+        tokens.forEach(System.out::println);
     }
     
     public List<Token> parse(String text)
@@ -110,7 +117,7 @@ public class Lexer
         
         String val = it.current();
         it.next();
-        return new Token(val, TokenType.UNKNOWN);
+        return new Token(val, TokenType.from(val));
     }
     
     private boolean isComment(String str)
