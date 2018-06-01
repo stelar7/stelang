@@ -102,11 +102,3 @@ operator+ (MyClass:left, other_class: right): Int {
     return left.some_field + right.other_field;
 }
 ```
-
-
-You can set special operators aswell
-```
-operator$ (MyClass: left, some_object: right): Text {
-    return "cash money yoooooo";
-}
-```
