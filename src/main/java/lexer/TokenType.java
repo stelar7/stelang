@@ -21,8 +21,7 @@ public enum TokenType
     
     // comparators
     EQUAL("=="), NOT("!"), NOTEQL("!="),
-    GREATER("<"), LESS(">"), SPACESHIP("<=>"),
-    GREATEREQL("<="), LESSEQL(">="),
+    SPACESHIP("<=>"), GREATEREQL("<="), LESSEQL(">="),
     
     // logic
     CARET("^"), TRUE("true"), FALSE("false"),
@@ -56,5 +55,34 @@ public enum TokenType
     public static TokenType from(String val)
     {
         return Stream.of(values()).filter(t -> t.token.equals(val)).findFirst().orElse(TokenType.UNKNOWN);
+    }
+    
+    public boolean canCompound(TokenType next)
+    {
+        switch (this)
+        {
+            case AMPERSAND:
+                return next == AMPERSAND;
+            case BAR:
+                return next == BAR;
+            
+            case SET:
+                return next == SET;
+            
+            case NOT:
+                return next == SET;
+            
+            case LANGLE:
+                return next == SET;
+            case RANGLE:
+                return next == SET;
+            
+            case GREATEREQL:
+                return next == RANGLE;
+            
+            default:
+                return false;
+            
+        }
     }
 }

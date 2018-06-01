@@ -24,8 +24,8 @@ public class SyntaxTree
         
         put(TokenType.SPACESHIP, 4);
         
-        put(TokenType.LESS, 5);
-        put(TokenType.GREATER, 5);
+        put(TokenType.RANGLE, 5);
+        put(TokenType.LANGLE, 5);
         put(TokenType.LESSEQL, 5);
         put(TokenType.GREATEREQL, 5);
         

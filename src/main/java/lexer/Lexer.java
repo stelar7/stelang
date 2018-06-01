@@ -16,6 +16,9 @@ public class Lexer
                 "class myclass {" +
                 "    function add(int:a, int:b):int {" +
                 "        return a + b;" +
+                "        return a == b;" +
+                "        return a <=> b;" +
+                "        return a != b;" +
                 "    }" +
                 
                 "    operator¤(myclass:self,otherclass:other):myclass {" +
@@ -139,9 +142,28 @@ public class Lexer
             return new Token(comment.toString(), TokenType.COMMENT);
         }
         
-        String val = it.current();
+        
+        String    val  = it.current();
+        TokenType type = TokenType.from(val);
         it.next();
-        return new Token(val, TokenType.from(val));
+        
+        String    nval  = it.current();
+        TokenType ntype = TokenType.from(nval);
+        
+        if (type.canCompound(ntype))
+        {
+            while (type.canCompound(ntype))
+            {
+                val += nval;
+                type = TokenType.from(val);
+                it.next();
+                
+                nval = it.current();
+                ntype = TokenType.from(nval);
+            }
+        }
+        
+        return new Token(val, type);
     }
     
     private boolean isOctal(String str)
