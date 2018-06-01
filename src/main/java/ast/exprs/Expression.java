@@ -1,4 +1,4 @@
-package ast;
+package ast.exprs;
 
 public class Expression
 {

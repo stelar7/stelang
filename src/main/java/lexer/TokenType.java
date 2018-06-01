@@ -16,12 +16,16 @@ public enum TokenType
     PLUS("+"), MINUS("-"),
     ASTERISK("*"), SLASH("/"),
     AMPERSAND("&"), BAR("|"),
+    AMPERSANDAMPERSAND("&&"), BARBAR("||"),
+    SET("="),
     
     // comparators
-    EQUAL("="), NOT("!"), GREATER("<"), LESS(">"),
+    EQUAL("=="), NOT("!"), NOTEQL("!="),
+    GREATER("<"), LESS(">"), SPACESHIP("<=>"),
+    GREATEREQL("<="), LESSEQL(">="),
     
     // logic
-    XOR("^"), TRUE("true"), FALSE("false"),
+    CARET("^"), TRUE("true"), FALSE("false"),
     
     // structure
     CLASS("class"), ENUM("enum"), FUNCTION("function"),
