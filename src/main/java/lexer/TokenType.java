@@ -14,17 +14,29 @@ public enum TokenType
     DOT("."), COMMA(","),
     COLON(":"), SEMICOLON(";"),
     PLUS("+"), MINUS("-"),
-    ASTERISK("*"), SLASH("/"),
+    ASTERISK("*"), SLASH("/"), PERCENT("%"),
     AMPERSAND("&"), BAR("|"),
     AMPERSANDAMPERSAND("&&"), BARBAR("||"),
     SET("="),
+    
+    SETEQL("==="), SETNOTEQL("=!="),
+    SETRANGLE("=>"), SETRANGLEEQL("=>="),
+    SETLANGLE("=<"), SETLANGLEEQL("=<="),
+    SETSPACESHIP("=<=>"),
+    SETPLUS("=+"), SETMINUS("=-"),
+    SETASTERIX("=*"), SETSLASH("=/"), SETPERCENT("=%"),
+    SETANDAND("=&&"), SETBARBAR("=||"), SETNOT("=!"),
+    SETAND("=&"), SETBAR("=|"), SETCARET("=^"),
+    SETRANGLERANGLE("=>>"), SETLANGLELANGLE("=<<"),
     
     // comparators
     EQUAL("=="), NOT("!"), NOTEQL("!="),
     SPACESHIP("<=>"), GREATEREQL("<="), LESSEQL(">="),
     
     // logic
-    CARET("^"), TRUE("true"), FALSE("false"),
+    CARET("^"),
+    TRUE("true"), FALSE("false"),
+    LSHIFT("<<"), RSHIFT(">>"),
     
     // structure
     CLASS("class"), ENUM("enum"), FUNCTION("function"),
@@ -32,18 +44,23 @@ public enum TokenType
     // control
     IF("if"), ELSE("else"),
     CONTINUE("continue"), BREAK("break"),
-    WHILE("while"), DO("do"), FOR("for"), THEN("then"),
+    WHILE("while"), DO("do"),
+    FOR("for"), THEN("then"),
     SWITCH("switch"), CASE("case"),
     RETURN("return"),
     
     // modifiers
-    CONST("const"), VAL("val"), GLOBAL("global"), PURE("pure"),
+    CONST("const"), VAL("val"),
+    GLOBAL("global"), PURE("pure"),
     
     // lexing
-    IDENTIFIER(""), KEYWORD(""), COMMENT(""), UNKNOWN(""),
+    IDENTIFIER(""), KEYWORD(""),
+    COMMENT(""), UNKNOWN(""),
     
     // literal
-    TEXT("text"), INT("int"), FLOAT("float"), NULL("null"), BOOL("bool");
+    TEXT("text"), INT("int"),
+    FLOAT("float"), NULL("null"),
+    BOOL("bool");
     
     String token;
     
@@ -57,32 +74,8 @@ public enum TokenType
         return Stream.of(values()).filter(t -> t.token.equals(val)).findFirst().orElse(TokenType.UNKNOWN);
     }
     
-    public boolean canCompound(TokenType next)
+    public static boolean canCompound(String left, String right)
     {
-        switch (this)
-        {
-            case AMPERSAND:
-                return next == AMPERSAND;
-            case BAR:
-                return next == BAR;
-            
-            case SET:
-                return next == SET;
-            
-            case NOT:
-                return next == SET;
-            
-            case LANGLE:
-                return next == SET;
-            case RANGLE:
-                return next == SET;
-            
-            case GREATEREQL:
-                return next == RANGLE;
-            
-            default:
-                return false;
-            
-        }
+        return from(left + right) != UNKNOWN;
     }
 }

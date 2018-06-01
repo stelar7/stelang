@@ -143,27 +143,22 @@ public class Lexer
         }
         
         
-        String    val  = it.current();
-        TokenType type = TokenType.from(val);
+        StringBuilder val = new StringBuilder(it.current());
         it.next();
         
-        String    nval  = it.current();
-        TokenType ntype = TokenType.from(nval);
+        String nval = it.current();
         
-        if (type.canCompound(ntype))
+        if (TokenType.canCompound(val.toString(), nval))
         {
-            while (type.canCompound(ntype))
+            while (TokenType.canCompound(val.toString(), nval))
             {
-                val += nval;
-                type = TokenType.from(val);
+                val.append(nval);
                 it.next();
-                
                 nval = it.current();
-                ntype = TokenType.from(nval);
             }
         }
         
-        return new Token(val, type);
+        return new Token(val.toString(), TokenType.from(val.toString()));
     }
     
     private boolean isOctal(String str)
