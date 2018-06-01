@@ -32,8 +32,11 @@ public enum TokenType
     // modifiers
     CONST("const"), VAL("val"), GLOBAL("global"), PURE("pure"),
     
+    // lexing
+    IDENTIFIER(""), KEYWORD(""), COMMENT(""), UNKNOWN(""),
+    
     // literal
-    IDENTIFIER(""), TEXT("text"), INT("int"), FLOAT("float"), NULL("null"), BOOL("bool");
+    TEXT("text"), INT("int"), FLOAT("float"), NULL("null"), BOOL("bool");
     
     String token;
     
