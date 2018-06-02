@@ -76,4 +76,9 @@ public enum TokenType
     {
         return from(left + right) != UNKNOWN;
     }
+    
+    public static boolean isSetType(Token currentToken)
+    {
+        return currentToken.getType().token.startsWith("=") && currentToken.getType() != EQUAL;
+    }
 }

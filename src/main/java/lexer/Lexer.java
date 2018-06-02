@@ -16,6 +16,16 @@ public class Lexer
         List<Token> tokens = l.parse(
                 "" +
                 "class myclass {" +
+
+                "    int d = 5;" +
+                "    val c = 5;" +
+                "    const a = 5;" +
+                "    const b = switch(a) {" +
+                "       case 1: {return 4};" +
+                "       case 2..4: {return 3};" +
+                "       case 5: {return 2};" +
+                "}"+
+                
                 "    function add(int:a, int:b):int {" +
                 "        return a + b;" +
                 "    }" +

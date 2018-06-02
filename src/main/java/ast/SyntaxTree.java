@@ -163,10 +163,16 @@ public class SyntaxTree
                     String identifier = currentToken.getContent();
                     nextToken();
                     
+                    Expression value = new NullExpression();
+                    if (TokenType.isSetType(currentToken))
+                    {
+                        value = parseExpression();
+                    }
+                    
                     assertType(TokenType.SEMICOLON);
                     nextToken();
                     
-                    syntaxes.add(new VariableDefinitionSyntax(identifier, visibility));
+                    syntaxes.add(new VariableDefinitionSyntax(identifier, visibility, value));
                     break;
                 }
                 
@@ -253,7 +259,7 @@ public class SyntaxTree
     
     private Expression parseExpression()
     {
-        // todo
+        // todo parse correctly, and add support for switch
         while (currentToken.getType() != TokenType.SEMICOLON)
         {
             nextToken();
