@@ -43,7 +43,9 @@ public class SyntaxTree
         put(TokenType.AMPERSANDAMPERSAND, 10);
         put(TokenType.BARBAR, 11);
         
-        put(TokenType.SET, 12);
+        put(TokenType.QUESTIONMARK, 12);
+        
+        put(TokenType.SET, 13);
         put(TokenType.SETEQL, 13);
         put(TokenType.SETNOTEQL, 13);
         put(TokenType.SETRANGLE, 13);
@@ -75,6 +77,16 @@ public class SyntaxTree
         }
         
         currentToken = tokens.get(index++);
+    }
+    
+    private Token peekToken()
+    {
+        if (index + 1 > tokens.size())
+        {
+            return null;
+        }
+        
+        return tokens.get(index + 1);
     }
     
     private int getPrecedence()
@@ -272,6 +284,12 @@ public class SyntaxTree
                 return parseSwitch();
             case IF:
                 return parseIf();
+            case FOR:
+                return parseFor();
+            case WHILE:
+                return parseWhile();
+            case DO:
+                return parseDo();
             case IDENTIFIER:
                 return parseIdentifier();
             case NUMBER:
@@ -290,7 +308,22 @@ public class SyntaxTree
         return new NumberExpression(num);
     }
     
-    // TODO start
+    // todo start
+    
+    private Expression parseDo()
+    {
+        return null;
+    }
+    
+    private Expression parseWhile()
+    {
+        return null;
+    }
+    
+    private Expression parseFor()
+    {
+        return null;
+    }
     
     private Expression parseIdentifier()
     {

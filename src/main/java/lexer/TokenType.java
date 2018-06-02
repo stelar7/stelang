@@ -17,7 +17,7 @@ public enum TokenType
     ASTERISK("*"), SLASH("/"), PERCENT("%"),
     AMPERSAND("&"), BAR("|"),
     AMPERSANDAMPERSAND("&&"), BARBAR("||"),
-    SET("="),
+    SET("="), QUESTIONMARK("?"),
     
     SETEQL("==="), SETNOTEQL("=!="),
     SETRANGLE("=>"), SETRANGLEEQL("=>="),
