@@ -12,6 +12,11 @@ public class SyntaxTree
     
     private Token currentToken;
     
+    public SyntaxTree(List<Token> tokens)
+    {
+        this.tokens = tokens;
+    }
+    
     private static Map<TokenType, Integer> binOps = new HashMap<>()
     {{
         put(TokenType.UNKNOWN, 1);
@@ -39,246 +44,308 @@ public class SyntaxTree
         put(TokenType.BARBAR, 11);
         
         put(TokenType.SET, 12);
+        put(TokenType.SETEQL, 13);
+        put(TokenType.SETNOTEQL, 13);
+        put(TokenType.SETRANGLE, 13);
+        put(TokenType.SETRANGLEEQL, 13);
+        put(TokenType.SETLANGLE, 13);
+        put(TokenType.SETLANGLEEQL, 13);
+        put(TokenType.SETSPACESHIP, 13);
+        put(TokenType.SETPLUS, 13);
+        put(TokenType.SETMINUS, 13);
+        put(TokenType.SETASTERIX, 13);
+        put(TokenType.SETSLASH, 13);
+        put(TokenType.SETPERCENT, 13);
+        put(TokenType.SETANDAND, 13);
+        put(TokenType.SETBARBAR, 13);
+        put(TokenType.SETNOT, 13);
+        put(TokenType.SETAND, 13);
+        put(TokenType.SETBAR, 13);
+        put(TokenType.SETCARET, 13);
+        put(TokenType.SETRANGLERANGLE, 13);
+        put(TokenType.SETLANGLELANGLE, 13);
     }};
     
     private void nextToken()
     {
+        if (index + 1 > tokens.size())
+        {
+            currentToken = null;
+            return;
+        }
+        
         currentToken = tokens.get(index++);
-    }
-    
-    private Expression parseSingle()
-    {
-        switch (currentToken.getType())
-        {
-            case INT:
-            case FLOAT:
-                return parseNumberExpression();
-            
-            case IDENTIFIER:
-                return parseIdentifierExpression();
-            
-            case LPAREN:
-                return parseParenthesisExpression();
-            
-            default:
-                System.err.println("Unknown token when expecting an expression: " + currentToken);
-        }
-        return null;
-    }
-    
-    private Expression parseNumberExpression()
-    {
-        Expression e = new NumberExpression(Double.parseDouble(currentToken.getContent()));
-        nextToken();
-        return e;
-    }
-    
-    private Expression parseParenthesisExpression()
-    {
-        nextToken();
-        
-        Expression e = parseSingle();
-        if (e == null)
-        {
-            return null;
-        }
-        
-        if (currentToken.getType() != TokenType.RPAREN)
-        {
-            System.err.println("Expected ) at end of expression");
-            return null;
-        }
-        
-        nextToken();
-        return e;
-    }
-    
-    private Expression parseIdentifierExpression()
-    {
-        String name = currentToken.getContent();
-        nextToken();
-        
-        if (currentToken.getType() != TokenType.LPAREN)
-        {
-            return new VariableExpression(name);
-        }
-        
-        nextToken();
-        List<Expression> arguments = new ArrayList<>();
-        if (currentToken.getType() != TokenType.RPAREN)
-        {
-            while (true)
-            {
-                Expression arg = parseSingle();
-                if (arg != null)
-                {
-                    arguments.add(arg);
-                } else
-                {
-                    return null;
-                }
-                
-                if (currentToken.getType() == TokenType.RPAREN)
-                {
-                    break;
-                }
-                
-                if (currentToken.getType() != TokenType.COMMA)
-                {
-                    System.err.println("Expected , or ) in argument list");
-                    return null;
-                }
-                
-                nextToken();
-            }
-        }
-        
-        nextToken();
-        return new CallExpression(name, arguments);
-    }
-    
-    private Expression parseExpression()
-    {
-        Expression left = parseSingle();
-        if (left == null)
-        {
-            return null;
-        }
-        
-        return parseBinOpRight(0, left);
-    }
-    
-    private Expression parseBinOpRight(int maxPrecedence, Expression left)
-    {
-        while (true)
-        {
-            int tokenPrecedence = getPrecedence();
-            
-            if (tokenPrecedence < maxPrecedence)
-            {
-                return left;
-            }
-            
-            Token op = currentToken;
-            nextToken();
-            
-            Expression right = parseSingle();
-            if (right == null)
-            {
-                return null;
-            }
-            
-            int nextPrecedence = getPrecedence();
-            if (tokenPrecedence < nextPrecedence)
-            {
-                right = parseBinOpRight(tokenPrecedence + 1, right);
-                if (right == null)
-                {
-                    return null;
-                }
-            }
-            
-            left = new BinaryExpression(op, left, right);
-        }
-    }
-    
-    private PrototypeSyntax parsePrototype()
-    {
-        if (currentToken.getType() != TokenType.IDENTIFIER)
-        {
-            System.err.println("Expected function name");
-            return null;
-        }
-        
-        String name = currentToken.getContent();
-        nextToken();
-        
-        if (currentToken.getType() != TokenType.LPAREN)
-        {
-            System.err.println("Expected ( in function declaration");
-            return null;
-        }
-        
-        List<PrototypeParameter> arguments = new ArrayList<>();
-        while (true)
-        {
-            nextToken();
-            if (currentToken.getType() == TokenType.IDENTIFIER)
-            {
-                String type = currentToken.getContent();
-                
-                nextToken();
-                if (currentToken.getType() != TokenType.COLON)
-                {
-                    System.err.println("Expected : after type declaration");
-                    return null;
-                }
-                
-                nextToken();
-                if (currentToken.getType() != TokenType.IDENTIFIER)
-                {
-                    System.err.println("Expected parameter name after :");
-                    return null;
-                }
-                
-                String paramName = currentToken.getContent();
-                arguments.add(new PrototypeParameter(type, paramName));
-                
-                nextToken();
-                if (currentToken.getType() == TokenType.RPAREN)
-                {
-                    break;
-                }
-            } else
-            {
-                if (currentToken.getType() != TokenType.IDENTIFIER)
-                {
-                    System.err.println("Expected parameter type");
-                    return null;
-                }
-            }
-        }
-        
-        return new PrototypeSyntax(name, arguments);
-    }
-    
-    private FunctionSyntax parseDefinition()
-    {
-        if (currentToken.getType() != TokenType.FUNCTION)
-        {
-            System.err.println("Function declarations should start with the \"function\" keyword");
-            return null;
-        }
-        
-        nextToken();
-        PrototypeSyntax proto = parsePrototype();
-        if (proto == null)
-        {
-            return null;
-        }
-        
-        Expression e = parseExpression();
-        if (e == null)
-        {
-            return null;
-        }
-        
-        return new FunctionSyntax(proto, e);
-    }
-    
-    private FunctionSyntax parseTopLevelExpression()
-    {
-        Expression e = parseExpression();
-        if (e == null)
-        {
-            return null;
-        }
-        
-        return new FunctionSyntax(new PrototypeSyntax("", new ArrayList<>()), e);
     }
     
     private int getPrecedence()
     {
         return binOps.getOrDefault(currentToken.getType(), -1);
+    }
+    
+    public boolean isValid()
+    {
+        // first token
+        nextToken();
+        
+        Syntax s;
+        switch (currentToken.getType())
+        {
+            case IMPORT:
+            {
+                s = parseImport();
+                break;
+            }
+            case CLASS:
+            {
+                s = parseClass();
+                break;
+            }
+            case ENUM:
+            {
+                s = parseEnum();
+                break;
+            }
+            default:
+            {
+                logError("Invalid start of file, must start with import or class definition.");
+                s = null;
+            }
+        }
+        System.out.println(s);
+        return true;
+    }
+    
+    private Syntax parseEnum()
+    {
+        // todo
+        return null;
+    }
+    
+    private Syntax parseClass()
+    {
+        // class x {
+        // eat class token
+        nextToken();
+        
+        assertType(TokenType.IDENTIFIER);
+        String classname = currentToken.getContent();
+        nextToken();
+        
+        assertType(TokenType.LSQUIGLY);
+        
+        List<Syntax> body = handleClassBody();
+        
+        assertType(TokenType.RSQUIGLY);
+        nextToken();
+        
+        return new ClassSyntax(classname, body);
+    }
+    
+    private List<Syntax> handleClassBody()
+    {
+        // {
+        nextToken();
+        
+        List<Syntax> syntaxes = new ArrayList<>();
+        while (currentToken.getType() != TokenType.RSQUIGLY)
+        {
+            switch (currentToken.getType())
+            {
+                // class member field
+                case CONST:
+                case VAL:
+                case IDENTIFIER:
+                {
+                    String visibility = currentToken.getContent();
+                    nextToken();
+                    
+                    assertType(TokenType.IDENTIFIER);
+                    String identifier = currentToken.getContent();
+                    nextToken();
+                    
+                    assertType(TokenType.SEMICOLON);
+                    nextToken();
+                    
+                    syntaxes.add(new VariableDefinitionSyntax(identifier, visibility));
+                    break;
+                }
+                
+                // class functions
+                case PURE:
+                case GLOBAL:
+                case FUNCTION:
+                {
+                    // pure add(a:a, a:b):a {return a + b;}
+                    
+                    // pure
+                    String visibility = currentToken.getContent();
+                    nextToken();
+                    
+                    //add(a:a, a:b):a
+                    assertType(TokenType.IDENTIFIER);
+                    String identifier = currentToken.getContent();
+                    nextToken();
+                    
+                    PrototypeSyntax f = parsePrototype(identifier);
+                    
+                    assertType(TokenType.LSQUIGLY);
+                    nextToken();
+                    
+                    // return a + b;
+                    List<Expression> b = new ArrayList<>();
+                    while (currentToken.getType() != TokenType.RSQUIGLY)
+                    {
+                        Expression e = parseExpression();
+                        nextToken();
+                        
+                        b.add(e);
+                    }
+                    
+                    assertType(TokenType.RSQUIGLY);
+                    nextToken();
+                    
+                    syntaxes.add(new FunctionSyntax(visibility, f, b));
+                    break;
+                }
+                
+                case OPERATOR:
+                {
+                    //operator+ (a:a, b: a): a {
+                    //    return a.some_field + b.other_field;
+                    //}
+                    
+                    // operator
+                    nextToken();
+                    
+                    String identifier = currentToken.getContent();
+                    if (TokenType.from(identifier) == TokenType.UNKNOWN)
+                    {
+                        // TODO should this be allowed?
+                        logError("Unknown operator attempted overload");
+                    }
+                    
+                    nextToken();
+                    PrototypeSyntax f = parsePrototype(identifier);
+                    
+                    assertType(TokenType.LSQUIGLY);
+                    nextToken();
+                    
+                    List<Expression> b = new ArrayList<>();
+                    while (currentToken.getType() != TokenType.RSQUIGLY)
+                    {
+                        Expression e = parseExpression();
+                        nextToken();
+                        
+                        b.add(e);
+                    }
+                    
+                    assertType(TokenType.RSQUIGLY);
+                    nextToken();
+                    
+                    syntaxes.add(new FunctionSyntax("operator", f, b));
+                    break;
+                }
+            }
+        }
+        
+        return syntaxes;
+    }
+    
+    private Expression parseExpression()
+    {
+        // todo
+        while (currentToken.getType() != TokenType.SEMICOLON)
+        {
+            nextToken();
+        }
+        return null;
+    }
+    
+    private Expression parsePrimary()
+    {
+        // todo
+        return null;
+    }
+    
+    private PrototypeSyntax parsePrototype(String identifier)
+    {
+        // add(a:b, a:c):a
+        
+        assertType(TokenType.LPAREN);
+        
+        List<PrototypeParameter> params = new ArrayList<>();
+        do
+        {
+            nextToken();
+            if (currentToken.getType() != TokenType.RPAREN)
+            {
+                assertType(TokenType.IDENTIFIER);
+                String clazz = currentToken.getContent();
+                nextToken();
+                
+                assertType(TokenType.COLON);
+                nextToken();
+                
+                assertType(TokenType.IDENTIFIER);
+                String name = currentToken.getContent();
+                nextToken();
+                
+                params.add(new PrototypeParameter(clazz, name));
+            }
+        } while (currentToken.getType() == TokenType.COMMA);
+        nextToken();
+        
+        assertType(TokenType.COLON);
+        nextToken();
+        
+        assertType(TokenType.IDENTIFIER);
+        String returnType = currentToken.getContent();
+        nextToken();
+        
+        
+        return new PrototypeSyntax(identifier, params, returnType);
+    }
+    
+    private Syntax parseImport()
+    {
+        // import x from y;
+        
+        // import keyword
+        nextToken();
+        
+        assertType(TokenType.IDENTIFIER);
+        String classname = currentToken.getContent();
+        nextToken();
+        
+        assertType(TokenType.FROM);
+        nextToken();
+        
+        assertType(TokenType.IDENTIFIER);
+        String location = currentToken.getContent();
+        nextToken();
+        
+        assertType(TokenType.SEMICOLON);
+        nextToken();
+        
+        return new ImportSyntax(classname, location);
+    }
+    
+    private void assertType(TokenType identifier)
+    {
+        if (currentToken.getType() == identifier)
+        {
+            return;
+        }
+        
+        System.err.print("Expected token " + identifier + ", Current token is: " + currentToken);
+        System.err.println(currentToken);
+        System.exit(0);
+    }
+    
+    private void logError(String s)
+    {
+        System.err.println(s);
+        System.err.print("Current token is: ");
+        System.err.println(currentToken);
     }
 }

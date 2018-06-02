@@ -32,6 +32,7 @@ public enum TokenType
     // comparators
     EQUAL("=="), NOT("!"), NOTEQL("!="),
     SPACESHIP("<=>"), GREATEREQL("<="), LESSEQL(">="),
+    ARROW("->"),
     
     // logic
     CARET("^"),
@@ -39,7 +40,9 @@ public enum TokenType
     LSHIFT("<<"), RSHIFT(">>"),
     
     // structure
-    CLASS("class"), ENUM("enum"), FUNCTION("function"),
+    CLASS("class"), ENUM("enum"), FUNCTION("function"), OPERATOR("operator"),
+    
+    IMPORT("import"), FROM("from"),
     
     // control
     IF("if"), ELSE("else"),
@@ -55,12 +58,7 @@ public enum TokenType
     
     // lexing
     IDENTIFIER(""), KEYWORD(""),
-    COMMENT(""), UNKNOWN(""),
-    
-    // literal
-    TEXT("text"), INT("int"),
-    FLOAT("float"), NULL("null"),
-    BOOL("bool");
+    COMMENT(""), UNKNOWN("");
     
     String token;
     

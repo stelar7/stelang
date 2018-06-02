@@ -1,5 +1,7 @@
 package lexer;
 
+import ast.SyntaxTree;
+
 import java.util.*;
 import java.util.regex.*;
 
@@ -16,17 +18,28 @@ public class Lexer
                 "class myclass {" +
                 "    function add(int:a, int:b):int {" +
                 "        return a + b;" +
-                "        return a == b;" +
-                "        return a <=> b;" +
-                "        return a != b;" +
+                "    }" +
+                
+                "    pure add(int:a, int:b):int {" +
+                "        return a + b;" +
+                "    }" +
+                
+                "    global add(int:a, int:b):int {" +
+                "        return a + b;" +
                 "    }" +
                 
                 "    operator¤(myclass:self,otherclass:other):myclass {" +
                 "        return myclass();" +
                 "    }" +
+
+                "    operator<=>(myclass:self,otherclass:other):myclass {" +
+                "        return myclass();" +
+                "    }" +
                 "}");
         
         tokens.forEach(System.out::println);
+        SyntaxTree s = new SyntaxTree(tokens);
+        s.isValid();
     }
     
     public List<Token> parse(String text)
@@ -42,11 +55,18 @@ public class Lexer
         return tokens;
     }
     
+    int lineNumber = 0;
+    
     private Token getNextToken(TextIterator it)
     {
         // skip whitespace
         while (isWhitespace(it.current()))
         {
+            if (it.current().equals("\n"))
+            {
+                lineNumber++;
+            }
+            
             it.next();
         }
         
@@ -59,8 +79,8 @@ public class Lexer
                 id.append(it.current());
             }
             
-            String keyword = getKeyword(id.toString());
-            return keyword != null ? new Token(keyword, TokenType.KEYWORD) : new Token(id.toString(), TokenType.IDENTIFIER);
+            Token keyword = getKeyword(id.toString());
+            return keyword != null ? keyword : new Token(id.toString(), TokenType.IDENTIFIER, lineNumber);
         }
         
         // read digits
@@ -86,10 +106,10 @@ public class Lexer
                         numb = numb.replaceFirst("\\.", "");
                     }
                     
-                    return new Token(numb, TokenType.FLOAT);
+                    return new Token(numb, TokenType.IDENTIFIER, lineNumber);
                 }
                 
-                return new Token(numb, TokenType.INT);
+                return new Token(numb, TokenType.IDENTIFIER, lineNumber);
             }
             
             // allow binary digits
@@ -100,7 +120,7 @@ public class Lexer
                     num.append(it.current());
                 }
                 
-                return new Token(String.valueOf(Long.parseUnsignedLong(num.toString(), 2)), TokenType.INT);
+                return new Token(String.valueOf(Long.parseUnsignedLong(num.toString(), 2)), TokenType.IDENTIFIER, lineNumber);
             }
             
             // allow hex digits
@@ -111,7 +131,7 @@ public class Lexer
                     num.append(it.current());
                 }
                 
-                return new Token(String.valueOf(Long.parseUnsignedLong(num.toString(), 16)), TokenType.INT);
+                return new Token(String.valueOf(Long.parseUnsignedLong(num.toString(), 16)), TokenType.IDENTIFIER, lineNumber);
             }
             
             // allow octal digits
@@ -122,10 +142,10 @@ public class Lexer
                     num.append(it.current());
                 }
                 
-                return new Token(String.valueOf(Long.parseUnsignedLong(num.toString(), 8)), TokenType.INT);
+                return new Token(String.valueOf(Long.parseUnsignedLong(num.toString(), 8)), TokenType.IDENTIFIER, lineNumber);
             }
             
-            return new Token(num.toString(), TokenType.INT);
+            return new Token(num.toString(), TokenType.IDENTIFIER, lineNumber);
         }
         
         // parse comments
@@ -139,7 +159,7 @@ public class Lexer
                 it.next();
             }
             
-            return new Token(comment.toString(), TokenType.COMMENT);
+            return new Token(comment.toString(), TokenType.COMMENT, lineNumber);
         }
         
         
@@ -158,7 +178,7 @@ public class Lexer
             }
         }
         
-        return new Token(val.toString(), TokenType.from(val.toString()));
+        return new Token(val.toString(), TokenType.from(val.toString()), lineNumber);
     }
     
     private boolean isOctal(String str)
@@ -196,19 +216,15 @@ public class Lexer
         return matcher.matches();
     }
     
-    private String getKeyword(String str)
+    private Token getKeyword(String str)
     {
-        List<String> keywords = Arrays.asList("class", "function", "enum", "operator", "global", "pure",
-                                              "if", "for", "while", "then", "continue", "break",
-                                              "switch", "case", "default", "const", "val", "return"
-                                             );
-        
-        if (keywords.contains(str))
+        TokenType type = TokenType.from(str);
+        if (type == TokenType.UNKNOWN)
         {
-            return str;
+            return null;
         }
         
-        return null;
+        return new Token(str, type, lineNumber);
     }
     
     private boolean isIdentifier(String str)
