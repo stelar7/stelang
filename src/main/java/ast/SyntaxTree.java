@@ -164,8 +164,15 @@ public class SyntaxTree
                     nextToken();
                     
                     Expression value = new NullExpression();
+                    if (currentToken.getType() == TokenType.SEMICOLON)
+                    {
+                        syntaxes.add(new VariableDefinitionSyntax(identifier, visibility, value));
+                        break;
+                    }
+                    
                     if (TokenType.isSetType(currentToken))
                     {
+                        nextToken();
                         value = parseExpression();
                     }
                     
@@ -257,20 +264,66 @@ public class SyntaxTree
         return syntaxes;
     }
     
-    private Expression parseExpression()
+    private Expression parsePrimary()
     {
-        // todo parse correctly, and add support for switch
-        while (currentToken.getType() != TokenType.SEMICOLON)
+        switch (currentToken.getType())
         {
-            nextToken();
+            case SWITCH:
+                return parseSwitch();
+            case IF:
+                return parseIf();
+            case IDENTIFIER:
+                return parseIdentifier();
+            case NUMBER:
+                return parseNumber();
+            case LPAREN:
+                return parseParenthesis();
+            default:
+                return null;
         }
+    }
+    
+    private Expression parseNumber()
+    {
+        double num = Double.parseDouble(currentToken.getContent());
+        nextToken();
+        return new NumberExpression(num);
+    }
+    
+    // TODO start
+    
+    private Expression parseIdentifier()
+    {
         return null;
     }
     
-    private Expression parsePrimary()
+    private Expression parseParenthesis()
     {
-        // todo
         return null;
+    }
+    
+    private Expression parseIf()
+    {
+        return null;
+    }
+    
+    private Expression parseSwitch()
+    {
+        return null;
+    }
+    
+    private Expression parseBinaryOps(int i, Expression left)
+    {
+        return left;
+    }
+    
+    // TODO end
+    
+    private Expression parseExpression()
+    {
+        Expression left = parsePrimary();
+        
+        return parseBinaryOps(0, left);
     }
     
     private PrototypeSyntax parsePrototype(String identifier)
@@ -343,8 +396,7 @@ public class SyntaxTree
             return;
         }
         
-        System.err.print("Expected token " + identifier + ", Current token is: " + currentToken);
-        System.err.println(currentToken);
+        System.err.print("Expected token " + identifier + ", Current: " + currentToken);
         System.exit(0);
     }
     

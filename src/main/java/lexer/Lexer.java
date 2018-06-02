@@ -16,7 +16,7 @@ public class Lexer
         List<Token> tokens = l.parse(
                 "" +
                 "class myclass {" +
-
+                
                 "    int d = 5;" +
                 "    val c = 5;" +
                 "    const a = 5;" +
@@ -24,7 +24,15 @@ public class Lexer
                 "       case 1: {return 4};" +
                 "       case 2..4: {return 3};" +
                 "       case 5: {return 2};" +
-                "}"+
+                "}" +
+                
+                "    function add(int:a, int:b):int {" +
+                "        if (a) return a; else return b;" +
+                "    }" +
+                
+                "    function add(int:a, int:b):int {" +
+                "        return a ? a : b" +
+                "    }" +
                 
                 "    function add(int:a, int:b):int {" +
                 "        return a + b;" +
@@ -41,7 +49,7 @@ public class Lexer
                 "    operator¤(myclass:self,otherclass:other):myclass {" +
                 "        return myclass();" +
                 "    }" +
-
+                
                 "    operator<=>(myclass:self,otherclass:other):myclass {" +
                 "        return myclass();" +
                 "    }" +
@@ -66,6 +74,7 @@ public class Lexer
     }
     
     int lineNumber = 0;
+    int lineIndex  = 0;
     
     private Token getNextToken(TextIterator it)
     {
@@ -75,36 +84,43 @@ public class Lexer
             if (it.current().equals("\n"))
             {
                 lineNumber++;
+                lineIndex = 0;
             }
             
+            lineIndex += it.current().length();
             it.next();
         }
         
         // read identifiers
         if (isIdentifier(it.current()))
         {
+            lineIndex += it.current().length();
             StringBuilder id = new StringBuilder(it.current());
             while (isIdentifier(it.next()))
             {
                 id.append(it.current());
+                lineIndex += it.current().length();
             }
             
             Token keyword = getKeyword(id.toString());
-            return keyword != null ? keyword : new Token(id.toString(), TokenType.IDENTIFIER, lineNumber);
+            return keyword != null ? keyword : new Token(id.toString(), TokenType.IDENTIFIER, lineNumber, lineIndex - id.toString().length());
         }
         
         // read digits
         if (isDigit(it.current()))
         {
+            lineIndex += it.current().length();
             StringBuilder num = new StringBuilder(it.current());
             
             // Allow _ in numbers
             String type = it.next();
             if (isDigit(type) || type.equals("_") || type.equals("."))
             {
+                lineIndex += it.current().length();
                 num.append(type);
                 while (isDigit(it.next()) || it.current().equals("_") || it.current().equals("."))
                 {
+                    lineIndex += it.current().length();
                     num.append(it.current());
                 }
                 
@@ -116,10 +132,10 @@ public class Lexer
                         numb = numb.replaceFirst("\\.", "");
                     }
                     
-                    return new Token(numb, TokenType.IDENTIFIER, lineNumber);
+                    return new Token(numb, TokenType.NUMBER, lineNumber, lineIndex - num.toString().length());
                 }
                 
-                return new Token(numb, TokenType.IDENTIFIER, lineNumber);
+                return new Token(numb, TokenType.NUMBER, lineNumber, lineIndex - num.toString().length());
             }
             
             // allow binary digits
@@ -127,10 +143,11 @@ public class Lexer
             {
                 while (isBinary(it.next()))
                 {
+                    lineIndex += it.current().length();
                     num.append(it.current());
                 }
                 
-                return new Token(String.valueOf(Long.parseUnsignedLong(num.toString(), 2)), TokenType.IDENTIFIER, lineNumber);
+                return new Token(String.valueOf(Long.parseUnsignedLong(num.toString(), 2)), TokenType.NUMBER, lineNumber, lineIndex - num.toString().length());
             }
             
             // allow hex digits
@@ -138,10 +155,11 @@ public class Lexer
             {
                 while (isHex(it.next()))
                 {
+                    lineIndex += it.current().length();
                     num.append(it.current());
                 }
                 
-                return new Token(String.valueOf(Long.parseUnsignedLong(num.toString(), 16)), TokenType.IDENTIFIER, lineNumber);
+                return new Token(String.valueOf(Long.parseUnsignedLong(num.toString(), 16)), TokenType.NUMBER, lineNumber, lineIndex - num.toString().length());
             }
             
             // allow octal digits
@@ -149,13 +167,14 @@ public class Lexer
             {
                 while (isOctal(it.next()))
                 {
+                    lineIndex += it.current().length();
                     num.append(it.current());
                 }
                 
-                return new Token(String.valueOf(Long.parseUnsignedLong(num.toString(), 8)), TokenType.IDENTIFIER, lineNumber);
+                return new Token(String.valueOf(Long.parseUnsignedLong(num.toString(), 8)), TokenType.NUMBER, lineNumber, lineIndex - num.toString().length());
             }
             
-            return new Token(num.toString(), TokenType.IDENTIFIER, lineNumber);
+            return new Token(num.toString(), TokenType.NUMBER, lineNumber, lineIndex - num.toString().length());
         }
         
         // parse comments
@@ -166,10 +185,11 @@ public class Lexer
             while (!it.current().equals("\n"))
             {
                 comment.append(it.current());
+                lineIndex += it.current().length();
                 it.next();
             }
             
-            return new Token(comment.toString(), TokenType.COMMENT, lineNumber);
+            return new Token(comment.toString(), TokenType.COMMENT, lineNumber, lineIndex - comment.toString().length());
         }
         
         
@@ -187,8 +207,8 @@ public class Lexer
                 nval = it.current();
             }
         }
-        
-        return new Token(val.toString(), TokenType.from(val.toString()), lineNumber);
+        lineIndex += it.current().length();
+        return new Token(val.toString(), TokenType.from(val.toString()), lineNumber, lineIndex - val.toString().length());
     }
     
     private boolean isOctal(String str)
@@ -234,7 +254,7 @@ public class Lexer
             return null;
         }
         
-        return new Token(str, type, lineNumber);
+        return new Token(str, type, lineNumber, lineIndex);
     }
     
     private boolean isIdentifier(String str)

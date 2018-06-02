@@ -2,15 +2,19 @@ package lexer;
 
 public class Token
 {
-    private int       line;
-    private String    content;
+    private String content;
+    
+    private int line;
+    private int index;
+    
     private TokenType type;
     
-    public Token(String content, TokenType type, int line)
+    public Token(String content, TokenType type, int line, int lineIndex)
     {
         this.content = content;
         this.type = type;
         this.line = line;
+        this.index = lineIndex;
     }
     
     public String getContent()
@@ -28,12 +32,18 @@ public class Token
         return line;
     }
     
+    public int getIndex()
+    {
+        return index;
+    }
+    
     @Override
     public String toString()
     {
         return "Token{" +
-               "line=" + line +
-               ", content='" + content + '\'' +
+               "content='" + content + '\'' +
+               ", line=" + line +
+               ", index=" + index +
                ", type=" + type +
                '}';
     }

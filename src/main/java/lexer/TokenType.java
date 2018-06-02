@@ -57,7 +57,7 @@ public enum TokenType
     GLOBAL("global"), PURE("pure"),
     
     // lexing
-    IDENTIFIER(""), KEYWORD(""),
+    IDENTIFIER(""), KEYWORD(""), NUMBER(""),
     COMMENT(""), UNKNOWN("");
     
     String token;
