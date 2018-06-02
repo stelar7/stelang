@@ -1,6 +1,7 @@
 package ast;
 
 import ast.exprs.*;
+import com.google.gson.Gson;
 import lexer.*;
 
 import java.util.*;
@@ -8,7 +9,7 @@ import java.util.*;
 public class SyntaxTree
 {
     private List<Token> tokens;
-    private int         index;
+    private int         tokenIndex;
     
     private Token currentToken;
     
@@ -70,23 +71,23 @@ public class SyntaxTree
     
     private void nextToken()
     {
-        if (index + 1 > tokens.size())
+        if (tokenIndex + 1 > tokens.size())
         {
             currentToken = null;
             return;
         }
         
-        currentToken = tokens.get(index++);
+        currentToken = tokens.get(tokenIndex++);
     }
     
     private Token peekToken()
     {
-        if (index + 1 > tokens.size())
+        if (tokenIndex + 1 > tokens.size())
         {
             return null;
         }
         
-        return tokens.get(index + 1);
+        return tokens.get(tokenIndex + 1);
     }
     
     private int getPrecedence()
@@ -123,14 +124,9 @@ public class SyntaxTree
                 s = null;
             }
         }
-        System.out.println(s);
+        
+        System.out.println(new Gson().toJson(s));
         return true;
-    }
-    
-    private Syntax parseEnum()
-    {
-        // todo
-        return null;
     }
     
     private Syntax parseClass()
@@ -292,13 +288,37 @@ public class SyntaxTree
                 return parseDo();
             case IDENTIFIER:
                 return parseIdentifier();
+            case DOTDOT:
+                return parseDotdot();
             case NUMBER:
                 return parseNumber();
             case LPAREN:
                 return parseParenthesis();
+            case RETURN:
+            {
+                nextToken();
+                return parseExpression();
+            }
             default:
                 return null;
         }
+    }
+    
+    private Expression parseDotdot()
+    {
+        String[] c = currentToken.getContent().split("\\.\\.");
+        long     f = Long.parseUnsignedLong(c[0]);
+        long     s = Long.parseUnsignedLong(c[1]);
+        
+        nextToken();
+        
+        List<Long> params = new ArrayList<>();
+        for (; f <= s; f++)
+        {
+            params.add(f);
+        }
+        
+        return new ArrayExpression(params);
     }
     
     private Expression parseNumber()
@@ -325,9 +345,14 @@ public class SyntaxTree
         return null;
     }
     
-    private Expression parseIdentifier()
+    private Syntax parseEnum()
     {
         return null;
+    }
+    
+    private Expression parseBinaryOps(int i, Expression left)
+    {
+        return left;
     }
     
     private Expression parseParenthesis()
@@ -340,17 +365,120 @@ public class SyntaxTree
         return null;
     }
     
+    // TODO end
+    
+    
+    private Expression parseIdentifier()
+    {
+        String id = currentToken.getContent();
+        nextToken();
+        
+        if (currentToken.getType() != TokenType.LPAREN)
+        {
+            return new VariableExpression(id);
+        }
+        
+        nextToken();
+        List<Expression> parameters = new ArrayList<>();
+        if (currentToken.getType() != TokenType.RPAREN)
+        {
+            while (true)
+            {
+                Expression e = parseExpression();
+                parameters.add(e);
+                
+                if (currentToken.getType() != TokenType.RPAREN)
+                {
+                    break;
+                }
+                
+                if (currentToken.getType() != TokenType.COMMA)
+                {
+                    logError("Expected , or ) in argument list");
+                }
+                
+                nextToken();
+            }
+        }
+        
+        nextToken();
+        
+        return new CallExpression(id, parameters);
+    }
+    
     private Expression parseSwitch()
     {
-        return null;
+        // switch
+        nextToken();
+        
+        assertType(TokenType.LPAREN);
+        nextToken();
+        
+        Expression e = parseExpression();
+        
+        assertType(TokenType.RPAREN);
+        nextToken();
+        
+        assertType(TokenType.LSQUIGLY);
+        nextToken();
+        
+        List<SwitchParameter> cases = new ArrayList<>();
+        
+        int             caseIndex    = -1;
+        Expression      condition    = new NullExpression();
+        Expression      expression   = new NullExpression();
+        SwitchParameter defaultParam = new SwitchParameter(caseIndex, condition, expression);
+        
+        while (currentToken.getType() != TokenType.RSQUIGLY)
+        {
+            if (currentToken.getType() == TokenType.CASE)
+            {
+                caseIndex++;
+                
+                nextToken();
+                Expression exp = parseExpression();
+                
+                assertType(TokenType.COLON);
+                nextToken();
+                
+                assertType(TokenType.LSQUIGLY);
+                nextToken();
+                
+                Expression body = parseExpression();
+                
+                assertType(TokenType.RSQUIGLY);
+                nextToken();
+                
+                assertType(TokenType.SEMICOLON);
+                nextToken();
+                cases.add(new SwitchParameter(caseIndex, exp, body));
+            }
+            
+            if (currentToken.getType() == TokenType.DEFAULT)
+            {
+                nextToken();
+                
+                assertType(TokenType.COLON);
+                nextToken();
+                
+                assertType(TokenType.LSQUIGLY);
+                nextToken();
+                
+                Expression body = parseExpression();
+                
+                assertType(TokenType.RSQUIGLY);
+                nextToken();
+                
+                assertType(TokenType.SEMICOLON);
+                nextToken();
+                
+                defaultParam = new SwitchParameter(-1, condition, body);
+            }
+        }
+        
+        nextToken();
+        return new SwitchExpression(cases, defaultParam);
     }
-    
-    private Expression parseBinaryOps(int i, Expression left)
-    {
-        return left;
-    }
-    
-    // TODO end
     
     private Expression parseExpression()
     {

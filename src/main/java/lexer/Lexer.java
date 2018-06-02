@@ -15,45 +15,46 @@ public class Lexer
         
         List<Token> tokens = l.parse(
                 "" +
-                "class myclass {" +
+                "class myclass {" + "\n" +
                 
-                "    int d = 5;" +
-                "    val c = 5;" +
-                "    const a = 5;" +
-                "    const b = switch(a) {" +
-                "       case 1: {return 4};" +
-                "       case 2..4: {return 3};" +
-                "       case 5: {return 2};" +
-                "}" +
+                "    int d = 5;" + "\n" +
+                "    val c = 5;" + "\n" +
+                "    const a = 5;" + "\n" +
+                "    const b = switch(a) {" + "\n" +
+                "       case 1: {return 4};" + "\n" +
+                "       case 2..4: {return 3};" + "\n" +
+                "       case 5: {return 2};" + "\n" +
+                "    };" + "\n" +
                 
-                "    function add(int:a, int:b):int {" +
-                "        if (a) return a; else return b;" +
-                "    }" +
+                "    function add(int:a, int:b):int {" + "\n" +
+                "        if (a) return a; else return b;" + "\n" +
+                "    }" + "\n" +
                 
-                "    function add(int:a, int:b):int {" +
-                "        return a ? a : b" +
-                "    }" +
+                "    function add(int:a, int:b):int {" + "\n" +
+                "        return a ? a : b" + "\n" +
+                "    }" + "\n" +
                 
-                "    function add(int:a, int:b):int {" +
-                "        return a + b;" +
-                "    }" +
+                "    function add(int:a, int:b):int {" + "\n" +
+                "        return a + b;" + "\n" +
+                "    }" + "\n" +
                 
-                "    pure add(int:a, int:b):int {" +
-                "        return a + b;" +
-                "    }" +
+                "    pure add(int:a, int:b):int {" + "\n" +
+                "        return a + b;" + "\n" +
+                "    }" + "\n" +
                 
-                "    global add(int:a, int:b):int {" +
-                "        return a + b;" +
-                "    }" +
+                "    global add(int:a, int:b):int {" + "\n" +
+                "        return a + b;" + "\n" +
+                "    }" + "\n" +
                 
-                "    operator¤(myclass:self,otherclass:other):myclass {" +
-                "        return myclass();" +
-                "    }" +
+                "    operator¤(myclass:self,otherclass:other):myclass {" + "\n" +
+                "        return myclass();" + "\n" +
+                "    }" + "\n" +
                 
-                "    operator<=>(myclass:self,otherclass:other):myclass {" +
-                "        return myclass();" +
-                "    }" +
-                "}");
+                "    operator<=>(myclass:self,otherclass:other):myclass {" + "\n" +
+                "        return myclass();" + "\n" +
+                "    }" + "\n" +
+                "}" + "\n" +
+                "");
         
         tokens.forEach(System.out::println);
         SyntaxTree s = new SyntaxTree(tokens);
@@ -73,7 +74,7 @@ public class Lexer
         return tokens;
     }
     
-    int lineNumber = 0;
+    int lineNumber = 1;
     int lineIndex  = 0;
     
     private Token getNextToken(TextIterator it)
@@ -112,11 +113,21 @@ public class Lexer
             lineIndex += it.current().length();
             StringBuilder num = new StringBuilder(it.current());
             
-            // Allow _ in numbers
             String type = it.next();
+            lineIndex += it.current().length();
+            if (type.equals(".") && it.peek().equals("."))
+            {
+                it.next();
+                it.next();
+                lineIndex += 2;
+                String startIndex = num.toString();
+                String endIndex   = getNextToken(it).getContent();
+                return new Token(startIndex + ".." + endIndex, TokenType.DOTDOT, lineNumber, lineIndex - (startIndex.length() + 2 + endIndex.length()));
+            }
+            
+            // Allow _ in numbers
             if (isDigit(type) || type.equals("_") || type.equals("."))
             {
-                lineIndex += it.current().length();
                 num.append(type);
                 while (isDigit(it.next()) || it.current().equals("_") || it.current().equals("."))
                 {

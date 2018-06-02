@@ -1,4 +1,4 @@
-package ast.exprs;
+package ast;
 
 import ast.Syntax;
 

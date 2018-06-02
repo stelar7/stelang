@@ -11,7 +11,7 @@ public enum TokenType
     LANGLE("<"), RANGLE(">"),
     
     // operators
-    DOT("."), COMMA(","),
+    DOT("."), DOTDOT(".."), COMMA(","),
     COLON(":"), SEMICOLON(";"),
     PLUS("+"), MINUS("-"),
     ASTERISK("*"), SLASH("/"), PERCENT("%"),
@@ -49,7 +49,7 @@ public enum TokenType
     CONTINUE("continue"), BREAK("break"),
     WHILE("while"), DO("do"),
     FOR("for"), THEN("then"),
-    SWITCH("switch"), CASE("case"),
+    SWITCH("switch"), CASE("case"), DEFAULT("default"),
     RETURN("return"),
     
     // modifiers
