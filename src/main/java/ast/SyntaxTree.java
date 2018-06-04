@@ -97,7 +97,6 @@ public class SyntaxTree
     
     public boolean isValid()
     {
-        // first token
         nextToken();
         
         List<Expression> s = new ArrayList<>();
@@ -133,8 +132,6 @@ public class SyntaxTree
     
     private Expression parseClass()
     {
-        // class x {
-        // eat class token
         nextToken();
         
         assertType(TokenType.IDENTIFIER);
@@ -151,7 +148,6 @@ public class SyntaxTree
     
     private List<Expression> handleClassBody()
     {
-        // {
         nextToken();
         
         List<Expression> expressions = new ArrayList<>();
@@ -165,11 +161,6 @@ public class SyntaxTree
     
     private Expression parseOperatorDeclaration()
     {
-        //operator+ (a:a, b: a): a {
-        //    return a.some_field + b.other_field;
-        //}
-        
-        // operator
         nextToken();
         
         String identifier = currentToken.getContent();
@@ -202,13 +193,9 @@ public class SyntaxTree
     
     private Expression parseFunctionDeclaration()
     {
-        // pure add(a:a, a:b):a {return a + b;}
-        
-        // pure
         String visibility = currentToken.getContent();
         nextToken();
         
-        //add(a:a, a:b):a
         assertType(TokenType.IDENTIFIER);
         String identifier = currentToken.getContent();
         nextToken();
@@ -382,7 +369,6 @@ public class SyntaxTree
     
     private Expression parseIf()
     {
-        // if
         nextToken();
         
         assertType(TokenType.LPAREN);
@@ -561,7 +547,6 @@ public class SyntaxTree
     
     private Expression parseSwitch()
     {
-        // switch
         nextToken();
         
         assertType(TokenType.LPAREN);
@@ -683,8 +668,6 @@ public class SyntaxTree
     
     private PrototypeExpression parsePrototype(String identifier)
     {
-        // add(a:b, a:c):a
-        
         assertType(TokenType.LPAREN);
         
         List<PrototypeParameter> params = new ArrayList<>();
@@ -722,9 +705,6 @@ public class SyntaxTree
     
     private Expression parseImport()
     {
-        // import x from y;
-        
-        // import keyword
         nextToken();
         
         assertType(TokenType.IDENTIFIER);
