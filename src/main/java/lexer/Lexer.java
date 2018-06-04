@@ -2,59 +2,34 @@ package lexer;
 
 import ast.SyntaxTree;
 
+import java.io.InputStream;
 import java.util.*;
 import java.util.regex.*;
 
 public class Lexer
 {
+    public static String readInternalAsString(String filename)
+    {
+        InputStream   file   = Lexer.class.getClassLoader().getResourceAsStream(filename);
+        StringBuilder result = new StringBuilder();
+        
+        try (Scanner scanner = new Scanner(file))
+        {
+            while (scanner.hasNextLine())
+            {
+                String line = scanner.nextLine();
+                result.append(line).append("\n");
+            }
+        }
+        
+        return result.toString();
+    }
+    
     public static void main(String[] args)
     {
-        Lexer l = new Lexer();
-        // List<Token> oktokens = l.parse("this is some text 0x00 0xf 0xffff 0 15 65535 0b0 0b1111 0b1111111111111111");
-//        List<Token> tokens = l.parse("// nt\nmore content starts here");
-        
-        List<Token> tokens = l.parse(
-                "" +
-                "class myclass {" + "\n" +
-                
-                "    int d = 5;" + "\n" +
-                "    val c = 5;" + "\n" +
-                "    const a = 5;" + "\n" +
-                "    const b = switch(a) {" + "\n" +
-                "       case 1: {return 4};" + "\n" +
-                "       case 2..4: {return 3};" + "\n" +
-                "       case 5: {return 2};" + "\n" +
-                "    };" + "\n" +
-                
-                "    function add(int:a, int:b):int {" + "\n" +
-                "        if (a) return a; else return b;" + "\n" +
-                "    }" + "\n" +
-                
-                "    function add(int:a, int:b):int {" + "\n" +
-                "        return a ? a : b" + "\n" +
-                "    }" + "\n" +
-                
-                "    function add(int:a, int:b):int {" + "\n" +
-                "        return a + b;" + "\n" +
-                "    }" + "\n" +
-                
-                "    pure add(int:a, int:b):int {" + "\n" +
-                "        return a + b;" + "\n" +
-                "    }" + "\n" +
-                
-                "    global add(int:a, int:b):int {" + "\n" +
-                "        return a + b;" + "\n" +
-                "    }" + "\n" +
-                
-                "    operator¤(myclass:self,otherclass:other):myclass {" + "\n" +
-                "        return myclass();" + "\n" +
-                "    }" + "\n" +
-                
-                "    operator<=>(myclass:self,otherclass:other):myclass {" + "\n" +
-                "        return myclass();" + "\n" +
-                "    }" + "\n" +
-                "}" + "\n" +
-                "");
+        Lexer       l      = new Lexer();
+        String      data   = readInternalAsString("test.stl");
+        List<Token> tokens = l.parse(data);
         
         tokens.forEach(System.out::println);
         SyntaxTree s = new SyntaxTree(tokens);

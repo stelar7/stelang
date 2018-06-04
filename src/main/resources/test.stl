@@ -1,0 +1,78 @@
+class myclass {
+
+	int a = 5;
+	const b = 5;
+    val c = 5;
+    const d = switch(a) {
+       case 1: {return 4};
+       case 2..4: {return 3};
+       case 5: {return 2};
+    };
+	
+    function testIf(int:a, int:b):int {
+        if (a) return a; else return b;
+        if (a) { return a; } else { return b;}
+    }
+	
+    function testTernary(int:a, int:b):int {
+        return a ? a : b;
+		return a ?: b;
+    }
+	
+    function testWhile(int:a, int:b):int {
+        val x = 1;
+        val y = 10;
+        while(x < y);
+        while(x < y) x++;
+        while(x < y) {x++;}
+        while(x < y) {x++;} then return x;
+        while(x < y) {x++;} then {return x;}
+    }
+	
+    function testDo(int:a, int:b):int {
+        val x = 1;
+        val y = 10;
+        do x++; while(x < y);
+        do {x++;} while(x < y);
+        do {x++;} while(x < y) then return x;
+        do {x++;} while(x < y) then {return x;}
+    }
+	
+    function testFor(int:a, int:b):int {
+        val x = 1;
+        val y = 10;
+        for (;;);
+        for (;;){}
+        for (;;) then return x;
+        for (;;){} then return x;
+        for (;;){} then {return x;}
+        for (;;){x++;} then {return x;}
+        for (int:z;;)
+        for (int:z = 0;;);
+        for (;y<x;);
+        for (;;x++);
+        for (int:z = 0;z<x;);
+        for (int:z = 0;z<x;z++);
+    }
+	
+    function testForeach(int:a, int:b):int {
+        val x = 0..3;
+        val y = List.of(a,b);
+        val z = Stream.of(a,b);
+        val a = Map.of(a,b);
+        for (int v : x);
+        for (int v : y);
+        for (int v : z);
+        for ((int v, int v2) : a);
+        for (int v : 0..3);
+        for (int v : List.of(a,b));
+        for (int v : Stream.of(a,b));
+        for ((int v, int v2) : Map.of(a, b));
+        for (int v : z) {} then {}
+        for (int v : 0..3) {} then {}
+    }
+	
+    operator<=>(myclass:self, otherclass:other):myclass {
+        return myclass();
+    }
+}

@@ -45,6 +45,7 @@ public class SyntaxTree
         put(TokenType.BARBAR, 11);
         
         put(TokenType.QUESTIONMARK, 12);
+        put(TokenType.QUESTIONMARKCOLON, 12);
         
         put(TokenType.SET, 13);
         put(TokenType.SETEQL, 13);
@@ -312,7 +313,7 @@ public class SyntaxTree
         
         nextToken();
         
-        List<Long> params = new ArrayList<>();
+        List<Object> params = new ArrayList<>();
         for (; f <= s; f++)
         {
             params.add(f);
@@ -350,11 +351,6 @@ public class SyntaxTree
         return null;
     }
     
-    private Expression parseBinaryOps(int i, Expression left)
-    {
-        return left;
-    }
-    
     private Expression parseParenthesis()
     {
         return null;
@@ -363,6 +359,11 @@ public class SyntaxTree
     private Expression parseIf()
     {
         return null;
+    }
+    
+    private Expression parseBinaryOps(int i, Expression left)
+    {
+        return left;
     }
     
     // TODO end

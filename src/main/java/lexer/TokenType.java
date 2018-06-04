@@ -17,7 +17,7 @@ public enum TokenType
     ASTERISK("*"), SLASH("/"), PERCENT("%"),
     AMPERSAND("&"), BAR("|"),
     AMPERSANDAMPERSAND("&&"), BARBAR("||"),
-    SET("="), QUESTIONMARK("?"),
+    SET("="), QUESTIONMARK("?"),QUESTIONMARKCOLON("?:"),
     
     SETEQL("==="), SETNOTEQL("=!="),
     SETRANGLE("=>"), SETRANGLEEQL("=>="),
@@ -50,7 +50,7 @@ public enum TokenType
     WHILE("while"), DO("do"),
     FOR("for"), THEN("then"),
     SWITCH("switch"), CASE("case"), DEFAULT("default"),
-    RETURN("return"),
+    RETURN("return"), ASSERT("assert"),
     
     // modifiers
     CONST("const"), VAL("val"),

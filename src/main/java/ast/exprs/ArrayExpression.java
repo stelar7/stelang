@@ -4,9 +4,9 @@ import java.util.List;
 
 public class ArrayExpression extends Expression
 {
-    private List<Long> params;
+    private List<Object> params;
     
-    public ArrayExpression(List<Long> params)
+    public ArrayExpression(List<Object> params)
     {
         this.params = params;
     }
