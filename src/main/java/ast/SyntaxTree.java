@@ -3,7 +3,7 @@ package ast;
 import ast.exprs.*;
 import ast.exprs.basic.*;
 import ast.exprs.control.*;
-import com.google.gson.Gson;
+import com.google.gson.*;
 import lexer.*;
 
 import java.util.*;
@@ -127,7 +127,7 @@ public class SyntaxTree
             }
         }
         
-        System.out.println(new Gson().toJson(s));
+        System.out.println(new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create().toJson(s));
         return true;
     }
     
