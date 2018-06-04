@@ -10,6 +10,7 @@ class myclass {
        case 2..4: {return 3;}
        case 5: {return 2;}
        case 6: return 1;
+       case {7,9}: return 0;
     };
 	
     function testIf(int:a, int:b):int {

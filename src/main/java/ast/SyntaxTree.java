@@ -557,7 +557,30 @@ public class SyntaxTree
                 caseIndex++;
                 
                 nextToken();
-                Expression exp = parseExpression();
+                Expression exp;
+                
+                if (currentToken.getType() == TokenType.LSQUIGLY)
+                {
+                    nextToken();
+                    List<Object> exps = new ArrayList<>();
+                    while (currentToken.getType() != TokenType.RSQUIGLY)
+                    {
+                        Expression parsed = parseExpression();
+                        if (currentToken.getType() == TokenType.RSQUIGLY)
+                        {
+                            break;
+                        }
+                        
+                        assertType(TokenType.COMMA);
+                        nextToken();
+                    }
+                    
+                    nextToken();
+                    exp = new ArrayExpression(exps);
+                } else
+                {
+                    exp = parseExpression();
+                }
                 
                 assertType(TokenType.COLON);
                 nextToken();
