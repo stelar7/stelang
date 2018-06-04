@@ -2,41 +2,41 @@ import otherclass from "otherclass.stl";
 
 class myclass {
 
-	int: a = 5;
-	const b = 5;
+    int: a = 5;
+    const b = 5;
     val c = 5;
     const d = switch(a) {
        case 1: {return 4;}
        case 2..4: {return 3;}
        case 5: {return 2;}
        case 6: return 1;
-       case {7,9}: return 0;
+       case {7, 9}: return 0;
     };
-	
+    
     function testIf(int:a, int:b):int {
         if (a) return a; else return b;
         if (a) { return a; } else { return b;}
     }
 
     function testTernary(int:a, int:b):int {
-        return a ? b ? c : d : e ? f : g ;
+        return a ? b ? c : d : e ? f : g;
         return a ? a : b;
-		return a ?: b;
+        return a ?: b;
     }
 
     function testBinaryOps(int:a, int:b):int {
         val x = 1;
         val y = 10;
 
-        x=-y;
-        x=y+1;
+        x =- y;
+        x = y + 1;
         x++;
         ++y;
 
-        return x+y;
-        return x/y;
+        return x + y;
+        return x / y;
     }
-	
+    
     function testWhile(int:a, int:b):int {
         val x = 1;
         val y = 10;
@@ -46,7 +46,7 @@ class myclass {
         while(x < y) {x++;} then return x;
         while(x < y) {x++;} then {return x;}
     }
-	
+    
     function testDo(int:a, int:b):int {
         val x = 1;
         val y = 10;
@@ -55,7 +55,7 @@ class myclass {
         do {x++;} while(x < y) then return x;
         do {x++;} while(x < y) then {return x;}
     }
-	
+    
     function testFor(int:a, int:b):int {
         val x = 1;
         val y = 10;
@@ -65,14 +65,14 @@ class myclass {
         for (;;){} then return x;
         for (;;){} then {return x;}
         for (;;){x++;} then {return x;}
-        for (int:z;;)
+        for (int: z;;)
         for (int:z = 0;;);
-        for (;y<x;);
-        for (;;x++);
-        for (int:z = 0;z<x;);
-        for (int:z = 0;z<x;z++);
+        for (;x < y;);
+        for (;; x++);
+        for (int:z = 0; z < x;);
+        for (int:z = 0; z < x; z++);
     }
-	
+    
     function testForeach(int:a, int:b):int {
         val x = 0..3;
         val y = List.of(a,b);
@@ -89,7 +89,7 @@ class myclass {
         for (int v : z) {} then {}
         for (int v : 0..3) {} then {}
     }
-	
+    
     operator<=>(myclass:self, otherclass:other):myclass {
         return myclass();
     }
