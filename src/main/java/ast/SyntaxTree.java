@@ -472,9 +472,19 @@ public class SyntaxTree
         return null;
     }
     
-    private Expression parseAssert()
+    private Expression parseEnum()
     {
         return null;
+    }
+    
+    // TODO end
+    
+    private Expression parseAssert()
+    {
+        nextToken();
+        Expression condition = parseExpression();
+        
+        return new AssertExpression(condition);
     }
     
     private Expression parseBinaryOps(int exprPre, Expression left)
@@ -501,13 +511,6 @@ public class SyntaxTree
             left = new BinaryExpression(op, left, right);
         }
     }
-    
-    private Expression parseEnum()
-    {
-        return null;
-    }
-    
-    // TODO end
     
     private Expression parseParenthesis()
     {

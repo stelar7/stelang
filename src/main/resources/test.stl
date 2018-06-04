@@ -12,6 +12,13 @@ class myclass {
        case 6: return 1;
        case {7, 9}: return 0;
     };
+
+    function testAssert(int:a, int:b):int {
+        assert a;
+        assert b;
+
+        return a + b;
+    }
     
     function testIf(int:a, int:b):int {
         if (a) return a; else return b;
@@ -38,7 +45,7 @@ class myclass {
         return x + y;
         return x / y;
     }
-    
+
     function testWhile(int:a, int:b):int {
         val x = 1;
         val y = 10;
