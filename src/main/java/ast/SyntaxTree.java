@@ -162,12 +162,6 @@ public class SyntaxTree
         List<Expression> expressions = new ArrayList<>();
         while (currentToken.getType() != TokenType.RSQUIGLY)
         {
-            if (currentToken.getType() == TokenType.IDENTIFIER)
-            {
-                expressions.add(parseVariableDefinition());
-                continue;
-            }
-            
             expressions.add(parseExpression());
         }
         
@@ -245,8 +239,15 @@ public class SyntaxTree
     
     private Expression parseVariableDefinition()
     {
-        String visibility = currentToken.getContent();
+        String    visibility = currentToken.getContent();
+        TokenType vType      = currentToken.getType();
         nextToken();
+        
+        if (vType != TokenType.VAL && vType != TokenType.CONST)
+        {
+            assertType(TokenType.COLON);
+            nextToken();
+        }
         
         assertType(TokenType.IDENTIFIER);
         String identifier = currentToken.getContent();
@@ -270,7 +271,7 @@ public class SyntaxTree
         return new VariableDefinitionExpression(identifier, visibility, value);
     }
     
-    private Expression parsePrimary(boolean allowTernary)
+    private Expression parsePrimary(boolean allowTernary, boolean allowVariableDeclaration)
     {
         switch (currentToken.getType())
         {
@@ -293,6 +294,15 @@ public class SyntaxTree
                         return parseTernary();
                     }
                 }
+                
+                if (allowVariableDeclaration)
+                {
+                    if (peekToken().getType() == TokenType.COLON)
+                    {
+                        return parseVariableDefinition();
+                    }
+                }
+                
                 return parseIdentifier();
             }
             case DOTDOT:
@@ -358,15 +368,15 @@ public class SyntaxTree
     
     private Expression parseTernary()
     {
-        Expression condition = parseExpression(false);
+        Expression condition = parseExpression(false, false);
         
         if (currentToken.getType() == TokenType.QUESTIONMARK)
         {
             nextToken();
-            Expression trueCond = parseExpression();
+            Expression trueCond = parseExpression(true, false);
             assertType(TokenType.COLON);
             nextToken();
-            Expression falseCond = parseExpression();
+            Expression falseCond = parseExpression(true, false);
             
             return new TernaryExpression(condition, trueCond, falseCond);
         }
@@ -628,16 +638,17 @@ public class SyntaxTree
         return new SwitchExpression(cases, defaultParam);
     }
     
-    private Expression parseExpression(boolean ternary)
+    private Expression parseExpression(boolean ternary, boolean allowVarDec)
     {
-        Expression left = parsePrimary(ternary);
+        Expression left = parsePrimary(ternary, allowVarDec);
         
         return parseBinaryOps(0, left);
     }
     
+    
     private Expression parseExpression()
     {
-        Expression left = parsePrimary(true);
+        Expression left = parsePrimary(true, true);
         
         return parseBinaryOps(0, left);
     }

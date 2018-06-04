@@ -2,7 +2,7 @@ import otherclass from "otherclass.stl";
 
 class myclass {
 
-	int a = 5;
+	int: a = 5;
 	const b = 5;
     val c = 5;
     const d = switch(a) {
@@ -17,10 +17,24 @@ class myclass {
         if (a) return a; else return b;
         if (a) { return a; } else { return b;}
     }
-	
+
     function testTernary(int:a, int:b):int {
+        return a ? b ? c : d : e ? f : g ;
         return a ? a : b;
 		return a ?: b;
+    }
+
+    function testBinaryOps(int:a, int:b):int {
+        val x = 1;
+        val y = 10;
+
+        x=-y;
+        x=y+1;
+        x++;
+        ++y;
+
+        return x+y;
+        return x/y;
     }
 	
     function testWhile(int:a, int:b):int {
