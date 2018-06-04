@@ -562,15 +562,19 @@ public class SyntaxTree
                 assertType(TokenType.COLON);
                 nextToken();
                 
-                assertType(TokenType.LSQUIGLY);
+                if (currentToken.getType() != TokenType.LSQUIGLY)
+                {
+                    assertType(TokenType.RETURN);
+                    Expression body = parseExpression();
+                    cases.add(new SwitchParameter(caseIndex, exp, body));
+                    continue;
+                }
+                
                 nextToken();
                 
                 Expression body = parseExpression();
                 
                 assertType(TokenType.RSQUIGLY);
-                nextToken();
-                
-                assertType(TokenType.SEMICOLON);
                 nextToken();
                 cases.add(new SwitchParameter(caseIndex, exp, body));
             }
