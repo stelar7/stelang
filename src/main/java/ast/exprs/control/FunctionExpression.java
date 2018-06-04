@@ -1,10 +1,10 @@
-package ast.exprs;
+package ast.exprs.control;
 
-import ast.exprs.control.PrototypeExpression;
+import ast.exprs.Expression;
 
 import java.util.List;
 
-public class FunctionExpression extends Expression
+public class FunctionExpression extends ControlExpression
 {
     private String              visibility;
     private PrototypeExpression prototype;

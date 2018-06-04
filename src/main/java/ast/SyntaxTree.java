@@ -231,7 +231,7 @@ public class SyntaxTree
             Expression e = parseExpression();
             b.add(e);
             
-            if (!(e instanceof IfExpression) && !(e instanceof FunctionExpression))
+            if (!(e instanceof ControlExpression))
             {
                 assertType(TokenType.SEMICOLON);
                 nextToken();

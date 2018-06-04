@@ -4,7 +4,7 @@ import ast.exprs.Expression;
 
 import java.util.List;
 
-public class IfExpression extends Expression
+public class IfExpression extends ControlExpression
 {
     private Expression       condition;
     private List<Expression> trueExpressions;
