@@ -386,13 +386,8 @@ public class SyntaxTree
             assertType(TokenType.SEMICOLON);
             nextToken();
             
-            if (currentToken.getType() == TokenType.ELSE)
-            {
-                nextToken();
-                return parseElse(condition, List.of(trueStatement));
-            }
+            return parseElse(condition, List.of(trueStatement));
             
-            return new IfExpression(condition, List.of(trueStatement), List.of(new NullExpression()));
         } else
         {
             nextToken();
@@ -407,21 +402,25 @@ public class SyntaxTree
             }
             nextToken();
             
-            if (currentToken.getType() == TokenType.ELSE)
-            {
-                nextToken();
-                return parseElse(condition, trueStatements);
-            }
-            
-            return new IfExpression(condition, trueStatements, List.of(new NullExpression()));
+            return parseElse(condition, trueStatements);
         }
     }
     
     private Expression parseElse(Expression condition, List<Expression> trueStatements)
     {
+        if (currentToken.getType() != TokenType.ELSE)
+        {
+            return new IfExpression(condition, trueStatements, List.of(new NullExpression()));
+        }
+        nextToken();
+        
         if (currentToken.getType() != TokenType.LSQUIGLY)
         {
             Expression falseStatement = parseExpression();
+            
+            assertType(TokenType.SEMICOLON);
+            nextToken();
+            
             return new IfExpression(condition, trueStatements, List.of(falseStatement));
         } else
         {

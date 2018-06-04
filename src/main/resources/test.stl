@@ -21,12 +21,14 @@ class myclass {
     }
     
     function testIf(int:a, int:b):int {
-        if (a) return a; else return b;
-        if (a) return a; else { return b; }
-        if (a) { return a; } else return b;
-        if (a) { return a; } else { return b; }
+        if (a) return b; else return c;
+        if (d) return e; else { return f; }
+        if (g) { return h; } else return i;
+        if (j) { return k; } else { return l; }
+        if (m) return n;
+        if (o) {return p;}
     }
-
+}
     function testTernary(int:a, int:b):int {
         return a ? b ? c : d : e ? f : g;
         return a ? a : b;
