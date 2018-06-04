@@ -15,7 +15,9 @@ class myclass {
     
     function testIf(int:a, int:b):int {
         if (a) return a; else return b;
-        if (a) { return a; } else { return b;}
+        if (a) return a; else { return b; }
+        if (a) { return a; } else return b;
+        if (a) { return a; } else { return b; }
     }
 
     function testTernary(int:a, int:b):int {

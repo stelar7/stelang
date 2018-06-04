@@ -46,9 +46,6 @@ public class SyntaxTree
         put(TokenType.AMPERSANDAMPERSAND, 10);
         put(TokenType.BARBAR, 11);
         
-        put(TokenType.QUESTIONMARK, 12);
-        put(TokenType.QUESTIONMARKCOLON, 12);
-        
         put(TokenType.SET, 13);
         put(TokenType.SETEQL, 13);
         put(TokenType.SETNOTEQL, 13);
@@ -145,11 +142,9 @@ public class SyntaxTree
         nextToken();
         
         assertType(TokenType.LSQUIGLY);
-        
-        List<Expression> body = handleClassBody();
-        
-        assertType(TokenType.RSQUIGLY);
         nextToken();
+        
+        List<Expression> body = parseExpressionList();
         
         return new ClassExpression(classname, body);
     }
@@ -223,18 +218,28 @@ public class SyntaxTree
         assertType(TokenType.LSQUIGLY);
         nextToken();
         
-        // return a + b;
+        List<Expression> b = parseExpressionList();
+        
+        return new FunctionExpression(visibility, f, b);
+    }
+    
+    private List<Expression> parseExpressionList()
+    {
         List<Expression> b = new ArrayList<>();
         while (currentToken.getType() != TokenType.RSQUIGLY)
         {
             Expression e = parseExpression();
             b.add(e);
+            
+            if (!(e instanceof IfExpression) && !(e instanceof FunctionExpression))
+            {
+                assertType(TokenType.SEMICOLON);
+                nextToken();
+            }
         }
         
-        assertType(TokenType.RSQUIGLY);
         nextToken();
-        
-        return new FunctionExpression(visibility, f, b);
+        return b;
     }
     
     private Expression parseVariableDefinition()
@@ -253,22 +258,7 @@ public class SyntaxTree
         String identifier = currentToken.getContent();
         nextToken();
         
-        Expression value = new NullExpression();
-        if (currentToken.getType() == TokenType.SEMICOLON)
-        {
-            return new VariableDefinitionExpression(identifier, visibility, value);
-        }
-        
-        if (TokenType.isSetType(currentToken))
-        {
-            nextToken();
-            value = parseExpression();
-        }
-        
-        assertType(TokenType.SEMICOLON);
-        nextToken();
-        
-        return new VariableDefinitionExpression(identifier, visibility, value);
+        return new VariableDefinitionExpression(identifier, visibility);
     }
     
     private Expression parsePrimary(boolean allowTernary, boolean allowVariableDeclaration)
@@ -318,8 +308,6 @@ public class SyntaxTree
                 nextToken();
                 Expression parsed = parseExpression();
                 Expression value  = new ReturnExpression(parsed);
-                assertType(TokenType.SEMICOLON);
-                nextToken();
                 return value;
             }
             case CONST:
@@ -409,6 +397,9 @@ public class SyntaxTree
         {
             Expression trueStatement = parseExpression();
             
+            assertType(TokenType.SEMICOLON);
+            nextToken();
+            
             if (currentToken.getType() == TokenType.ELSE)
             {
                 nextToken();
@@ -424,6 +415,9 @@ public class SyntaxTree
             {
                 Expression parsed = parseExpression();
                 trueStatements.add(parsed);
+                
+                assertType(TokenType.SEMICOLON);
+                nextToken();
             }
             nextToken();
             
@@ -450,10 +444,12 @@ public class SyntaxTree
             while (currentToken.getType() != TokenType.RSQUIGLY)
             {
                 Expression parsed = parseExpression();
-                nextToken();
-                
                 falseStatements.add(parsed);
+                
+                assertType(TokenType.SEMICOLON);
+                nextToken();
             }
+            nextToken();
             
             return new IfExpression(condition, trueStatements, falseStatements);
         }
@@ -476,19 +472,34 @@ public class SyntaxTree
         return null;
     }
     
-    private Expression parseParenthesis()
-    {
-        return null;
-    }
-    
     private Expression parseAssert()
     {
         return null;
     }
     
-    private Expression parseBinaryOps(int i, Expression left)
+    private Expression parseBinaryOps(int exprPre, Expression left)
     {
-        return left;
+        while (true)
+        {
+            int precedence = getPrecedence();
+            if (precedence < exprPre)
+            {
+                return left;
+            }
+            
+            Token op = currentToken;
+            nextToken();
+            
+            Expression right = parseExpression();
+            
+            int next = getPrecedence();
+            if (precedence < next)
+            {
+                right = parseBinaryOps(precedence + 1, right);
+            }
+            
+            left = new BinaryExpression(op, left, right);
+        }
     }
     
     private Expression parseEnum()
@@ -498,6 +509,14 @@ public class SyntaxTree
     
     // TODO end
     
+    private Expression parseParenthesis()
+    {
+        nextToken();
+        Expression v = parseExpression();
+        assertType(TokenType.RPAREN);
+        nextToken();
+        return v;
+    }
     
     private Expression parseIdentifier()
     {
@@ -558,7 +577,7 @@ public class SyntaxTree
         int             caseIndex    = -1;
         Expression      condition    = new NullExpression();
         Expression      expression   = new NullExpression();
-        SwitchParameter defaultParam = new SwitchParameter(caseIndex, condition, expression);
+        SwitchParameter defaultParam = new SwitchParameter(caseIndex, condition, List.of(expression));
         
         while (currentToken.getType() != TokenType.RSQUIGLY)
         {
@@ -599,16 +618,17 @@ public class SyntaxTree
                 {
                     assertType(TokenType.RETURN);
                     Expression body = parseExpression();
-                    cases.add(new SwitchParameter(caseIndex, exp, body));
+                    cases.add(new SwitchParameter(caseIndex, exp, List.of(body)));
+                    
+                    assertType(TokenType.SEMICOLON);
+                    nextToken();
+                    
                     continue;
                 }
                 
                 nextToken();
                 
-                Expression body = parseExpression();
-                
-                assertType(TokenType.RSQUIGLY);
-                nextToken();
+                List<Expression> body = parseExpressionList();
                 cases.add(new SwitchParameter(caseIndex, exp, body));
             }
             
@@ -630,27 +650,32 @@ public class SyntaxTree
                 assertType(TokenType.SEMICOLON);
                 nextToken();
                 
-                defaultParam = new SwitchParameter(-1, condition, body);
+                defaultParam = new SwitchParameter(-1, condition, List.of(body));
             }
         }
         
         nextToken();
+        
         return new SwitchExpression(cases, defaultParam);
     }
     
     private Expression parseExpression(boolean ternary, boolean allowVarDec)
     {
         Expression left = parsePrimary(ternary, allowVarDec);
-        
-        return parseBinaryOps(0, left);
+        return parseExpressionImpl(left);
     }
     
     
     private Expression parseExpression()
     {
         Expression left = parsePrimary(true, true);
-        
-        return parseBinaryOps(0, left);
+        return parseExpressionImpl(left);
+    }
+    
+    private Expression parseExpressionImpl(Expression left)
+    {
+        Expression bin = parseBinaryOps(0, left);
+        return bin;
     }
     
     private PrototypeExpression parsePrototype(String identifier)
