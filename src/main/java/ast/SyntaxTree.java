@@ -440,17 +440,166 @@ public class SyntaxTree
         }
     }
     
-    // todo start
-    
     private Expression parseDo()
     {
-        return null;
+        nextToken();
+        
+        List<Expression> body = new ArrayList<>();
+        
+        if (currentToken.getType() != TokenType.LSQUIGLY)
+        {
+            Expression doStatement = parseExpression();
+            
+            assertType(TokenType.SEMICOLON);
+            nextToken();
+            
+            body.add(doStatement);
+        } else
+        {
+            nextToken();
+            while (currentToken.getType() != TokenType.RSQUIGLY)
+            {
+                Expression parsed = parseExpression();
+                body.add(parsed);
+                
+                assertType(TokenType.SEMICOLON);
+                nextToken();
+            }
+            nextToken();
+        }
+        
+        assertType(TokenType.WHILE);
+        nextToken();
+        
+        assertType(TokenType.LPAREN);
+        nextToken();
+        
+        Expression condition = parseExpression();
+        
+        assertType(TokenType.RPAREN);
+        nextToken();
+        
+        return parseThenDo(condition, body);
+    }
+    
+    private Expression parseThenDo(Expression condition, List<Expression> doStatements)
+    {
+        if (currentToken.getType() != TokenType.THEN)
+        {
+            if (currentToken.getType() == TokenType.SEMICOLON)
+            {
+                nextToken();
+            }
+            
+            return new DoWhileExpression(condition, doStatements);
+        }
+        nextToken();
+        
+        if (currentToken.getType() != TokenType.LSQUIGLY)
+        {
+            Expression thenStatements = parseExpression();
+            
+            assertType(TokenType.SEMICOLON);
+            nextToken();
+            
+            return new DoWhileThenExpression(condition, doStatements, List.of(thenStatements));
+        } else
+        {
+            nextToken();
+            List<Expression> falseStatements = new ArrayList<>();
+            while (currentToken.getType() != TokenType.RSQUIGLY)
+            {
+                Expression parsed = parseExpression();
+                falseStatements.add(parsed);
+                
+                assertType(TokenType.SEMICOLON);
+                nextToken();
+            }
+            nextToken();
+            
+            return new DoWhileThenExpression(condition, doStatements, falseStatements);
+        }
     }
     
     private Expression parseWhile()
     {
-        return null;
+        nextToken();
+        
+        assertType(TokenType.LPAREN);
+        nextToken();
+        
+        Expression condition = parseExpression();
+        
+        assertType(TokenType.RPAREN);
+        nextToken();
+        
+        if (currentToken.getType() == TokenType.SEMICOLON)
+        {
+            nextToken();
+            return parseThenWhile(condition, List.of(new NullExpression()));
+        }
+        
+        if (currentToken.getType() != TokenType.LSQUIGLY)
+        {
+            Expression doStatement = parseExpression();
+            
+            assertType(TokenType.SEMICOLON);
+            nextToken();
+            
+            return parseThenWhile(condition, List.of(doStatement));
+        } else
+        {
+            nextToken();
+            List<Expression> doStatements = new ArrayList<>();
+            while (currentToken.getType() != TokenType.RSQUIGLY)
+            {
+                Expression parsed = parseExpression();
+                doStatements.add(parsed);
+                
+                assertType(TokenType.SEMICOLON);
+                nextToken();
+            }
+            nextToken();
+            
+            return parseThenWhile(condition, doStatements);
+        }
     }
+    
+    private Expression parseThenWhile(Expression condition, List<Expression> doStatements)
+    {
+        if (currentToken.getType() != TokenType.THEN)
+        {
+            return new WhileExpression(condition, doStatements);
+        }
+        nextToken();
+        
+        if (currentToken.getType() != TokenType.LSQUIGLY)
+        {
+            Expression thenStatements = parseExpression();
+            
+            assertType(TokenType.SEMICOLON);
+            nextToken();
+            
+            return new WhileThenExpression(condition, doStatements, List.of(thenStatements));
+        } else
+        {
+            nextToken();
+            List<Expression> falseStatements = new ArrayList<>();
+            while (currentToken.getType() != TokenType.RSQUIGLY)
+            {
+                Expression parsed = parseExpression();
+                falseStatements.add(parsed);
+                
+                assertType(TokenType.SEMICOLON);
+                nextToken();
+            }
+            nextToken();
+            
+            return new WhileThenExpression(condition, doStatements, falseStatements);
+        }
+    }
+    
+    // todo start
     
     private Expression parseFor()
     {

@@ -28,7 +28,7 @@ class myclass {
         if (m) return n;
         if (o) {return p;}
     }
-}
+
     function testTernary(int:a, int:b):int {
         return a ? b ? c : d : e ? f : g;
         return a ? a : b;
@@ -57,7 +57,7 @@ class myclass {
         while(x < y) {x++;} then return x;
         while(x < y) {x++;} then {return x;}
     }
-    
+
     function testDo(int:a, int:b):int {
         val x = 1;
         val y = 10;
@@ -65,6 +65,7 @@ class myclass {
         do {x++;} while(x < y);
         do {x++;} while(x < y) then return x;
         do {x++;} while(x < y) then {return x;}
+    }
     }
     
     function testFor(int:a, int:b):int {
