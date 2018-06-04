@@ -1,5 +1,6 @@
-package ast.exprs;
+package ast.exprs.basic;
 
+import ast.exprs.Expression;
 import lexer.Token;
 
 public class BinaryExpression extends Expression

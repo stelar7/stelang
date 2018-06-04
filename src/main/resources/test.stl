@@ -1,12 +1,14 @@
+import otherclass from "otherclass.stl";
+
 class myclass {
 
 	int a = 5;
 	const b = 5;
     val c = 5;
     const d = switch(a) {
-       case 1: {return 4};
-       case 2..4: {return 3};
-       case 5: {return 2};
+       case 1: {return 4;};
+       case 2..4: {return 3;};
+       case 5: {return 2;};
     };
 	
     function testIf(int:a, int:b):int {

@@ -17,7 +17,7 @@ public enum TokenType
     ASTERISK("*"), SLASH("/"), PERCENT("%"),
     AMPERSAND("&"), BAR("|"),
     AMPERSANDAMPERSAND("&&"), BARBAR("||"),
-    SET("="), QUESTIONMARK("?"),QUESTIONMARKCOLON("?:"),
+    SET("="), QUESTIONMARK("?"), QUESTIONMARKCOLON("?:"),
     
     SETEQL("==="), SETNOTEQL("=!="),
     SETRANGLE("=>"), SETRANGLEEQL("=>="),
@@ -42,7 +42,7 @@ public enum TokenType
     // structure
     CLASS("class"), ENUM("enum"), FUNCTION("function"), OPERATOR("operator"),
     
-    IMPORT("import"), FROM("from"),
+    IMPORT("import"), FROM("from"), DOUBLEQUOTE("\""), SINGLEQUOTE("'"),
     
     // control
     IF("if"), ELSE("else"),

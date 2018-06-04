@@ -1,6 +1,8 @@
 package ast;
 
 import ast.exprs.*;
+import ast.exprs.basic.*;
+import ast.exprs.control.*;
 import com.google.gson.Gson;
 import lexer.*;
 
@@ -88,7 +90,7 @@ public class SyntaxTree
             return null;
         }
         
-        return tokens.get(tokenIndex + 1);
+        return tokens.get(tokenIndex);
     }
     
     private int getPrecedence()
@@ -101,28 +103,30 @@ public class SyntaxTree
         // first token
         nextToken();
         
-        Syntax s;
-        switch (currentToken.getType())
+        List<Expression> s = new ArrayList<>();
+        while (currentToken.getType() != TokenType.UNKNOWN)
         {
-            case IMPORT:
+            switch (currentToken.getType())
             {
-                s = parseImport();
-                break;
-            }
-            case CLASS:
-            {
-                s = parseClass();
-                break;
-            }
-            case ENUM:
-            {
-                s = parseEnum();
-                break;
-            }
-            default:
-            {
-                logError("Invalid start of file, must start with import or class definition.");
-                s = null;
+                case IMPORT:
+                {
+                    s.add(parseImport());
+                    break;
+                }
+                case CLASS:
+                {
+                    s.add(parseClass());
+                    break;
+                }
+                case ENUM:
+                {
+                    s.add(parseEnum());
+                    break;
+                }
+                default:
+                {
+                    logError("Invalid start of file, must start with import or class definition.");
+                }
             }
         }
         
@@ -130,7 +134,7 @@ public class SyntaxTree
         return true;
     }
     
-    private Syntax parseClass()
+    private Expression parseClass()
     {
         // class x {
         // eat class token
@@ -142,138 +146,131 @@ public class SyntaxTree
         
         assertType(TokenType.LSQUIGLY);
         
-        List<Syntax> body = handleClassBody();
+        List<Expression> body = handleClassBody();
         
         assertType(TokenType.RSQUIGLY);
         nextToken();
         
-        return new ClassSyntax(classname, body);
+        return new ClassExpression(classname, body);
     }
     
-    private List<Syntax> handleClassBody()
+    private List<Expression> handleClassBody()
     {
         // {
         nextToken();
         
-        List<Syntax> syntaxes = new ArrayList<>();
+        List<Expression> expressions = new ArrayList<>();
         while (currentToken.getType() != TokenType.RSQUIGLY)
         {
-            switch (currentToken.getType())
+            if (currentToken.getType() == TokenType.IDENTIFIER)
             {
-                // class member field
-                case CONST:
-                case VAL:
-                case IDENTIFIER:
-                {
-                    String visibility = currentToken.getContent();
-                    nextToken();
-                    
-                    assertType(TokenType.IDENTIFIER);
-                    String identifier = currentToken.getContent();
-                    nextToken();
-                    
-                    Expression value = new NullExpression();
-                    if (currentToken.getType() == TokenType.SEMICOLON)
-                    {
-                        syntaxes.add(new VariableDefinitionSyntax(identifier, visibility, value));
-                        break;
-                    }
-                    
-                    if (TokenType.isSetType(currentToken))
-                    {
-                        nextToken();
-                        value = parseExpression();
-                    }
-                    
-                    assertType(TokenType.SEMICOLON);
-                    nextToken();
-                    
-                    syntaxes.add(new VariableDefinitionSyntax(identifier, visibility, value));
-                    break;
-                }
-                
-                // class functions
-                case PURE:
-                case GLOBAL:
-                case FUNCTION:
-                {
-                    // pure add(a:a, a:b):a {return a + b;}
-                    
-                    // pure
-                    String visibility = currentToken.getContent();
-                    nextToken();
-                    
-                    //add(a:a, a:b):a
-                    assertType(TokenType.IDENTIFIER);
-                    String identifier = currentToken.getContent();
-                    nextToken();
-                    
-                    PrototypeSyntax f = parsePrototype(identifier);
-                    
-                    assertType(TokenType.LSQUIGLY);
-                    nextToken();
-                    
-                    // return a + b;
-                    List<Expression> b = new ArrayList<>();
-                    while (currentToken.getType() != TokenType.RSQUIGLY)
-                    {
-                        Expression e = parseExpression();
-                        nextToken();
-                        
-                        b.add(e);
-                    }
-                    
-                    assertType(TokenType.RSQUIGLY);
-                    nextToken();
-                    
-                    syntaxes.add(new FunctionSyntax(visibility, f, b));
-                    break;
-                }
-                
-                case OPERATOR:
-                {
-                    //operator+ (a:a, b: a): a {
-                    //    return a.some_field + b.other_field;
-                    //}
-                    
-                    // operator
-                    nextToken();
-                    
-                    String identifier = currentToken.getContent();
-                    if (TokenType.from(identifier) == TokenType.UNKNOWN)
-                    {
-                        // TODO should this be allowed?
-                        logError("Unknown operator attempted overload");
-                    }
-                    
-                    nextToken();
-                    PrototypeSyntax f = parsePrototype(identifier);
-                    
-                    assertType(TokenType.LSQUIGLY);
-                    nextToken();
-                    
-                    List<Expression> b = new ArrayList<>();
-                    while (currentToken.getType() != TokenType.RSQUIGLY)
-                    {
-                        Expression e = parseExpression();
-                        nextToken();
-                        
-                        b.add(e);
-                    }
-                    
-                    assertType(TokenType.RSQUIGLY);
-                    nextToken();
-                    
-                    syntaxes.add(new FunctionSyntax("operator", f, b));
-                    break;
-                }
+                expressions.add(parseVariableDefinition());
+                continue;
             }
+            
+            expressions.add(parseExpression());
         }
         
-        return syntaxes;
+        return expressions;
     }
     
-    private Expression parsePrimary()
+    private Expression parseOperatorDeclaration()
+    {
+        //operator+ (a:a, b: a): a {
+        //    return a.some_field + b.other_field;
+        //}
+        
+        // operator
+        nextToken();
+        
+        String identifier = currentToken.getContent();
+        if (TokenType.from(identifier) == TokenType.UNKNOWN)
+        {
+            // TODO should this be allowed?
+            logError("Unknown operator attempted overload");
+        }
+        
+        nextToken();
+        PrototypeExpression f = parsePrototype(identifier);
+        
+        assertType(TokenType.LSQUIGLY);
+        nextToken();
+        
+        List<Expression> b = new ArrayList<>();
+        while (currentToken.getType() != TokenType.RSQUIGLY)
+        {
+            Expression e = parseExpression();
+            nextToken();
+            
+            b.add(e);
+        }
+        
+        assertType(TokenType.RSQUIGLY);
+        nextToken();
+        
+        return new FunctionExpression("operator", f, b);
+    }
+    
+    private Expression parseFunctionDeclaration()
+    {
+        // pure add(a:a, a:b):a {return a + b;}
+        
+        // pure
+        String visibility = currentToken.getContent();
+        nextToken();
+        
+        //add(a:a, a:b):a
+        assertType(TokenType.IDENTIFIER);
+        String identifier = currentToken.getContent();
+        nextToken();
+        
+        PrototypeExpression f = parsePrototype(identifier);
+        
+        assertType(TokenType.LSQUIGLY);
+        nextToken();
+        
+        // return a + b;
+        List<Expression> b = new ArrayList<>();
+        while (currentToken.getType() != TokenType.RSQUIGLY)
+        {
+            Expression e = parseExpression();
+            b.add(e);
+        }
+        
+        assertType(TokenType.RSQUIGLY);
+        nextToken();
+        
+        return new FunctionExpression(visibility, f, b);
+    }
+    
+    private Expression parseVariableDefinition()
+    {
+        String visibility = currentToken.getContent();
+        nextToken();
+        
+        assertType(TokenType.IDENTIFIER);
+        String identifier = currentToken.getContent();
+        nextToken();
+        
+        Expression value = new NullExpression();
+        if (currentToken.getType() == TokenType.SEMICOLON)
+        {
+            return new VariableDefinitionExpression(identifier, visibility, value);
+        }
+        
+        if (TokenType.isSetType(currentToken))
+        {
+            nextToken();
+            value = parseExpression();
+        }
+        
+        assertType(TokenType.SEMICOLON);
+        nextToken();
+        
+        return new VariableDefinitionExpression(identifier, visibility, value);
+    }
+    
+    private Expression parsePrimary(boolean allowTernary)
     {
         switch (currentToken.getType())
         {
@@ -288,17 +285,47 @@ public class SyntaxTree
             case DO:
                 return parseDo();
             case IDENTIFIER:
+            {
+                if (allowTernary)
+                {
+                    if ((peekToken().getType() == TokenType.QUESTIONMARK) || (peekToken().getType() == TokenType.QUESTIONMARKCOLON))
+                    {
+                        return parseTernary();
+                    }
+                }
                 return parseIdentifier();
+            }
             case DOTDOT:
                 return parseDotdot();
             case NUMBER:
                 return parseNumber();
             case LPAREN:
                 return parseParenthesis();
+            case ASSERT:
+                return parseAssert();
             case RETURN:
             {
                 nextToken();
-                return parseExpression();
+                Expression parsed = parseExpression();
+                Expression value  = new ReturnExpression(parsed);
+                assertType(TokenType.SEMICOLON);
+                nextToken();
+                return value;
+            }
+            case CONST:
+            case VAL:
+            {
+                return parseVariableDefinition();
+            }
+            case PURE:
+            case GLOBAL:
+            case FUNCTION:
+            {
+                return parseFunctionDeclaration();
+            }
+            case OPERATOR:
+            {
+                return parseOperatorDeclaration();
             }
             default:
                 return null;
@@ -329,6 +356,99 @@ public class SyntaxTree
         return new NumberExpression(num);
     }
     
+    private Expression parseTernary()
+    {
+        Expression condition = parseExpression(false);
+        
+        if (currentToken.getType() == TokenType.QUESTIONMARK)
+        {
+            nextToken();
+            Expression trueCond = parseExpression();
+            assertType(TokenType.COLON);
+            nextToken();
+            Expression falseCond = parseExpression();
+            
+            return new TernaryExpression(condition, trueCond, falseCond);
+        }
+        
+        if (currentToken.getType() == TokenType.QUESTIONMARKCOLON)
+        {
+            nextToken();
+            Expression falseCond = parseExpression();
+            return new TernaryExpression(condition, condition, falseCond);
+        }
+        
+        logError("Invalid ternary syntax, expected ? or ?:");
+        return null;
+    }
+    
+    private Expression parseIf()
+    {
+        // if
+        nextToken();
+        
+        assertType(TokenType.LPAREN);
+        nextToken();
+        
+        Expression condition = parseExpression();
+        
+        assertType(TokenType.RPAREN);
+        nextToken();
+        
+        if (currentToken.getType() != TokenType.LSQUIGLY)
+        {
+            Expression trueStatement = parseExpression();
+            
+            if (currentToken.getType() == TokenType.ELSE)
+            {
+                nextToken();
+                return parseElse(condition, List.of(trueStatement));
+            }
+            
+            return new IfExpression(condition, List.of(trueStatement), List.of(new NullExpression()));
+        } else
+        {
+            nextToken();
+            List<Expression> trueStatements = new ArrayList<>();
+            while (currentToken.getType() != TokenType.RSQUIGLY)
+            {
+                Expression parsed = parseExpression();
+                trueStatements.add(parsed);
+            }
+            nextToken();
+            
+            if (currentToken.getType() == TokenType.ELSE)
+            {
+                nextToken();
+                return parseElse(condition, trueStatements);
+            }
+            
+            return new IfExpression(condition, trueStatements, List.of(new NullExpression()));
+        }
+    }
+    
+    private Expression parseElse(Expression condition, List<Expression> trueStatements)
+    {
+        if (currentToken.getType() != TokenType.LSQUIGLY)
+        {
+            Expression falseStatement = parseExpression();
+            return new IfExpression(condition, trueStatements, List.of(falseStatement));
+        } else
+        {
+            nextToken();
+            List<Expression> falseStatements = new ArrayList<>();
+            while (currentToken.getType() != TokenType.RSQUIGLY)
+            {
+                Expression parsed = parseExpression();
+                nextToken();
+                
+                falseStatements.add(parsed);
+            }
+            
+            return new IfExpression(condition, trueStatements, falseStatements);
+        }
+    }
+    
     // todo start
     
     private Expression parseDo()
@@ -346,17 +466,12 @@ public class SyntaxTree
         return null;
     }
     
-    private Syntax parseEnum()
-    {
-        return null;
-    }
-    
     private Expression parseParenthesis()
     {
         return null;
     }
     
-    private Expression parseIf()
+    private Expression parseAssert()
     {
         return null;
     }
@@ -364,6 +479,11 @@ public class SyntaxTree
     private Expression parseBinaryOps(int i, Expression left)
     {
         return left;
+    }
+    
+    private Expression parseEnum()
+    {
+        return null;
     }
     
     // TODO end
@@ -481,14 +601,21 @@ public class SyntaxTree
         return new SwitchExpression(cases, defaultParam);
     }
     
-    private Expression parseExpression()
+    private Expression parseExpression(boolean ternary)
     {
-        Expression left = parsePrimary();
+        Expression left = parsePrimary(ternary);
         
         return parseBinaryOps(0, left);
     }
     
-    private PrototypeSyntax parsePrototype(String identifier)
+    private Expression parseExpression()
+    {
+        Expression left = parsePrimary(true);
+        
+        return parseBinaryOps(0, left);
+    }
+    
+    private PrototypeExpression parsePrototype(String identifier)
     {
         // add(a:b, a:c):a
         
@@ -524,10 +651,10 @@ public class SyntaxTree
         nextToken();
         
         
-        return new PrototypeSyntax(identifier, params, returnType);
+        return new PrototypeExpression(identifier, params, returnType);
     }
     
-    private Syntax parseImport()
+    private Expression parseImport()
     {
         // import x from y;
         
@@ -541,14 +668,26 @@ public class SyntaxTree
         assertType(TokenType.FROM);
         nextToken();
         
-        assertType(TokenType.IDENTIFIER);
-        String location = currentToken.getContent();
+        
+        assertType(TokenType.DOUBLEQUOTE);
+        nextToken();
+        
+        
+        StringBuilder filename = new StringBuilder();
+        while (currentToken.getType() != TokenType.DOUBLEQUOTE)
+        {
+            String location = currentToken.getContent();
+            filename.append(location);
+            nextToken();
+        }
+        
+        assertType(TokenType.DOUBLEQUOTE);
         nextToken();
         
         assertType(TokenType.SEMICOLON);
         nextToken();
         
-        return new ImportSyntax(classname, location);
+        return new ImportExpression(classname, filename.toString());
     }
     
     private void assertType(TokenType identifier)

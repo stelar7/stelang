@@ -1,4 +1,6 @@
-package ast.exprs;
+package ast.exprs.basic;
+
+import ast.exprs.Expression;
 
 public class NumberExpression extends Expression
 {

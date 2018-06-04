@@ -1,4 +1,4 @@
-package ast;
+package ast.exprs.control;
 
 public class PrototypeParameter
 {
