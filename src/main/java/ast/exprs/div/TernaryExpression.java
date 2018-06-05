@@ -1,4 +1,6 @@
-package ast.exprs;
+package ast.exprs.div;
+
+import ast.exprs.Expression;
 
 import java.util.List;
 

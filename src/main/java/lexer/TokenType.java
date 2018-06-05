@@ -16,7 +16,7 @@ public enum TokenType
     PLUS("+"), MINUS("-"),
     ASTERISK("*"), SLASH("/"), PERCENT("%"),
     AMPERSAND("&"), BAR("|"),
-    AMPERSANDAMPERSAND("&&"), BARBAR("||"),
+    AMPERSANDAMPERSAND("&&"), BARBAR("||"), PLUSPLUS("++"), MINUSMINUS("--"),
     SET("="), QUESTIONMARK("?"), QUESTIONMARKCOLON("?:"),
     
     SETEQL("==="), SETNOTEQL("=!="),
@@ -40,7 +40,7 @@ public enum TokenType
     LSHIFT("<<"), RSHIFT(">>"),
     
     // structure
-    CLASS("class"), ENUM("enum"), FUNCTION("function"), OPERATOR("operator"),
+    CLASS("class"), ENUM("enum"), FUNCTION("function"), CONSTRUCTOR("constructor"), OPERATOR("operator"),
     
     IMPORT("import"), FROM("from"), DOUBLEQUOTE("\""), SINGLEQUOTE("'"),
     
@@ -57,7 +57,7 @@ public enum TokenType
     GLOBAL("global"), PURE("pure"),
     
     // lexing
-    IDENTIFIER(""), KEYWORD(""), NUMBER(""),
+    IDENTIFIER(""), KEYWORD(""), NUMBER(""), TEXT(""),
     COMMENT(""), UNKNOWN("");
     
     String token;

@@ -1,5 +1,21 @@
 import otherclass from "otherclass.stl";
 
+enum myenum {
+    A, B, C, D;
+}
+
+enum myenum2 {
+    A(1), B(1), C(1), D(1);
+    constructor myenum2(int:value);
+}
+
+enum myenum3 {
+    A(3542, 1), B(1, ""), C("asd", 1), D("""asd
+    some long text
+    """, 1);
+    constructor myenum3(object:val1, int:val2);
+}
+
 class myclass {
 
     int: a = 5;
@@ -44,6 +60,8 @@ class myclass {
         x++;
         ++y;
 
+        x++ + ++x;
+
         return x + y;
         return x / y;
     }
@@ -56,6 +74,7 @@ class myclass {
         while(x < y) {x++;}
         while(x < y) {x++;} then return x;
         while(x < y) {x++;} then {return x;}
+        while(y-->x);
     }
 
     function testDo(int:a, int:b):int {
@@ -65,7 +84,6 @@ class myclass {
         do {x++;} while(x < y);
         do {x++;} while(x < y) then return x;
         do {x++;} while(x < y) then {return x;}
-    }
     }
     
     function testFor(int:a, int:b):int {

@@ -72,8 +72,13 @@ public class Lexer
         {
             lineIndex += it.current().length();
             StringBuilder id = new StringBuilder(it.current());
-            while (isIdentifier(it.next()))
+            while (isIdentifier(id.toString()))
             {
+                if (!canAppendToIdentifier(it.next()))
+                {
+                    break;
+                }
+                
                 id.append(it.current());
                 lineIndex += it.current().length();
             }
@@ -178,6 +183,68 @@ public class Lexer
             return new Token(comment.toString(), TokenType.COMMENT, lineNumber, lineIndex - comment.toString().length());
         }
         
+        // parse text
+        if (isDoubleQuote(it.current()))
+        {
+            it.next();
+            if (isDoubleQuote(it.current()) && !isDoubleQuote(it.peek()))
+            {
+                it.next();
+                lineIndex += 2;
+                return new Token("", TokenType.TEXT, lineNumber, lineIndex);
+            } else if (!isDoubleQuote(it.current()))
+            {
+                StringBuilder sb = new StringBuilder();
+                while (!isDoubleQuote(it.current()))
+                {
+                    sb.append(it.current());
+                    lineIndex += it.current().length();
+                    if (it.current().equals("\n"))
+                    {
+                        lineNumber++;
+                        lineIndex = 0;
+                    }
+                    
+                    it.next();
+                }
+                
+                it.next();
+                return new Token(sb.toString(), TokenType.TEXT, lineNumber, lineIndex);
+            } else if (isDoubleQuote(it.current()) && isDoubleQuote(it.peek()))
+            {
+                StringBuilder sb = new StringBuilder();
+                it.next();
+                it.next();
+                
+                boolean condition = !(isDoubleQuote(it.current()) &&
+                                      isDoubleQuote(it.peek()) &&
+                                      isDoubleQuote(it.peekTwo()));
+                
+                while (condition)
+                {
+                    sb.append(it.current());
+                    
+                    lineIndex += it.current().length();
+                    if (it.current().equals("\n"))
+                    {
+                        lineNumber++;
+                        lineIndex = 0;
+                    }
+                    
+                    it.next();
+                    
+                    condition = !(isDoubleQuote(it.current()) &&
+                                  isDoubleQuote(it.peek()) &&
+                                  isDoubleQuote(it.peekTwo()));
+                }
+                
+                it.next();
+                it.next();
+                it.next();
+                return new Token(sb.toString(), TokenType.TEXT, lineNumber, lineIndex);
+            }
+        }
+        
         
         StringBuilder val = new StringBuilder(it.current());
         it.next();
@@ -195,6 +262,20 @@ public class Lexer
         }
         lineIndex += it.current().length();
         return new Token(val.toString(), TokenType.from(val.toString()), lineNumber, lineIndex - val.toString().length());
+    }
+    
+    private boolean isDoubleQuote(String str)
+    {
+        Pattern pattern = Pattern.compile("\"");
+        Matcher matcher = pattern.matcher(str);
+        return matcher.matches();
+    }
+    
+    private boolean isTripleDoubleQuote(String str)
+    {
+        Pattern pattern = Pattern.compile("\"{3}");
+        Matcher matcher = pattern.matcher(str);
+        return matcher.matches();
     }
     
     private boolean isOctal(String str)
@@ -246,6 +327,13 @@ public class Lexer
     private boolean isIdentifier(String str)
     {
         Pattern pattern = Pattern.compile("[_a-zA-Z][_a-zA-Z0-9]*");
+        Matcher matcher = pattern.matcher(str);
+        return matcher.matches();
+    }
+    
+    private boolean canAppendToIdentifier(String str)
+    {
+        Pattern pattern = Pattern.compile("[_a-zA-Z0-9]*");
         Matcher matcher = pattern.matcher(str);
         return matcher.matches();
     }

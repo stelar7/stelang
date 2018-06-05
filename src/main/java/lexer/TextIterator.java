@@ -26,6 +26,12 @@ public class TextIterator
         return codepointToString(point);
     }
     
+    public String peekTwo()
+    {
+        int point = charAt(pos + 2);
+        return codepointToString(point);
+    }
+    
     public String current()
     {
         return codepointToString(current);

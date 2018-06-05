@@ -2,7 +2,9 @@ package ast;
 
 import ast.exprs.*;
 import ast.exprs.basic.*;
+import ast.exprs.clazz.*;
 import ast.exprs.control.*;
+import ast.exprs.div.*;
 import com.google.gson.*;
 import lexer.*;
 
@@ -23,6 +25,9 @@ public class SyntaxTree
     private static Map<TokenType, Integer> binOps = new HashMap<>()
     {{
         put(TokenType.UNKNOWN, 1);
+        
+        put(TokenType.PLUSPLUS, 1);
+        put(TokenType.MINUSMINUS, 1);
         
         put(TokenType.PLUS, 2);
         put(TokenType.MINUS, 2);
@@ -80,14 +85,20 @@ public class SyntaxTree
         currentToken = tokens.get(tokenIndex++);
     }
     
-    private Token peekToken()
+    private boolean peekType(int i, TokenType othertype)
     {
-        if (tokenIndex + 1 > tokens.size())
+        Token t = peekToken(i);
+        return t.getType() == othertype;
+    }
+    
+    private Token peekToken(int offset)
+    {
+        if (tokenIndex + offset > tokens.size())
         {
             return null;
         }
         
-        return tokens.get(tokenIndex);
+        return tokens.get(tokenIndex + (offset - 1));
     }
     
     private int getPrecedence()
@@ -159,6 +170,31 @@ public class SyntaxTree
         return expressions;
     }
     
+    private Expression parseConstructorDeclaration()
+    {
+        String visibility = currentToken.getContent();
+        nextToken();
+        
+        assertType(TokenType.IDENTIFIER);
+        String identifier = currentToken.getContent();
+        nextToken();
+        
+        PrototypeExpression f = parsePrototype(visibility, identifier);
+        
+        if (currentToken.getType() == TokenType.SEMICOLON)
+        {
+            nextToken();
+            return new FunctionExpression(visibility, f, List.of());
+        }
+        
+        assertType(TokenType.LSQUIGLY);
+        nextToken();
+        
+        List<Expression> b = parseExpressionList();
+        
+        return new ConstructorExpression(visibility, f, b);
+    }
+    
     private Expression parseOperatorDeclaration()
     {
         nextToken();
@@ -171,7 +207,7 @@ public class SyntaxTree
         }
         
         nextToken();
-        PrototypeExpression f = parsePrototype(identifier);
+        PrototypeExpression f = parsePrototype("operator", identifier);
         
         assertType(TokenType.LSQUIGLY);
         nextToken();
@@ -188,7 +224,7 @@ public class SyntaxTree
         assertType(TokenType.RSQUIGLY);
         nextToken();
         
-        return new FunctionExpression("operator", f, b);
+        return new OperatorExpression("operator", f, b);
     }
     
     private Expression parseFunctionDeclaration()
@@ -200,7 +236,7 @@ public class SyntaxTree
         String identifier = currentToken.getContent();
         nextToken();
         
-        PrototypeExpression f = parsePrototype(identifier);
+        PrototypeExpression f = parsePrototype(visibility, identifier);
         
         assertType(TokenType.LSQUIGLY);
         nextToken();
@@ -266,7 +302,7 @@ public class SyntaxTree
             {
                 if (allowTernary)
                 {
-                    if ((peekToken().getType() == TokenType.QUESTIONMARK) || (peekToken().getType() == TokenType.QUESTIONMARKCOLON))
+                    if ((peekToken(1).getType() == TokenType.QUESTIONMARK) || (peekToken(1).getType() == TokenType.QUESTIONMARKCOLON))
                     {
                         return parseTernary();
                     }
@@ -274,7 +310,7 @@ public class SyntaxTree
                 
                 if (allowVariableDeclaration)
                 {
-                    if (peekToken().getType() == TokenType.COLON)
+                    if (peekToken(1).getType() == TokenType.COLON)
                     {
                         return parseVariableDefinition();
                     }
@@ -286,6 +322,10 @@ public class SyntaxTree
                 return parseDotdot();
             case NUMBER:
                 return parseNumber();
+            case TEXT:
+            {
+                return parseText();
+            }
             case LPAREN:
                 return parseParenthesis();
             case ASSERT:
@@ -308,6 +348,10 @@ public class SyntaxTree
             {
                 return parseFunctionDeclaration();
             }
+            case CONSTRUCTOR:
+            {
+                return parseConstructorDeclaration();
+            }
             case OPERATOR:
             {
                 return parseOperatorDeclaration();
@@ -316,6 +360,31 @@ public class SyntaxTree
                 return null;
         }
     }
+    
+    private Expression parseText()
+    {
+        String value = currentToken.getContent();
+        nextToken();
+        return new TextExpression(value);
+    }
+    
+    private Expression parseMultilineText()
+    {
+        StringBuilder sb = new StringBuilder();
+        
+        while (!(peekType(0, TokenType.DOUBLEQUOTE) &&
+                 peekType(1, TokenType.DOUBLEQUOTE) &&
+                 peekType(2, TokenType.DOUBLEQUOTE)))
+        {
+            sb.append(currentToken.getContent());
+            nextToken();
+        }
+        nextToken();
+        nextToken();
+        nextToken();
+        return new TextExpression(sb.toString());
+    }
+    
     
     private Expression parseDotdot()
     {
@@ -599,19 +668,83 @@ public class SyntaxTree
         }
     }
     
-    // todo start
     
     private Expression parseFor()
     {
+        // todo
         return null;
     }
+    
     
     private Expression parseEnum()
     {
-        return null;
+        nextToken();
+        
+        assertType(TokenType.IDENTIFIER);
+        String identifier = currentToken.getContent();
+        nextToken();
+        
+        assertType(TokenType.LSQUIGLY);
+        nextToken();
+        
+        List<Expression> members = parseEnumMembers();
+        
+        if (currentToken.getType() == TokenType.RSQUIGLY)
+        {
+            nextToken();
+            return new EnumExpression(identifier, members, List.of());
+        }
+        
+        List<Expression> methods = parseExpressionList();
+        
+        return new EnumExpression(identifier, members, methods);
     }
     
-    // TODO end
+    private List<Expression> parseEnumMembers()
+    {
+        List<Expression> members = new ArrayList<>();
+        while (currentToken.getType() != TokenType.SEMICOLON)
+        {
+            assertType(TokenType.IDENTIFIER);
+            String name = currentToken.getContent();
+            nextToken();
+            
+            if (currentToken.getType() == TokenType.LPAREN)
+            {
+                nextToken();
+                List<Expression> params = new ArrayList<>();
+                while (currentToken.getType() != TokenType.RPAREN)
+                {
+                    Expression parsed = parseExpression();
+                    params.add(parsed);
+                    
+                    if (currentToken.getType() == TokenType.RPAREN)
+                    {
+                        break;
+                    }
+                    
+                    assertType(TokenType.COMMA);
+                    nextToken();
+                }
+                nextToken();
+                members.add(new EnumMemberExpression(name, params));
+                if (currentToken.getType() == TokenType.COMMA)
+                {
+                    nextToken();
+                    continue;
+                }
+            }
+            
+            if (currentToken.getType() == TokenType.COMMA)
+            {
+                members.add(new EnumMemberExpression(name, List.of()));
+                nextToken();
+            }
+        }
+        
+        nextToken();
+        return members;
+    }
     
     private Expression parseAssert()
     {
@@ -814,7 +947,7 @@ public class SyntaxTree
         return bin;
     }
     
-    private PrototypeExpression parsePrototype(String identifier)
+    private PrototypeExpression parsePrototype(String visibility, String identifier)
     {
         assertType(TokenType.LPAREN);
         
@@ -840,6 +973,14 @@ public class SyntaxTree
         } while (currentToken.getType() == TokenType.COMMA);
         nextToken();
         
+        if (visibility.equals("constructor"))
+        {
+            if (currentToken.getType() == TokenType.SEMICOLON)
+            {
+                return new PrototypeExpression(identifier, params, identifier);
+            }
+        }
+        
         assertType(TokenType.COLON);
         nextToken();
         
@@ -863,25 +1004,14 @@ public class SyntaxTree
         nextToken();
         
         
-        assertType(TokenType.DOUBLEQUOTE);
-        nextToken();
-        
-        
-        StringBuilder filename = new StringBuilder();
-        while (currentToken.getType() != TokenType.DOUBLEQUOTE)
-        {
-            String location = currentToken.getContent();
-            filename.append(location);
-            nextToken();
-        }
-        
-        assertType(TokenType.DOUBLEQUOTE);
+        assertType(TokenType.TEXT);
+        String filename = currentToken.getContent();
         nextToken();
         
         assertType(TokenType.SEMICOLON);
         nextToken();
         
-        return new ImportExpression(classname, filename.toString());
+        return new ImportExpression(classname, filename);
     }
     
     private void assertType(TokenType identifier)

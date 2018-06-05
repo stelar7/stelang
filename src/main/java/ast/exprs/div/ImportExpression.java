@@ -1,4 +1,6 @@
-package ast.exprs;
+package ast.exprs.div;
+
+import ast.exprs.Expression;
 
 public class ImportExpression extends Expression
 {
