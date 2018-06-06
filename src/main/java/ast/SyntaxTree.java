@@ -24,54 +24,56 @@ public class SyntaxTree
     
     private static Map<TokenType, Integer> binOps = new HashMap<>()
     {{
-        put(TokenType.UNKNOWN, 1);
+        put(TokenType.UNKNOWN, 0);
+    
+        put(TokenType.DOT, 9);
         
-        put(TokenType.PLUSPLUS, 1);
-        put(TokenType.MINUSMINUS, 1);
+        put(TokenType.PLUSPLUS, 10);
+        put(TokenType.MINUSMINUS, 10);
         
-        put(TokenType.PLUS, 2);
-        put(TokenType.MINUS, 2);
+        put(TokenType.PLUS, 20);
+        put(TokenType.MINUS, 20);
         
-        put(TokenType.ASTERISK, 3);
-        put(TokenType.SLASH, 3);
+        put(TokenType.ASTERISK, 30);
+        put(TokenType.SLASH, 30);
         
-        put(TokenType.SPACESHIP, 4);
+        put(TokenType.SPACESHIP, 40);
         
-        put(TokenType.RANGLE, 5);
-        put(TokenType.LANGLE, 5);
-        put(TokenType.LESSEQL, 5);
-        put(TokenType.GREATEREQL, 5);
+        put(TokenType.RANGLE, 50);
+        put(TokenType.LANGLE, 50);
+        put(TokenType.LESSEQL, 50);
+        put(TokenType.GREATEREQL, 50);
         
-        put(TokenType.EQUAL, 6);
-        put(TokenType.NOTEQL, 6);
+        put(TokenType.EQUAL, 60);
+        put(TokenType.NOTEQL, 60);
         
-        put(TokenType.AMPERSAND, 7);
-        put(TokenType.CARET, 8);
-        put(TokenType.BAR, 9);
-        put(TokenType.AMPERSANDAMPERSAND, 10);
-        put(TokenType.BARBAR, 11);
+        put(TokenType.AMPERSAND, 70);
+        put(TokenType.CARET, 80);
+        put(TokenType.BAR, 90);
+        put(TokenType.AMPERSANDAMPERSAND, 100);
+        put(TokenType.BARBAR, 110);
         
-        put(TokenType.SET, 13);
-        put(TokenType.SETEQL, 13);
-        put(TokenType.SETNOTEQL, 13);
-        put(TokenType.SETRANGLE, 13);
-        put(TokenType.SETRANGLEEQL, 13);
-        put(TokenType.SETLANGLE, 13);
-        put(TokenType.SETLANGLEEQL, 13);
-        put(TokenType.SETSPACESHIP, 13);
-        put(TokenType.SETPLUS, 13);
-        put(TokenType.SETMINUS, 13);
-        put(TokenType.SETASTERIX, 13);
-        put(TokenType.SETSLASH, 13);
-        put(TokenType.SETPERCENT, 13);
-        put(TokenType.SETANDAND, 13);
-        put(TokenType.SETBARBAR, 13);
-        put(TokenType.SETNOT, 13);
-        put(TokenType.SETAND, 13);
-        put(TokenType.SETBAR, 13);
-        put(TokenType.SETCARET, 13);
-        put(TokenType.SETRANGLERANGLE, 13);
-        put(TokenType.SETLANGLELANGLE, 13);
+        put(TokenType.SET, 130);
+        put(TokenType.SETEQL, 130);
+        put(TokenType.SETNOTEQL, 130);
+        put(TokenType.SETRANGLE, 130);
+        put(TokenType.SETRANGLEEQL, 130);
+        put(TokenType.SETLANGLE, 130);
+        put(TokenType.SETLANGLEEQL, 130);
+        put(TokenType.SETSPACESHIP, 130);
+        put(TokenType.SETPLUS, 130);
+        put(TokenType.SETMINUS, 130);
+        put(TokenType.SETASTERIX, 130);
+        put(TokenType.SETSLASH, 130);
+        put(TokenType.SETPERCENT, 130);
+        put(TokenType.SETANDAND, 130);
+        put(TokenType.SETBARBAR, 130);
+        put(TokenType.SETNOT, 130);
+        put(TokenType.SETAND, 130);
+        put(TokenType.SETBAR, 130);
+        put(TokenType.SETCARET, 130);
+        put(TokenType.SETRANGLERANGLE, 130);
+        put(TokenType.SETLANGLELANGLE, 130);
     }};
     
     private void nextToken()
