@@ -25,7 +25,7 @@ public class SyntaxTree
     private static Map<TokenType, Integer> binOps = new HashMap<>()
     {{
         put(TokenType.UNKNOWN, 0);
-    
+        
         put(TokenType.DOT, 9);
         
         put(TokenType.PLUSPLUS, 10);
@@ -481,7 +481,7 @@ public class SyntaxTree
     {
         if (currentToken.getType() != TokenType.ELSE)
         {
-            return new IfExpression(condition, trueStatements, List.of(new NullExpression()));
+            return new IfExpression(condition, trueStatements, List.of());
         }
         nextToken();
         
@@ -607,15 +607,24 @@ public class SyntaxTree
         if (currentToken.getType() == TokenType.SEMICOLON)
         {
             nextToken();
-            return parseThenWhile(condition, List.of(new NullExpression()));
+            return parseThenWhile(condition, List.of());
         }
+        
+        if (currentToken.getType() == TokenType.THEN)
+        {
+            return parseThenWhile(condition, List.of());
+        }
+        
         
         if (currentToken.getType() != TokenType.LSQUIGLY)
         {
             Expression doStatement = parseExpression();
             
-            assertType(TokenType.SEMICOLON);
-            nextToken();
+            if (!(doStatement instanceof ControlExpression))
+            {
+                assertType(TokenType.SEMICOLON);
+                nextToken();
+            }
             
             return parseThenWhile(condition, List.of(doStatement));
         } else
@@ -673,8 +682,111 @@ public class SyntaxTree
     
     private Expression parseFor()
     {
-        // todo
-        return null;
+        nextToken();
+        
+        assertType(TokenType.LPAREN);
+        nextToken();
+        
+        if (currentToken.getType() == TokenType.LPAREN)
+        {
+            // todo parameter list
+            return new NullExpression();
+        }
+        
+        Expression init      = new NullExpression();
+        Expression condition = new NullExpression();
+        Expression increment = new NullExpression();
+        
+        if (currentToken.getType() != TokenType.SEMICOLON)
+        {
+            init = parseExpression();
+        }
+        nextToken();
+        
+        if (currentToken.getType() != TokenType.SEMICOLON)
+        {
+            condition = parseExpression();
+        }
+        nextToken();
+        
+        if (currentToken.getType() != TokenType.RPAREN)
+        {
+            increment = parseExpression();
+        }
+        nextToken();
+        
+        if (currentToken.getType() == TokenType.SEMICOLON)
+        {
+            nextToken();
+            return parseThenFor(init, condition, increment, List.of());
+        }
+        
+        if (currentToken.getType() == TokenType.THEN)
+        {
+            return parseThenFor(init, condition, increment, List.of());
+        }
+        
+        if (currentToken.getType() != TokenType.LSQUIGLY)
+        {
+            Expression doStatement = parseExpression();
+            
+            if (!(doStatement instanceof ControlExpression))
+            {
+                assertType(TokenType.SEMICOLON);
+                nextToken();
+            }
+            
+            return parseThenFor(init, condition, increment, List.of(doStatement));
+        } else
+        {
+            nextToken();
+            List<Expression> doStatements = new ArrayList<>();
+            while (currentToken.getType() != TokenType.RSQUIGLY)
+            {
+                Expression parsed = parseExpression();
+                doStatements.add(parsed);
+                
+                assertType(TokenType.SEMICOLON);
+                nextToken();
+            }
+            nextToken();
+            
+            return parseThenFor(init, condition, increment, doStatements);
+        }
+    }
+    
+    private Expression parseThenFor(Expression init, Expression condition, Expression increment, List<Expression> doStatements)
+    {
+        if (currentToken.getType() != TokenType.THEN)
+        {
+            return new ForExpression(init, condition, increment, doStatements);
+        }
+        nextToken();
+        
+        if (currentToken.getType() != TokenType.LSQUIGLY)
+        {
+            Expression thenStatements = parseExpression();
+            
+            assertType(TokenType.SEMICOLON);
+            nextToken();
+            
+            return new ForThenExpression(init, condition, increment, doStatements, List.of(thenStatements));
+        } else
+        {
+            nextToken();
+            List<Expression> falseStatements = new ArrayList<>();
+            while (currentToken.getType() != TokenType.RSQUIGLY)
+            {
+                Expression parsed = parseExpression();
+                falseStatements.add(parsed);
+                
+                assertType(TokenType.SEMICOLON);
+                nextToken();
+            }
+            nextToken();
+            
+            return new ForThenExpression(init, condition, increment, doStatements, falseStatements);
+        }
     }
     
     
@@ -809,7 +921,7 @@ public class SyntaxTree
                 Expression e = parseExpression();
                 parameters.add(e);
                 
-                if (currentToken.getType() != TokenType.RPAREN)
+                if (currentToken.getType() == TokenType.RPAREN)
                 {
                     break;
                 }
