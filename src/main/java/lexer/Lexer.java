@@ -28,7 +28,7 @@ public class Lexer
     public static void main(String[] args)
     {
         Lexer       l      = new Lexer();
-        String      data   = readInternalAsString("test.stl");
+        String      data   = readInternalAsString("test.st7");
         List<Token> tokens = l.parse(data);
         
         tokens.forEach(System.out::println);

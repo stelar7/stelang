@@ -112,7 +112,7 @@ class myclass {
     }
 }
 
-import otherclass from "otherclass.stl";
+import otherclass from "otherclass.st7";
 
 enum myenum {
     A, B, C, D;
