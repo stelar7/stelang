@@ -402,11 +402,9 @@ public class SyntaxTree
     
     private Expression parseDotdot()
     {
-        String[] c = currentToken.getContent().split("\\.\\.");
+        String[] c = assertGetThenNext(TokenType.DOTDOT).split("\\.\\.");
         long     f = Long.parseUnsignedLong(c[0]);
         long     s = Long.parseUnsignedLong(c[1]);
-        
-        nextToken();
         
         List<Object> params = new ArrayList<>();
         for (; f <= s; f++)
@@ -419,8 +417,8 @@ public class SyntaxTree
     
     private Expression parseNumber()
     {
-        double num = Double.parseDouble(currentToken.getContent());
-        nextToken();
+        String content = assertGetThenNext(TokenType.NUMBER);
+        double num     = Double.parseDouble(content);
         return new NumberExpression(num);
     }
     
@@ -451,8 +449,7 @@ public class SyntaxTree
     
     private Expression parseIf()
     {
-        nextToken();
-        
+        assertThenNext(TokenType.IF);
         assertThenNext(TokenType.LPAREN);
         
         Expression condition = parseExpression();
@@ -518,8 +515,7 @@ public class SyntaxTree
     
     private Expression parseDo()
     {
-        nextToken();
-        
+        assertThenNext(TokenType.DO);
         List<Expression> body = new ArrayList<>();
         
         if (currentToken.getType() != TokenType.LSQUIGLY)
@@ -590,8 +586,7 @@ public class SyntaxTree
     
     private Expression parseWhile()
     {
-        nextToken();
-        
+        assertThenNext(TokenType.WHILE);
         assertThenNext(TokenType.LPAREN);
         Expression condition = parseExpression();
         assertThenNext(TokenType.RPAREN);
@@ -671,8 +666,7 @@ public class SyntaxTree
     
     private Expression parseFor()
     {
-        nextToken();
-        
+        assertThenNext(TokenType.FOR);
         assertThenNext(TokenType.LPAREN);
         
         List<Expression> init = parseCommaSeparatedExpressions(TokenType.SEMICOLON, TokenType.COLON);
@@ -966,9 +960,7 @@ public class SyntaxTree
     
     private Expression parseIdentifier()
     {
-        String id = currentToken.getContent();
-        nextToken();
-        
+        String id = assertGetThenNext(TokenType.IDENTIFIER);
         if (currentToken.getType() != TokenType.LPAREN)
         {
             return new VariableExpression(id);
@@ -1004,8 +996,7 @@ public class SyntaxTree
     
     private Expression parseSwitch()
     {
-        nextToken();
-        
+        assertThenNext(TokenType.SWITCH);
         assertThenNext(TokenType.LPAREN);
         
         Expression e = parseExpression();
