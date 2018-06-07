@@ -85,6 +85,7 @@ class myclass {
         for (;; x++);
         for (int:z = 0; z < x;);
         for (int:z = 0; z < x; z++);
+        for (int:z = 0, int:a = 12; z < a; z++);
     }
     
     function testForeach(int:a, int:b):int {

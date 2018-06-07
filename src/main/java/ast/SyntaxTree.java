@@ -693,27 +693,9 @@ public class SyntaxTree
             return new NullExpression();
         }
         
-        Expression init      = new NullExpression();
-        Expression condition = new NullExpression();
-        Expression increment = new NullExpression();
-        
-        if (currentToken.getType() != TokenType.SEMICOLON)
-        {
-            init = parseExpression();
-        }
-        nextToken();
-        
-        if (currentToken.getType() != TokenType.SEMICOLON)
-        {
-            condition = parseExpression();
-        }
-        nextToken();
-        
-        if (currentToken.getType() != TokenType.RPAREN)
-        {
-            increment = parseExpression();
-        }
-        nextToken();
+        List<Expression> init      = parseCommaSeparatedExpressions(TokenType.SEMICOLON);
+        List<Expression> condition = parseCommaSeparatedExpressions(TokenType.SEMICOLON);
+        List<Expression> increment = parseCommaSeparatedExpressions(TokenType.RPAREN);
         
         if (currentToken.getType() == TokenType.SEMICOLON)
         {
@@ -755,7 +737,27 @@ public class SyntaxTree
         }
     }
     
-    private Expression parseThenFor(Expression init, Expression condition, Expression increment, List<Expression> doStatements)
+    private List<Expression> parseCommaSeparatedExpressions(TokenType endToken)
+    {
+        List<Expression> data = new ArrayList<>();
+        while (currentToken.getType() != endToken)
+        {
+            Expression parsed = parseExpression();
+            data.add(parsed);
+            
+            if (currentToken.getType() != TokenType.COMMA)
+            {
+                logError("Expected , in argument list");
+            } else
+            {
+                nextToken();
+            }
+        }
+        nextToken();
+        return data;
+    }
+    
+    private Expression parseThenFor(List<Expression> init, List<Expression> condition, List<Expression> increment, List<Expression> doStatements)
     {
         if (currentToken.getType() != TokenType.THEN)
         {
