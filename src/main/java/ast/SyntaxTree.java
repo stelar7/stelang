@@ -87,6 +87,11 @@ public class SyntaxTree
         currentToken = tokens.get(tokenIndex++);
     }
     
+    private Token peekPrevToken()
+    {
+        return tokens.get(tokenIndex - 2);
+    }
+    
     private boolean peekType(int i, TokenType othertype)
     {
         Token t = peekToken(i);
@@ -687,13 +692,13 @@ public class SyntaxTree
         assertType(TokenType.LPAREN);
         nextToken();
         
-        if (currentToken.getType() == TokenType.LPAREN)
+        List<Expression> init = parseCommaSeparatedExpressions(TokenType.SEMICOLON, TokenType.COLON);
+        
+        if (peekPrevToken().getType() == TokenType.COLON)
         {
-            // todo parameter list
-            return new NullExpression();
+            return parseForEach(init);
         }
         
-        List<Expression> init      = parseCommaSeparatedExpressions(TokenType.SEMICOLON);
         List<Expression> condition = parseCommaSeparatedExpressions(TokenType.SEMICOLON);
         List<Expression> increment = parseCommaSeparatedExpressions(TokenType.RPAREN);
         
@@ -737,13 +742,101 @@ public class SyntaxTree
         }
     }
     
-    private List<Expression> parseCommaSeparatedExpressions(TokenType endToken)
+    private Expression parseForEach(List<Expression> init)
     {
+        Expression collection = parseExpression();
+        assertType(TokenType.RPAREN);
+        nextToken();
+        
+        if (currentToken.getType() == TokenType.SEMICOLON)
+        {
+            nextToken();
+            return parseThenForEach(init, collection, List.of());
+        }
+        
+        if (currentToken.getType() == TokenType.THEN)
+        {
+            return parseThenForEach(init, collection, List.of());
+        }
+        
+        if (currentToken.getType() != TokenType.LSQUIGLY)
+        {
+            Expression doStatement = parseExpression();
+            
+            if (!(doStatement instanceof ControlExpression))
+            {
+                assertType(TokenType.SEMICOLON);
+                nextToken();
+            }
+            
+            return parseThenForEach(init, collection, List.of(doStatement));
+        } else
+        {
+            nextToken();
+            List<Expression> doStatements = new ArrayList<>();
+            while (currentToken.getType() != TokenType.RSQUIGLY)
+            {
+                Expression parsed = parseExpression();
+                doStatements.add(parsed);
+                
+                assertType(TokenType.SEMICOLON);
+                nextToken();
+            }
+            nextToken();
+            
+            return parseThenForEach(init, collection, doStatements);
+        }
+    }
+    
+    private Expression parseThenForEach(List<Expression> init, Expression collection, List<Expression> doStatements)
+    {
+        if (currentToken.getType() != TokenType.THEN)
+        {
+            return new ForEachExpression(init, collection, doStatements);
+        }
+        nextToken();
+        
+        if (currentToken.getType() != TokenType.LSQUIGLY)
+        {
+            Expression thenStatements = parseExpression();
+            
+            assertType(TokenType.SEMICOLON);
+            nextToken();
+            
+            return new ForEachThenExpression(init, collection, doStatements, List.of(thenStatements));
+        } else
+        {
+            nextToken();
+            List<Expression> falseStatements = new ArrayList<>();
+            while (currentToken.getType() != TokenType.RSQUIGLY)
+            {
+                Expression parsed = parseExpression();
+                falseStatements.add(parsed);
+                
+                assertType(TokenType.SEMICOLON);
+                nextToken();
+            }
+            nextToken();
+            
+            return new ForEachThenExpression(init, collection, doStatements, falseStatements);
+        }
+    }
+    
+    private List<Expression> parseCommaSeparatedExpressions(TokenType... endTokens)
+    {
+        List.of(endTokens);
         List<Expression> data = new ArrayList<>();
-        while (currentToken.getType() != endToken)
+        
+        while (!List.of(endTokens).contains(currentToken.getType()))
         {
             Expression parsed = parseExpression();
             data.add(parsed);
+            
+            if (List.of(endTokens).contains(currentToken.getType()))
+            {
+                nextToken();
+                return data;
+            }
             
             if (currentToken.getType() != TokenType.COMMA)
             {

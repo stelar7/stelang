@@ -1,4 +1,5 @@
 class myclass {
+
     int: a = 5;
     const b = 5;
     val c = 5;
@@ -97,11 +98,11 @@ class myclass {
         for (const v : y);
         for (val v : y);
         for (int:v : z);
-        for ((int:v, int:v2) : a);
+        for (int:v, int:v2 : a);
         for (int:v : 0..3);
         for (int:v : List.of(a,b));
         for (int:v : Stream.of(a,b));
-        for ((int:v, int:v2) : Map.of(a, b));
+        for (int:v, int:v2 : Map.of(a, b));
         for (int:v : z) {} then {}
         for (int:v : 0..3) {} then {}
     }
