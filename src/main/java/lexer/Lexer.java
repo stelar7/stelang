@@ -1,40 +1,10 @@
 package lexer;
 
-import ast.SyntaxTree;
-
-import java.io.InputStream;
 import java.util.*;
 import java.util.regex.*;
 
 public class Lexer
 {
-    public static String readInternalAsString(String filename)
-    {
-        InputStream   file   = Lexer.class.getClassLoader().getResourceAsStream(filename);
-        StringBuilder result = new StringBuilder();
-        
-        try (Scanner scanner = new Scanner(file))
-        {
-            while (scanner.hasNextLine())
-            {
-                String line = scanner.nextLine();
-                result.append(line).append("\n");
-            }
-        }
-        
-        return result.toString();
-    }
-    
-    public static void main(String[] args)
-    {
-        Lexer       l      = new Lexer();
-        String      data   = readInternalAsString("test.st7");
-        List<Token> tokens = l.parse(data);
-        
-        tokens.forEach(System.out::println);
-        SyntaxTree s = new SyntaxTree(tokens);
-        s.isValid();
-    }
     
     public List<Token> parse(String text)
     {

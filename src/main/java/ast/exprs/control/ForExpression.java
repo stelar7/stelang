@@ -6,12 +6,12 @@ import java.util.List;
 
 public class ForExpression extends ControlExpression
 {
-    private List<Expression>       init;
-    private List<Expression>       condition;
-    private List<Expression>       increment;
-    private List<Expression> doStatements;
+    private List<Expression> init;
+    private List<Expression> condition;
+    private List<Expression> increment;
+    private Expression       doStatements;
     
-    public ForExpression(List<Expression> init, List<Expression> condition, List<Expression> increment, List<Expression> doStatements)
+    public ForExpression(List<Expression> init, List<Expression> condition, List<Expression> increment, Expression doStatements)
     {
         this.init = init;
         this.condition = condition;

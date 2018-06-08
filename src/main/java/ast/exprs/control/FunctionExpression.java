@@ -8,9 +8,9 @@ public class FunctionExpression extends ControlExpression
 {
     private String              visibility;
     private PrototypeExpression prototype;
-    private List<Expression>    body;
+    private Expression          body;
     
-    public FunctionExpression(String visibility, PrototypeExpression prototype, List<Expression> body)
+    public FunctionExpression(String visibility, PrototypeExpression prototype, Expression body)
     {
         this.visibility = visibility;
         this.prototype = prototype;

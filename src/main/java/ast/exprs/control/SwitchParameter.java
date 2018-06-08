@@ -6,11 +6,11 @@ import java.util.List;
 
 public class SwitchParameter
 {
-    private int              caseIndex;
-    private Expression       condition;
-    private List<Expression> expressions;
+    private int        caseIndex;
+    private Expression condition;
+    private Expression expressions;
     
-    public SwitchParameter(int caseIndex, Expression condition, List<Expression> expressions)
+    public SwitchParameter(int caseIndex, Expression condition, Expression expressions)
     {
         this.caseIndex = caseIndex;
         this.condition = condition;

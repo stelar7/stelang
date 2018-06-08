@@ -7,7 +7,7 @@ import java.util.List;
 
 public class ConstructorExpression extends FunctionExpression
 {
-    public ConstructorExpression(String visibility, PrototypeExpression prototype, List<Expression> body)
+    public ConstructorExpression(String visibility, PrototypeExpression prototype, Expression body)
     {
         super(visibility, prototype, body);
     }
