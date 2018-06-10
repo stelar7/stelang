@@ -316,6 +316,7 @@ public class SyntaxTree
             }
             case DOTDOT:
                 return parseDotdot();
+            case FLOAT:
             case NUMBER:
                 return parseNumber();
             case TEXT:
@@ -405,9 +406,16 @@ public class SyntaxTree
     
     private Expression parseNumber()
     {
-        String content = assertGetThenNext(TokenType.NUMBER);
+        if (currentToken.getType() == TokenType.NUMBER)
+        {
+            String content = assertGetThenNext(TokenType.NUMBER);
+            Long   num     = Long.parseUnsignedLong(content, 10);
+            return new LongExpression(num);
+        }
+        
+        String content = assertGetThenNext(TokenType.FLOAT);
         double num     = Double.parseDouble(content);
-        return new NumberExpression(num);
+        return new DoubleExpression(num);
     }
     
     private Expression parseTernary()

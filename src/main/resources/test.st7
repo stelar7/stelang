@@ -36,6 +36,7 @@ class myclass {
     function testBinaryOps(int:a, int:b):int {
         val x = 1;
         val y = 10;
+        const z = 3.50;
 
         x =- y;
         x = y + 1;

@@ -93,7 +93,7 @@ public class Lexer
                         numb = numb.replaceFirst("\\.", "");
                     }
                     
-                    return new Token(numb, TokenType.NUMBER, lineNumber, lineIndex - num.toString().length());
+                    return new Token(numb, TokenType.FLOAT, lineNumber, lineIndex - num.toString().length());
                 }
                 
                 return new Token(numb, TokenType.NUMBER, lineNumber, lineIndex - num.toString().length());
