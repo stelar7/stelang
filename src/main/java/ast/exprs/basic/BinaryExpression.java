@@ -16,6 +16,21 @@ public class BinaryExpression extends Expression
         this.right = right;
     }
     
+    public Token getOp()
+    {
+        return op;
+    }
+    
+    public Expression getLeft()
+    {
+        return left;
+    }
+    
+    public Expression getRight()
+    {
+        return right;
+    }
+    
     @Override
     public String codegen()
     {

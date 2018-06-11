@@ -14,6 +14,16 @@ public class VariableDefinitionExpression extends Expression
         this.visibility = visibility;
     }
     
+    public String getIdentifier()
+    {
+        return identifier;
+    }
+    
+    public String getVisibility()
+    {
+        return visibility;
+    }
+    
     @Override
     public String codegen()
     {

@@ -75,37 +75,96 @@ public class SyntaxTree
             BlockExpression b = (BlockExpression) c.getBody();
             for (Expression be : b.getBody())
             {
-                if (!(be instanceof FunctionExpression))
+                if (be instanceof FunctionExpression)
                 {
-                    continue;
+                    validateFunction(c, be, types);
                 }
                 
-                PrototypeExpression pe = ((FunctionExpression) be).getPrototype();
-                if (!types.contains(pe.getReturnType()))
+                if (be instanceof VariableDefinitionExpression)
                 {
-                    logSemanticError(String.format("Function \"%s\" has unknown return type: \"%s\"", pe.getName(), pe.getReturnType()));
+                    validateVariable(be, types, null);
                 }
                 
-                String type = "Function";
-                if (be instanceof ConstructorExpression)
+                if (be instanceof BinaryExpression)
                 {
-                    type = "Constructor";
-                }
-                
-                if (be instanceof OperatorExpression)
-                {
-                    type = "Operator";
-                }
-                
-                for (PrototypeParameter par : pe.getParameters())
-                {
-                    if (!types.contains(par.getType()))
+                    if (((BinaryExpression) be).getLeft() instanceof VariableDefinitionExpression)
                     {
-                        logSemanticError(String.format("%s \"%s\" in class \"%s\" has unknown type for parameter \"%s\": \"%s\"", type, pe.getName(), c.getClassname(), par.getName(), par.getType()));
+                        validateVariable(((BinaryExpression) be).getLeft(), types, null);
                     }
                 }
             }
         }
+    }
+    
+    private void validateVariable(Expression be, Set<String> types, PrototypeExpression proto)
+    {
+        VariableDefinitionExpression pe = ((VariableDefinitionExpression) be);
+        
+        if (pe.getVisibility().equals("const") || pe.getVisibility().equals("val"))
+        {
+            return;
+        }
+        
+        String extra = "class";
+        if (proto != null)
+        {
+            extra = "method \"" + proto.getName() + "\"";
+        }
+        
+        if (!types.contains(pe.getVisibility()))
+        {
+            logSemanticError(String.format("Variable in %s \"%s\" has unknown return type: \"%s\"", extra, pe.getIdentifier(), pe.getVisibility()));
+        }
+        
+    }
+    
+    private void validateFunction(ClassExpression c, Expression be, Set<String> types)
+    {
+        PrototypeExpression pe = ((FunctionExpression) be).getPrototype();
+        if (!types.contains(pe.getReturnType()))
+        {
+            logSemanticError(String.format("Function \"%s\" has unknown return type: \"%s\"", pe.getName(), pe.getReturnType()));
+        }
+        
+        String type = "Function";
+        if (be instanceof ConstructorExpression)
+        {
+            type = "Constructor";
+        }
+        
+        if (be instanceof OperatorExpression)
+        {
+            type = "Operator";
+        }
+        
+        for (PrototypeParameter par : pe.getParameters())
+        {
+            if (!types.contains(par.getType()))
+            {
+                logSemanticError(String.format("%s \"%s\" in class \"%s\" has unknown type for parameter \"%s\": \"%s\"", type, pe.getName(), c.getClassname(), par.getName(), par.getType()));
+            }
+        }
+        
+        if (((FunctionExpression) be).getBody() instanceof BlockExpression)
+        {
+            BlockExpression bl = (BlockExpression) ((FunctionExpression) be).getBody();
+            for (Expression ble : bl.getBody())
+            {
+                if (ble instanceof VariableDefinitionExpression)
+                {
+                    validateVariable(ble, types, pe);
+                }
+                
+                if (ble instanceof BinaryExpression)
+                {
+                    if (((BinaryExpression) ble).getLeft() instanceof VariableDefinitionExpression)
+                    {
+                        validateVariable(((BinaryExpression) ble).getLeft(), types, pe);
+                    }
+                }
+            }
+        }
+        
     }
     
     private Set<String> buildTypeList(List<Expression> ast)
