@@ -1,6 +1,7 @@
-package ast.exprs.control;
+package ast.exprs.clazz;
 
 import ast.exprs.Expression;
+import ast.exprs.control.*;
 
 import java.util.List;
 
@@ -15,6 +16,21 @@ public class FunctionExpression extends ControlExpression
         this.visibility = visibility;
         this.prototype = prototype;
         this.body = body;
+    }
+    
+    public PrototypeExpression getPrototype()
+    {
+        return prototype;
+    }
+    
+    public void setPrototype(PrototypeExpression prototype)
+    {
+        this.prototype = prototype;
+    }
+    
+    public Expression getBody()
+    {
+        return body;
     }
     
     @Override

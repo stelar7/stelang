@@ -14,4 +14,19 @@ public class PrototypeExpression
         this.parameters = parameters;
         this.returnType = returnType;
     }
+    
+    public String getName()
+    {
+        return name;
+    }
+    
+    public List<PrototypeParameter> getParameters()
+    {
+        return parameters;
+    }
+    
+    public String getReturnType()
+    {
+        return returnType;
+    }
 }

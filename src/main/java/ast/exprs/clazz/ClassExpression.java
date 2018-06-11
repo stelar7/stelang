@@ -16,6 +16,16 @@ public class ClassExpression extends Expression
         this.body = body;
     }
     
+    public String getClassname()
+    {
+        return classname;
+    }
+    
+    public Expression getBody()
+    {
+        return body;
+    }
+    
     @Override
     public String codegen()
     {

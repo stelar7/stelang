@@ -13,6 +13,11 @@ public class ImportExpression extends Expression
         this.location = location;
     }
     
+    public String getClassname()
+    {
+        return classname;
+    }
+    
     @Override
     public String codegen()
     {

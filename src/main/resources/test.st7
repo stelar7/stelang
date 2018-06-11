@@ -119,8 +119,13 @@ class myclass {
 
         }
     }
+
+    function testInvalidTypes(unknown:a, unknown2:b):unknown3 {
+        unknown4:a = 0;
+        val a = unknown5();
+    }
     
-    operator<=>(myclass:self, otherclass:other):myclass {
+    operator<=>(myclass:self, otherclass:other) {
         return myclass();
     }
 }

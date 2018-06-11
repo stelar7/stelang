@@ -5,7 +5,6 @@ import ast.exprs.basic.*;
 import ast.exprs.clazz.*;
 import ast.exprs.control.*;
 import ast.exprs.div.*;
-import com.google.gson.*;
 import lexer.*;
 
 import java.util.*;
@@ -21,7 +20,114 @@ public class SyntaxTree
     {
         this.tokens = tokens;
         nextToken();
-        validate();
+        
+        List<Expression> ast = validateSyntax();
+        updateOperatorReturnType(ast);
+        Set<String> types = buildTypeList(ast);
+        validateTypes(ast, types);
+    }
+    
+    private void updateOperatorReturnType(List<Expression> ast)
+    {
+        for (Expression e : ast)
+        {
+            if (!(e instanceof ClassExpression))
+            {
+                continue;
+            }
+            
+            ClassExpression c = (ClassExpression) e;
+            if (!(c.getBody() instanceof BlockExpression))
+            {
+                continue;
+            }
+            
+            BlockExpression b = (BlockExpression) c.getBody();
+            for (Expression be : b.getBody())
+            {
+                if (!(be instanceof OperatorExpression))
+                {
+                    continue;
+                }
+                
+                OperatorExpression  oe = (OperatorExpression) be;
+                PrototypeExpression pe = oe.getPrototype();
+                oe.setPrototype(new PrototypeExpression(pe.getName(), pe.getParameters(), c.getClassname()));
+            }
+        }
+    }
+    
+    private void validateTypes(List<Expression> ast, Set<String> types)
+    {
+        for (Expression e : ast)
+        {
+            if (!(e instanceof ClassExpression))
+            {
+                continue;
+            }
+            
+            ClassExpression c = (ClassExpression) e;
+            if (!(c.getBody() instanceof BlockExpression))
+            {
+                continue;
+            }
+            
+            BlockExpression b = (BlockExpression) c.getBody();
+            for (Expression be : b.getBody())
+            {
+                if (!(be instanceof FunctionExpression))
+                {
+                    continue;
+                }
+                
+                PrototypeExpression pe = ((FunctionExpression) be).getPrototype();
+                if (!types.contains(pe.getReturnType()))
+                {
+                    logSemanticError(String.format("Function \"%s\" has unknown return type: \"%s\"", pe.getName(), pe.getReturnType()));
+                }
+                
+                String type = "Function";
+                if (be instanceof ConstructorExpression)
+                {
+                    type = "Constructor";
+                }
+                
+                if (be instanceof OperatorExpression)
+                {
+                    type = "Operator";
+                }
+                
+                for (PrototypeParameter par : pe.getParameters())
+                {
+                    if (!types.contains(par.getType()))
+                    {
+                        logSemanticError(String.format("%s \"%s\" in class \"%s\" has unknown type for parameter \"%s\": \"%s\"", type, pe.getName(), c.getClassname(), par.getName(), par.getType()));
+                    }
+                }
+            }
+        }
+    }
+    
+    private Set<String> buildTypeList(List<Expression> ast)
+    {
+        Set<String> types = new HashSet<>(Set.of("int", "float", "text", "bool", "object"));
+        for (Expression e : ast)
+        {
+            if (e instanceof ImportExpression)
+            {
+                ImportExpression i = (ImportExpression) e;
+                types.add(i.getClassname());
+            }
+            
+            if (e instanceof ClassExpression)
+            {
+                ClassExpression c = (ClassExpression) e;
+                types.add(c.getClassname());
+            }
+            
+        }
+        
+        return types;
     }
     
     private static Map<TokenType, Integer> binOps = new HashMap<>()
@@ -78,11 +184,16 @@ public class SyntaxTree
         put(TokenType.SETLANGLELANGLE, 130);
     }};
     
-    private void logError(String s)
+    private void logParseError(String s)
     {
         System.err.println(s);
         System.err.print("Current token is: ");
         System.err.println(currentToken);
+    }
+    
+    private void logSemanticError(String s)
+    {
+        System.err.println(s);
     }
     
     private void nextToken()
@@ -147,7 +258,7 @@ public class SyntaxTree
         return binOps.getOrDefault(currentToken.getType(), -1);
     }
     
-    public boolean validate()
+    public List<Expression> validateSyntax()
     {
         List<Expression> s = new ArrayList<>();
         while (currentToken.getType() != TokenType.UNKNOWN)
@@ -171,13 +282,12 @@ public class SyntaxTree
                 }
                 default:
                 {
-                    logError("Invalid start of file, must start with import or class definition.");
+                    logParseError("Invalid start of file, must start with import or class definition.");
                 }
             }
         }
         
-        System.out.println(new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create().toJson(s));
-        return true;
+        return s;
     }
     
     private Expression parseClass()
@@ -221,19 +331,19 @@ public class SyntaxTree
     
     private Expression parseOperatorDeclaration()
     {
-        nextToken();
+        String visibility = assertGetThenNext(TokenType.OPERATOR);
         String identifier = currentToken.getContent();
+        nextToken();
         if (TokenType.from(identifier) == TokenType.UNKNOWN)
         {
             // TODO should this be allowed?
-            logError("Unknown operator attempted overload");
+            logParseError("Unknown operator attempted overload");
         }
         
-        nextToken();
         
-        PrototypeExpression prototype = parsePrototype("operator", identifier);
+        PrototypeExpression prototype = parseOperatorPrototype(visibility, identifier);
         Expression          body      = parseBlockExpression();
-        return new OperatorExpression("operator", prototype, body);
+        return new OperatorExpression(visibility, prototype, body);
     }
     
     private Expression parseFunctionDeclaration()
@@ -439,7 +549,7 @@ public class SyntaxTree
             return new TernaryExpression(condition, condition, falseCond);
         }
         
-        logError("Invalid ternary syntax, expected ? or ?:");
+        logParseError("Invalid ternary syntax, expected ? or ?:");
         return null;
     }
     
@@ -776,7 +886,7 @@ public class SyntaxTree
             
             if (currentToken.getType() != TokenType.COMMA)
             {
-                logError("Expected , in argument list");
+                logParseError("Expected , in argument list");
             } else
             {
                 nextToken();
@@ -935,7 +1045,7 @@ public class SyntaxTree
                 
                 if (currentToken.getType() != TokenType.COMMA)
                 {
-                    logError("Expected , or ) in argument list");
+                    logParseError("Expected , or ) in argument list");
                 }
                 
                 nextToken();
@@ -1051,6 +1161,45 @@ public class SyntaxTree
     {
         Expression bin = parseBinaryOps(0, left);
         return bin;
+    }
+    
+    private PrototypeExpression parseOperatorPrototype(String visibility, String identifier)
+    {
+        assertType(TokenType.LPAREN);
+        
+        List<PrototypeParameter> params = new ArrayList<>();
+        do
+        {
+            nextToken();
+            if (currentToken.getType() != TokenType.RPAREN)
+            {
+                String clazz = assertGetThenNext(TokenType.IDENTIFIER);
+                assertThenNext(TokenType.COLON);
+                String name = assertGetThenNext(TokenType.IDENTIFIER);
+                params.add(new PrototypeParameter(clazz, name));
+            }
+        } while (currentToken.getType() == TokenType.COMMA);
+        nextToken();
+        
+        if (visibility.equals("constructor"))
+        {
+            if (currentToken.getType() == TokenType.SEMICOLON)
+            {
+                return new PrototypeExpression(identifier, params, identifier);
+            }
+        }
+        
+        if (visibility.equals("operator"))
+        {
+            if (currentToken.getType() == TokenType.LSQUIGLY || currentToken.getType() == TokenType.RETURN)
+            {
+                return new PrototypeExpression(identifier, params, "");
+            }
+        }
+        
+        assertThenNext(TokenType.COLON);
+        String returnType = assertGetThenNext(TokenType.IDENTIFIER);
+        return new PrototypeExpression(identifier, params, returnType);
     }
     
     private PrototypeExpression parsePrototype(String visibility, String identifier)
