@@ -16,15 +16,20 @@ public class SyntaxTree
     
     private Token currentToken;
     
+    private List<Expression> ast;
+    
+    public List<Expression> getAST()
+    {
+        return ast;
+    }
+    
     public SyntaxTree(List<Token> tokens)
     {
         this.tokens = tokens;
         nextToken();
         
-        List<Expression> ast = validateSyntax();
+        ast = validateSyntax();
         updateOperatorReturnType(ast);
-        Set<String> types = buildTypeList(ast);
-        validateTypes(ast, types);
     }
     
     private void updateOperatorReturnType(List<Expression> ast)
@@ -55,138 +60,6 @@ public class SyntaxTree
                 oe.setPrototype(new PrototypeExpression(pe.getName(), pe.getParameters(), c.getClassname()));
             }
         }
-    }
-    
-    private void validateTypes(List<Expression> ast, Set<String> types)
-    {
-        for (Expression e : ast)
-        {
-            if (!(e instanceof ClassExpression))
-            {
-                continue;
-            }
-            
-            ClassExpression c = (ClassExpression) e;
-            if (!(c.getBody() instanceof BlockExpression))
-            {
-                continue;
-            }
-            
-            BlockExpression b = (BlockExpression) c.getBody();
-            for (Expression be : b.getBody())
-            {
-                if (be instanceof FunctionExpression)
-                {
-                    validateFunction(c, be, types);
-                }
-                
-                if (be instanceof VariableDefinitionExpression)
-                {
-                    validateVariable(be, types, null);
-                }
-                
-                if (be instanceof BinaryExpression)
-                {
-                    if (((BinaryExpression) be).getLeft() instanceof VariableDefinitionExpression)
-                    {
-                        validateVariable(((BinaryExpression) be).getLeft(), types, null);
-                    }
-                }
-            }
-        }
-    }
-    
-    private void validateVariable(Expression be, Set<String> types, PrototypeExpression proto)
-    {
-        VariableDefinitionExpression pe = ((VariableDefinitionExpression) be);
-        
-        if (pe.getVisibility().equals("const") || pe.getVisibility().equals("val"))
-        {
-            return;
-        }
-        
-        String extra = "class";
-        if (proto != null)
-        {
-            extra = "method \"" + proto.getName() + "\"";
-        }
-        
-        if (!types.contains(pe.getVisibility()))
-        {
-            logSemanticError(String.format("Variable in %s \"%s\" has unknown return type: \"%s\"", extra, pe.getIdentifier(), pe.getVisibility()));
-        }
-        
-    }
-    
-    private void validateFunction(ClassExpression c, Expression be, Set<String> types)
-    {
-        PrototypeExpression pe = ((FunctionExpression) be).getPrototype();
-        if (!types.contains(pe.getReturnType()))
-        {
-            logSemanticError(String.format("Function \"%s\" has unknown return type: \"%s\"", pe.getName(), pe.getReturnType()));
-        }
-        
-        String type = "Function";
-        if (be instanceof ConstructorExpression)
-        {
-            type = "Constructor";
-        }
-        
-        if (be instanceof OperatorExpression)
-        {
-            type = "Operator";
-        }
-        
-        for (PrototypeParameter par : pe.getParameters())
-        {
-            if (!types.contains(par.getType()))
-            {
-                logSemanticError(String.format("%s \"%s\" in class \"%s\" has unknown type for parameter \"%s\": \"%s\"", type, pe.getName(), c.getClassname(), par.getName(), par.getType()));
-            }
-        }
-        
-        if (((FunctionExpression) be).getBody() instanceof BlockExpression)
-        {
-            BlockExpression bl = (BlockExpression) ((FunctionExpression) be).getBody();
-            for (Expression ble : bl.getBody())
-            {
-                if (ble instanceof VariableDefinitionExpression)
-                {
-                    validateVariable(ble, types, pe);
-                }
-                
-                if (ble instanceof BinaryExpression)
-                {
-                    if (((BinaryExpression) ble).getLeft() instanceof VariableDefinitionExpression)
-                    {
-                        validateVariable(((BinaryExpression) ble).getLeft(), types, pe);
-                    }
-                }
-            }
-        }
-        
-    }
-    
-    private Set<String> buildTypeList(List<Expression> ast)
-    {
-        Set<String> types = new HashSet<>(Set.of("int", "float", "text", "bool", "object"));
-        for (Expression e : ast)
-        {
-            if (e instanceof ImportExpression)
-            {
-                ImportExpression i = (ImportExpression) e;
-                types.add(i.getClassname());
-            }
-            
-            if (e instanceof ClassExpression)
-            {
-                ClassExpression c = (ClassExpression) e;
-                types.add(c.getClassname());
-            }
-            
-        }
-        
-        return types;
     }
     
     private static Map<TokenType, Integer> binOps = new HashMap<>()
@@ -250,11 +123,6 @@ public class SyntaxTree
         System.err.println(currentToken);
     }
     
-    private void logSemanticError(String s)
-    {
-        System.err.println(s);
-    }
-    
     private void nextToken()
     {
         if (tokenIndex + 1 > tokens.size())
@@ -287,24 +155,27 @@ public class SyntaxTree
         return tokens.get(tokenIndex + (offset - 1));
     }
     
-    private void assertType(TokenType identifier)
+    private void assertType(TokenType... identifier)
     {
-        if (currentToken.getType() == identifier)
+        for (TokenType type : identifier)
         {
-            return;
+            if (currentToken.getType() == type)
+            {
+                return;
+            }
         }
         
-        System.err.print("Expected token " + identifier + ", Current: " + currentToken);
+        System.err.print("Expected token " + Arrays.toString(identifier) + ", Current: " + currentToken);
         System.exit(0);
     }
     
-    private void assertThenNext(TokenType type)
+    private void assertThenNext(TokenType... type)
     {
         assertType(type);
         nextToken();
     }
     
-    private String assertGetThenNext(TokenType type)
+    private String assertGetThenNext(TokenType... type)
     {
         assertType(type);
         String content = currentToken.getContent();
@@ -395,7 +266,6 @@ public class SyntaxTree
         nextToken();
         if (TokenType.from(identifier) == TokenType.UNKNOWN)
         {
-            // TODO should this be allowed?
             logParseError("Unknown operator attempted overload");
         }
         
@@ -407,7 +277,7 @@ public class SyntaxTree
     
     private Expression parseFunctionDeclaration()
     {
-        String              visibility = assertGetThenNext(TokenType.FUNCTION);
+        String              visibility = assertGetThenNext(TokenType.FUNCTION, TokenType.PURE, TokenType.GLOBAL);
         String              identifier = assertGetThenNext(TokenType.IDENTIFIER);
         PrototypeExpression prototype  = parsePrototype(visibility, identifier);
         Expression          body       = parseBlockExpression();
@@ -1285,6 +1155,11 @@ public class SyntaxTree
             {
                 return new PrototypeExpression(identifier, params, identifier);
             }
+        }
+        
+        if (currentToken.getType() != TokenType.COLON)
+        {
+            return new PrototypeExpression(identifier, params, "void");
         }
         
         assertThenNext(TokenType.COLON);

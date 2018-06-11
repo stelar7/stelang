@@ -16,6 +16,12 @@ class myclass {
         val a = unknown5();
     }
 
+    function testDuplicateMethod(int:a, int:b):int {}
+    function testDuplicateMethod(int:a, int:b):int {}
+    function testDuplicateMethod():int {}
+
+    function testVoidReturn() {}
+
     function testAssert(int:a, int:b):int {
         assert a;
         assert b;
@@ -123,6 +129,14 @@ class myclass {
             {int:c = 0;}
 
         }
+    }
+
+    pure testPure(int:a, int:b):int {
+        return a + b;
+    }
+
+    global testGlobal(int:a, int:b):int {
+        return a + b;
     }
 
     operator<=>(myclass:self, otherclass:other) {

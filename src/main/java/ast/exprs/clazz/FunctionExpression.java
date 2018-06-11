@@ -18,6 +18,11 @@ public class FunctionExpression extends ControlExpression
         this.body = body;
     }
     
+    public String getVisibility()
+    {
+        return visibility;
+    }
+    
     public PrototypeExpression getPrototype()
     {
         return prototype;
