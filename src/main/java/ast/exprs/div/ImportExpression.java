@@ -18,6 +18,11 @@ public class ImportExpression extends Expression
         return classname;
     }
     
+    public String getLocation()
+    {
+        return location;
+    }
+    
     @Override
     public String codegen()
     {

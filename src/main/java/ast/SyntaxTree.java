@@ -41,14 +41,9 @@ public class SyntaxTree
                 continue;
             }
             
-            ClassExpression c = (ClassExpression) e;
-            if (!(c.getBody() instanceof BlockExpression))
-            {
-                continue;
-            }
-            
-            BlockExpression b = (BlockExpression) c.getBody();
-            for (Expression be : b.getBody())
+            ClassExpression  c  = (ClassExpression) e;
+            List<Expression> bl = c.getBody();
+            for (Expression be : bl)
             {
                 if (!(be instanceof OperatorExpression))
                 {
@@ -224,8 +219,8 @@ public class SyntaxTree
     {
         nextToken();
         
-        String     classname = assertGetThenNext(TokenType.IDENTIFIER);
-        Expression body      = parseBlockExpression();
+        String          classname = assertGetThenNext(TokenType.IDENTIFIER);
+        BlockExpression body      = parseBlockExpression();
         return new ClassExpression(classname, body);
     }
     
@@ -420,7 +415,7 @@ public class SyntaxTree
         return new TextExpression(sb.toString());
     }
     
-    private Expression parseBlockExpression()
+    private BlockExpression parseBlockExpression()
     {
         assertThenNext(TokenType.LSQUIGLY);
         List<Expression> body = parseExpressionList();
@@ -858,7 +853,7 @@ public class SyntaxTree
         if (currentToken.getType() == TokenType.RSQUIGLY)
         {
             nextToken();
-            return new EnumExpression(identifier, members, new NullExpression());
+            return new EnumExpression(identifier, members, new BlockExpression(List.of()));
         }
         
         List<Expression> methods = parseExpressionList();

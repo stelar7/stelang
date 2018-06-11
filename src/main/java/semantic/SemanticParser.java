@@ -14,6 +14,7 @@ import java.util.*;
 public class SemanticParser
 {
     private List<Expression> ast;
+    private Lexer            lexer = new Lexer();
     
     public SemanticParser(SyntaxTree syntaxTree)
     {
@@ -24,7 +25,7 @@ public class SemanticParser
     public void postProcess()
     {
         ast.addAll(generateDefaultTypeAST());
-        Set<String>                                  types   = buildTypeList(ast);
+        Set<String>                                  types   = buildTypeList(ast, new HashSet<>());
         Map<String, Map<String, List<ParameterMap>>> methods = buildMethodList(ast);
         validateTypes(ast, types);
     }
@@ -50,29 +51,24 @@ public class SemanticParser
     
     private Map<String, Map<String, List<ParameterMap>>> buildMethodList(List<Expression> ast)
     {
-        // map <class, map <visibility, parameterMap>>
         Map<String, Map<String, List<ParameterMap>>> returnData = new HashMap<>();
         
+        List<ImportExpression> imports = new ArrayList<>();
         for (Expression e : ast)
         {
             //noinspection StatementWithEmptyBody
             if (e instanceof ImportExpression)
             {
-                // TODO: read the class file, and load those methods aswell
+                imports.add((ImportExpression) e);
             }
             
             if (e instanceof ClassExpression)
             {
-                ClassExpression c = (ClassExpression) e;
-                
-                if (!(c.getBody() instanceof BlockExpression))
-                {
-                    continue;
-                }
+                ClassExpression  c  = (ClassExpression) e;
+                List<Expression> bl = c.getBody();
                 
                 Map<String, List<ParameterMap>> classMap = returnData.getOrDefault(c.getClassname(), new HashMap<>());
-                BlockExpression                 bl       = (BlockExpression) c.getBody();
-                for (Expression body : bl.getBody())
+                for (Expression body : bl)
                 {
                     if (!(body instanceof FunctionExpression))
                     {
@@ -97,6 +93,16 @@ public class SemanticParser
             }
         }
         
+        for (ImportExpression e : imports)
+        {
+            if (returnData.get(e.getClassname()) != null)
+            {
+                String     source     = Utils.readFileExternal(e.getLocation());
+                SyntaxTree syntaxTree = new SyntaxTree(lexer.parse(source));
+                returnData.putAll(buildMethodList(syntaxTree.getAST()));
+            }
+        }
+        
         return returnData;
     }
     
@@ -110,14 +116,10 @@ public class SemanticParser
                 continue;
             }
             
-            ClassExpression c = (ClassExpression) e;
-            if (!(c.getBody() instanceof BlockExpression))
-            {
-                continue;
-            }
+            ClassExpression  c  = (ClassExpression) e;
+            List<Expression> bl = c.getBody();
             
-            BlockExpression b = (BlockExpression) c.getBody();
-            for (Expression be : b.getBody())
+            for (Expression be : bl)
             {
                 if (be instanceof FunctionExpression)
                 {
@@ -211,16 +213,14 @@ public class SemanticParser
         
     }
     
-    private Set<String> buildTypeList(List<Expression> ast)
+    private Set<String> buildTypeList(List<Expression> ast, Set<String> types)
     {
-        Set<String> types = new HashSet<>();
+        List<ImportExpression> imports = new ArrayList<>();
         for (Expression e : ast)
         {
             if (e instanceof ImportExpression)
             {
-                ImportExpression i = (ImportExpression) e;
-                types.add(i.getClassname());
-                // TODO: read the class file, and load those types aswell
+                imports.add((ImportExpression) e);
             }
             
             if (e instanceof ClassExpression)
@@ -228,7 +228,16 @@ public class SemanticParser
                 ClassExpression c = (ClassExpression) e;
                 types.add(c.getClassname());
             }
-            
+        }
+        
+        for (ImportExpression e : imports)
+        {
+            if (!types.contains(e.getClassname()))
+            {
+                String     source     = Utils.readFileExternal(e.getLocation());
+                SyntaxTree syntaxTree = new SyntaxTree(lexer.parse(source));
+                types.addAll(buildTypeList(syntaxTree.getAST(), types));
+            }
         }
         
         return types;

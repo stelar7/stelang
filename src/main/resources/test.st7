@@ -1,4 +1,6 @@
-class myclass {
+import test2 from "/test2.st7";
+
+class test {
 
     int: a = 5;
     const b = 5;
@@ -139,12 +141,10 @@ class myclass {
         return a + b;
     }
 
-    operator<=>(myclass:self, otherclass:other) {
-        return myclass();
+    operator<=>(test:self, test2:other) {
+        return test();
     }
 }
-
-import otherclass from "otherclass.st7";
 
 enum myenum {
     A, B, C, D;
