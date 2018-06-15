@@ -148,6 +148,10 @@ class test {
         return test();
     }
 
+
+    /*
+        this is some text
+    */
     constructor test() {
         // blank const
     }

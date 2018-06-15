@@ -138,8 +138,23 @@ public class Lexer
             return new Token(num.toString(), TokenType.NUMBER, lineNumber, lineIndex - num.toString().length());
         }
         
-        // parse comments
-        if (isComment(it.current()) && isComment(it.peek()))
+        if (isBlockCommentStart(it.current() + it.peek()))
+        {
+            StringBuilder comment = new StringBuilder(it.current());
+            it.next();
+            while (!isBlockCommentEnd(it.current() + it.peek()))
+            {
+                comment.append(it.current());
+                lineIndex += it.current().length();
+                it.next();
+            }
+            it.next();
+            it.next();
+            
+            return new Token(comment.toString(), TokenType.COMMENT, lineNumber, lineIndex - comment.toString().length());
+        }
+        
+        if (isSingleLineComment(it.current()) && isSingleLineComment(it.peek()))
         {
             StringBuilder comment = new StringBuilder(it.current());
             it.next();
@@ -255,9 +270,23 @@ public class Lexer
         return matcher.matches();
     }
     
-    private boolean isComment(String str)
+    private boolean isSingleLineComment(String str)
     {
         Pattern pattern = Pattern.compile("[/]");
+        Matcher matcher = pattern.matcher(str);
+        return matcher.matches();
+    }
+    
+    private boolean isBlockCommentStart(String str)
+    {
+        Pattern pattern = Pattern.compile("/\\*");
+        Matcher matcher = pattern.matcher(str);
+        return matcher.matches();
+    }
+    
+    private boolean isBlockCommentEnd(String str)
+    {
+        Pattern pattern = Pattern.compile("\\*/");
         Matcher matcher = pattern.matcher(str);
         return matcher.matches();
     }
