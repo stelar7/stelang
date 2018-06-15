@@ -172,6 +172,30 @@ public class SemanticParser
         }
     }
     
+    private void validateBlock(BlockExpression ble, Set<String> knownTypes, PrototypeExpression pe, Map<String, String> usedVariables)
+    {
+        for (Expression bex : ble.getBody())
+        {
+            if (bex instanceof VariableDefinitionExpression)
+            {
+                validateVariableDefinition(bex, knownTypes, pe, usedVariables);
+            }
+            
+            if (bex instanceof BinaryExpression)
+            {
+                if (((BinaryExpression) bex).getLeft() instanceof VariableDefinitionExpression)
+                {
+                    validateVariableDefinition(((BinaryExpression) bex).getLeft(), knownTypes, pe, usedVariables);
+                }
+            }
+            
+            if (bex instanceof BlockExpression)
+            {
+                validateBlock((BlockExpression) bex, knownTypes, pe, new HashMap<>(usedVariables));
+            }
+        }
+    }
+    
     private void validateFunction(ClassExpression c, FunctionExpression be, Set<String> types, Map<String, String> typeMap)
     {
         PrototypeExpression pe = be.getPrototype();
@@ -211,41 +235,7 @@ public class SemanticParser
             }
         }
         
-        for (Expression ble : be.getBody())
-        {
-            if (ble instanceof VariableDefinitionExpression)
-            {
-                validateVariableDefinition(ble, types, pe, functionTypes);
-            }
-            
-            if (ble instanceof BinaryExpression)
-            {
-                if (((BinaryExpression) ble).getLeft() instanceof VariableDefinitionExpression)
-                {
-                    validateVariableDefinition(((BinaryExpression) ble).getLeft(), types, pe, functionTypes);
-                }
-            }
-            
-            if (ble instanceof BlockExpression)
-            {
-                Map<String, String> blockTypes = new HashMap<>(functionTypes);
-                for (Expression bex : ((BlockExpression) ble).getBody())
-                {
-                    if (bex instanceof VariableDefinitionExpression)
-                    {
-                        validateVariableDefinition(be, types, null, blockTypes);
-                    }
-                    
-                    if (bex instanceof BinaryExpression)
-                    {
-                        if (((BinaryExpression) bex).getLeft() instanceof VariableDefinitionExpression)
-                        {
-                            validateVariableDefinition(((BinaryExpression) bex).getLeft(), types, null, blockTypes);
-                        }
-                    }
-                }
-            }
-        }
+        validateBlock(be.getBlock(), types, pe, functionTypes);
     }
     
     private Set<String> buildTypeList(List<Expression> ast, Set<String> types)

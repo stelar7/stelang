@@ -61,12 +61,10 @@ class test {
 
     function testBlocks(int:t, int:y):int {
         int:a = 0;
+        {int:b = 0;}
+        {int:b = 0;}
         {
-            int:b = 0;
-        }
-        {
-            int:b = 0;
-            {int:c = 0;}
+            int:c = 0;
             {int:c = 0;}
         }
     }

@@ -38,6 +38,11 @@ public class FunctionExpression extends ControlExpression
         return body.getBody();
     }
     
+    public BlockExpression getBlock()
+    {
+        return body;
+    }
+    
     @Override
     public String codegen()
     {
