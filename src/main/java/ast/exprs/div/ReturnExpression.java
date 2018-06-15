@@ -2,7 +2,7 @@ package ast.exprs.div;
 
 import ast.exprs.Expression;
 
-public class ReturnExpression extends Expression
+public class ReturnExpression implements Expression
 {
     Expression value;
     

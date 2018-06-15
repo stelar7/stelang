@@ -1,6 +1,11 @@
 package ast.exprs;
 
-public abstract class Expression
+public interface Expression
 {
-    public abstract String codegen();
+    String codegen();
+    
+    default int getSortOrder()
+    {
+        return 10;
+    }
 }

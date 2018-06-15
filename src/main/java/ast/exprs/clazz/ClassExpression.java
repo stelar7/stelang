@@ -6,13 +6,15 @@ import ast.exprs.control.BlockExpression;
 
 import java.util.List;
 
-public class ClassExpression extends Expression
+public class ClassExpression implements Expression
 {
     private String          classname;
+    private String          superClass;
     private BlockExpression body;
     
-    public ClassExpression(String classname, BlockExpression body)
+    public ClassExpression(String classname, BlockExpression body, String superClass)
     {
+        this.superClass = superClass;
         this.classname = classname;
         this.body = body;
     }

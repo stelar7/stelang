@@ -40,7 +40,7 @@ public enum TokenType
     LSHIFT("<<"), RSHIFT(">>"),
     
     // structure
-    CLASS("class"), ENUM("enum"), FUNCTION("function"), CONSTRUCTOR("constructor"), OPERATOR("operator"),
+    CLASS("class"), ENUM("enum"), FUNCTION("function"), CONSTRUCTOR("constructor"), OPERATOR("operator"), EXTENDS("extends"),
     
     IMPORT("import"), FROM("from"), DOUBLEQUOTE("\""), SINGLEQUOTE("'"),
     
@@ -53,7 +53,7 @@ public enum TokenType
     RETURN("return"), ASSERT("assert"),
     
     // modifiers
-    CONST("const"), VAL("val"),
+    CONST("const"), VAR("var"),
     GLOBAL("global"), PURE("pure"),
     
     // lexing

@@ -3,15 +3,15 @@ package ast.exprs.div;
 
 import ast.exprs.Expression;
 
-public class VariableDefinitionExpression extends Expression
+public class VariableDefinitionExpression implements Expression
 {
     private String identifier;
-    private String visibility;
+    private String type;
     
     public VariableDefinitionExpression(String identifier, String visibility)
     {
         this.identifier = identifier;
-        this.visibility = visibility;
+        this.type = visibility;
     }
     
     public String getIdentifier()
@@ -19,14 +19,20 @@ public class VariableDefinitionExpression extends Expression
         return identifier;
     }
     
-    public String getVisibility()
+    public String getType()
     {
-        return visibility;
+        return type;
     }
     
     @Override
     public String codegen()
     {
         return null;
+    }
+    
+    @Override
+    public int getSortOrder()
+    {
+        return 1;
     }
 }

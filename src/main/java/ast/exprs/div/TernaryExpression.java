@@ -4,7 +4,7 @@ import ast.exprs.Expression;
 
 import java.util.List;
 
-public class TernaryExpression extends Expression
+public class TernaryExpression implements Expression
 {
     private Expression condition;
     private Expression trueExpression;

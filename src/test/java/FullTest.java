@@ -5,7 +5,7 @@ import semantic.SemanticParser;
 
 import java.util.*;
 
-public class LexerTest
+public class FullTest
 {
     
     public static void main(String[] args)

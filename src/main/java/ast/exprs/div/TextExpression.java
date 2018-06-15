@@ -2,7 +2,7 @@ package ast.exprs.div;
 
 import ast.exprs.Expression;
 
-public class TextExpression extends Expression
+public class TextExpression implements Expression
 {
     String content;
     

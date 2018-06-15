@@ -10,9 +10,9 @@ public class EnumExpression extends ClassExpression
 {
     private List<Expression> members;
     
-    public EnumExpression(String classname, List<Expression> members, BlockExpression body)
+    public EnumExpression(String classname, String superClass, List<Expression> members, BlockExpression body)
     {
-        super(classname, body);
+        super(classname, body, superClass);
         this.members = members;
     }
     

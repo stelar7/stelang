@@ -9,9 +9,9 @@ public class FunctionExpression extends ControlExpression
 {
     private String              visibility;
     private PrototypeExpression prototype;
-    private Expression          body;
+    private BlockExpression     body;
     
-    public FunctionExpression(String visibility, PrototypeExpression prototype, Expression body)
+    public FunctionExpression(String visibility, PrototypeExpression prototype, BlockExpression body)
     {
         this.visibility = visibility;
         this.prototype = prototype;
@@ -33,9 +33,9 @@ public class FunctionExpression extends ControlExpression
         this.prototype = prototype;
     }
     
-    public Expression getBody()
+    public List<Expression> getBody()
     {
-        return body;
+        return body.getBody();
     }
     
     @Override
@@ -43,4 +43,5 @@ public class FunctionExpression extends ControlExpression
     {
         return null;
     }
+    
 }

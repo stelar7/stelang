@@ -25,7 +25,7 @@ public class SemanticParser
     public void postProcess()
     {
         ast.addAll(generateDefaultTypeAST());
-        Set<String>                                  types   = buildTypeList(ast, new HashSet<>());
+        Set<String>                                  types   = buildTypeList(ast, new HashSet<>(List.of("const", "var")));
         Map<String, Map<String, List<ParameterMap>>> methods = buildMethodList(ast);
         validateTypes(ast, types);
     }
@@ -83,7 +83,7 @@ public class SemanticParser
                     
                     if (methods.contains(self))
                     {
-                        logSemanticError(String.format("Method \"%s\" (parameters %s) already exists in class \"%s\"", proto.getName(), self, c.getClassname()));
+                        logSemanticError(String.format("%s \"%s\"%s already exists in class \"%s\"", func.getVisibility(), proto.getName(), self, c.getClassname()));
                     }
                     
                     methods.add(self);
@@ -116,39 +116,43 @@ public class SemanticParser
                 continue;
             }
             
+            Map<String, String> typeMap = new HashMap<>();
+            
             ClassExpression  c  = (ClassExpression) e;
             List<Expression> bl = c.getBody();
+            
+            bl.sort(Comparator.comparing(Expression::getSortOrder));
             
             for (Expression be : bl)
             {
                 if (be instanceof FunctionExpression)
                 {
-                    validateFunction(c, be, types);
+                    validateFunction(c, (FunctionExpression) be, types, typeMap);
                 }
                 
                 if (be instanceof VariableDefinitionExpression)
                 {
-                    validateVariable(be, types, null);
+                    validateVariableDefinition(be, types, null, typeMap);
                 }
                 
                 if (be instanceof BinaryExpression)
                 {
                     if (((BinaryExpression) be).getLeft() instanceof VariableDefinitionExpression)
                     {
-                        validateVariable(((BinaryExpression) be).getLeft(), types, null);
+                        validateVariableDefinition(((BinaryExpression) be).getLeft(), types, null, typeMap);
                     }
                 }
             }
         }
     }
     
-    private void validateVariable(Expression be, Set<String> types, PrototypeExpression proto)
+    private void validateVariableDefinition(Expression be, Set<String> types, PrototypeExpression proto, Map<String, String> typeMap)
     {
         VariableDefinitionExpression pe = ((VariableDefinitionExpression) be);
         
-        if (pe.getVisibility().equals("const") || pe.getVisibility().equals("val"))
+        if (typeMap.containsKey(pe.getIdentifier()))
         {
-            return;
+            logSemanticError(String.format("Variable named \"%s\" is already defined in scope", pe.getIdentifier()));
         }
         
         String extra = "class";
@@ -157,16 +161,20 @@ public class SemanticParser
             extra = "method \"" + proto.getName() + "\"";
         }
         
-        if (!types.contains(pe.getVisibility()))
+        if (!types.contains(pe.getType()))
         {
-            logSemanticError(String.format("Variable in %s \"%s\" has unknown return type: \"%s\"", extra, pe.getIdentifier(), pe.getVisibility()));
+            logSemanticError(String.format("Variable in %s \"%s\" has unknown return type: \"%s\"", extra, pe.getIdentifier(), pe.getType()));
         }
         
+        if (!typeMap.containsKey(pe.getIdentifier()))
+        {
+            typeMap.put(pe.getIdentifier(), pe.getType());
+        }
     }
     
-    private void validateFunction(ClassExpression c, Expression be, Set<String> types)
+    private void validateFunction(ClassExpression c, FunctionExpression be, Set<String> types, Map<String, String> typeMap)
     {
-        PrototypeExpression pe = ((FunctionExpression) be).getPrototype();
+        PrototypeExpression pe = be.getPrototype();
         if (!types.contains(pe.getReturnType()))
         {
             logSemanticError(String.format("Function \"%s\" has unknown return type: \"%s\"", pe.getName(), pe.getReturnType()));
@@ -183,34 +191,61 @@ public class SemanticParser
             type = "Operator";
         }
         
+        Map<String, String> functionTypes = new HashMap<>(typeMap);
+        
         for (PrototypeParameter par : pe.getParameters())
         {
             if (!types.contains(par.getType()))
             {
                 logSemanticError(String.format("%s \"%s\" in class \"%s\" has unknown type for parameter \"%s\": \"%s\"", type, pe.getName(), c.getClassname(), par.getName(), par.getType()));
             }
+            
+            if (functionTypes.containsKey(par.getName()))
+            {
+                logSemanticError(String.format("Parameter named \"%s\" is already defined in scope", par.getName()));
+            }
+            
+            if (!functionTypes.containsKey(par.getName()))
+            {
+                functionTypes.put(par.getName(), par.getType());
+            }
         }
         
-        if (((FunctionExpression) be).getBody() instanceof BlockExpression)
+        for (Expression ble : be.getBody())
         {
-            BlockExpression bl = (BlockExpression) ((FunctionExpression) be).getBody();
-            for (Expression ble : bl.getBody())
+            if (ble instanceof VariableDefinitionExpression)
             {
-                if (ble instanceof VariableDefinitionExpression)
+                validateVariableDefinition(ble, types, pe, functionTypes);
+            }
+            
+            if (ble instanceof BinaryExpression)
+            {
+                if (((BinaryExpression) ble).getLeft() instanceof VariableDefinitionExpression)
                 {
-                    validateVariable(ble, types, pe);
+                    validateVariableDefinition(((BinaryExpression) ble).getLeft(), types, pe, functionTypes);
                 }
-                
-                if (ble instanceof BinaryExpression)
+            }
+            
+            if (ble instanceof BlockExpression)
+            {
+                Map<String, String> blockTypes = new HashMap<>(functionTypes);
+                for (Expression bex : ((BlockExpression) ble).getBody())
                 {
-                    if (((BinaryExpression) ble).getLeft() instanceof VariableDefinitionExpression)
+                    if (bex instanceof VariableDefinitionExpression)
                     {
-                        validateVariable(((BinaryExpression) ble).getLeft(), types, pe);
+                        validateVariableDefinition(be, types, null, blockTypes);
+                    }
+                    
+                    if (bex instanceof BinaryExpression)
+                    {
+                        if (((BinaryExpression) bex).getLeft() instanceof VariableDefinitionExpression)
+                        {
+                            validateVariableDefinition(((BinaryExpression) bex).getLeft(), types, null, blockTypes);
+                        }
                     }
                 }
             }
         }
-        
     }
     
     private Set<String> buildTypeList(List<Expression> ast, Set<String> types)

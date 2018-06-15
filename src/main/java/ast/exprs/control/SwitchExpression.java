@@ -4,7 +4,7 @@ import ast.exprs.Expression;
 
 import java.util.List;
 
-public class SwitchExpression extends Expression
+public class SwitchExpression implements Expression
 {
     private List<SwitchParameter> cases;
     private SwitchParameter       defaultParam;

@@ -4,7 +4,7 @@ import ast.exprs.Expression;
 
 import java.util.List;
 
-public class CallExpression extends Expression
+public class CallExpression implements Expression
 {
     private String           caller;
     private List<Expression> arguments;

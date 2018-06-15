@@ -2,10 +2,11 @@ import test2 from "/test2.st7";
 
 class test {
 
-    int: a = 5;
-    const b = 5;
-    val c = 5;
-    const d = switch(a) {
+    int:n;
+    int: j = 5;
+    const k = 5;
+    var l = 5;
+    const m = switch(a) {
        case 1: {return 4;}
        case 2..4: {return 3;}
        case 5: {return 2;}
@@ -14,13 +15,9 @@ class test {
     };
 
     function testInvalidTypes(unknown:a, unknown2:b):unknown3 {
-        unknown4:a = 0;
-        val a = unknown5();
+        unknown4:e = 0;
+        var f = unknown5();
     }
-
-    function testDuplicateMethod(int:a, int:b):int {}
-    function testDuplicateMethod(int:a, int:b):int {}
-    function testDuplicateMethod():int {}
 
     function testVoidReturn() {}
 
@@ -47,8 +44,8 @@ class test {
     }
 
     function testBinaryOps(int:a, int:b):int {
-        val x = 1;
-        val y = 10;
+        var x = 1;
+        var y = 10;
         const z = 3.50;
 
         x =- y;
@@ -62,9 +59,21 @@ class test {
         return x / y;
     }
 
+    function testBlocks(int:t, int:y):int {
+        int:a = 0;
+        {
+            int:b = 0;
+        }
+        {
+            int:b = 0;
+            {int:c = 0;}
+            {int:c = 0;}
+        }
+    }
+
     function testWhile(int:a, int:b):int {
-        val x = 1;
-        val y = 10;
+        var x = 1;
+        var y = 10;
         while(x < y);
         while(x < y) x++;
         while(x < y)
@@ -77,8 +86,8 @@ class test {
     }
 
     function testDo(int:a, int:b):int {
-        val x = 1;
-        val y = 10;
+        var x = 1;
+        var y = 10;
         do x++; while(x < y);
         do {x++;} while(x < y);
         do {x++;} while(x < y) then return x;
@@ -86,8 +95,8 @@ class test {
     }
     
     function testFor(int:a, int:b):int {
-        val x = 1;
-        val y = 10;
+        var x = 1;
+        var y = 10;
         for (;;);
         for (;;){}
         for (;;) then return x;
@@ -104,33 +113,21 @@ class test {
     }
     
     function testForeach(int:a, int:b):int {
-        val x = 0..3;
-        val y = List.of(a,b);
-        val z = Stream.of(a,b);
-        val a = Map.of(a,b);
+        var x = 0..3;
+        var y = List.of(a,b);
+        var z = Stream.of(a,b);
+        var w = Map.of(a,b);
         for (int:v : x);
         for (const v : y);
-        for (val v : y);
+        for (var v : y);
         for (int:v : z);
-        for (int:v, int:v2 : a);
+        for (int:v, int:v2 : w);
         for (int:v : 0..3);
-        for (int:v : List.of(a,b));
-        for (int:v : Stream.of(a,b));
-        for (int:v, int:v2 : Map.of(a, b));
+        for (int:v : List.of(w,b));
+        for (int:v : Stream.of(w,b));
+        for (int:v, int:v2 : Map.of(w, b));
         for (int:v : z) {} then {}
         for (int:v : 0..3) {} then {}
-    }
-
-    function testBlocks(int:a, int:b):int {
-        int:a = 0;
-        {int:b = 0;}
-        {
-            int:b = 0;
-
-            {int:c = 0;}
-            {int:c = 0;}
-
-        }
     }
 
     pure testPure(int:a, int:b):int {
@@ -143,6 +140,25 @@ class test {
 
     operator<=>(test:self, test2:other) {
         return test();
+    }
+
+    operator+(test:self, test2:int) {
+        return test();
+    }
+
+    operator+(test:self, test2:text) {
+        return test();
+    }
+
+    constructor test() {
+        // blank const
+    }
+
+    constructor test(int:a);
+
+    constructor test(int:a, int:b) {
+        j = a;
+        l = b;
     }
 }
 

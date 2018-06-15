@@ -8,6 +8,7 @@ import ast.exprs.div.*;
 import lexer.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class SyntaxTree
 {
@@ -25,7 +26,7 @@ public class SyntaxTree
     
     public SyntaxTree(List<Token> tokens)
     {
-        this.tokens = tokens;
+        this.tokens = tokens.stream().filter(t -> t.getType() != TokenType.COMMENT).collect(Collectors.toList());
         nextToken();
         
         ast = validateSyntax();
@@ -217,11 +218,18 @@ public class SyntaxTree
     
     private Expression parseClass()
     {
-        nextToken();
+        assertThenNext(TokenType.CLASS);
+        String classname  = assertGetThenNext(TokenType.IDENTIFIER);
+        String superClass = "object";
         
-        String          classname = assertGetThenNext(TokenType.IDENTIFIER);
-        BlockExpression body      = parseBlockExpression();
-        return new ClassExpression(classname, body);
+        if (currentToken.getType() == TokenType.EXTENDS)
+        {
+            assertThenNext(TokenType.EXTENDS);
+            superClass = assertGetThenNext(TokenType.IDENTIFIER);
+        }
+        
+        BlockExpression body = parseBlockExpression();
+        return new ClassExpression(classname, body, superClass);
     }
     
     private List<Expression> handleClassBody()
@@ -245,12 +253,11 @@ public class SyntaxTree
         
         if (currentToken.getType() == TokenType.SEMICOLON)
         {
-            nextToken();
-            return new FunctionExpression(visibility, f, new NullExpression());
+            assertGetThenNext(TokenType.SEMICOLON);
+            return new ConstructorExpression(visibility, f, new BlockExpression(List.of()));
         }
         
-        Expression b = parseBlockExpression();
-        
+        BlockExpression b = parseBlockExpression();
         return new ConstructorExpression(visibility, f, b);
     }
     
@@ -266,7 +273,7 @@ public class SyntaxTree
         
         
         PrototypeExpression prototype = parseOperatorPrototype(visibility, identifier);
-        Expression          body      = parseBlockExpression();
+        BlockExpression     body      = parseBlockExpression();
         return new OperatorExpression(visibility, prototype, body);
     }
     
@@ -275,7 +282,7 @@ public class SyntaxTree
         String              visibility = assertGetThenNext(TokenType.FUNCTION, TokenType.PURE, TokenType.GLOBAL);
         String              identifier = assertGetThenNext(TokenType.IDENTIFIER);
         PrototypeExpression prototype  = parsePrototype(visibility, identifier);
-        Expression          body       = parseBlockExpression();
+        BlockExpression     body       = parseBlockExpression();
         
         return new FunctionExpression(visibility, prototype, body);
     }
@@ -302,7 +309,7 @@ public class SyntaxTree
         TokenType vType      = currentToken.getType();
         nextToken();
         
-        if (vType != TokenType.VAL && vType != TokenType.CONST)
+        if (vType != TokenType.VAR && vType != TokenType.CONST)
         {
             assertThenNext(TokenType.COLON);
         }
@@ -369,7 +376,7 @@ public class SyntaxTree
                 return value;
             }
             case CONST:
-            case VAL:
+            case VAR:
             {
                 return parseVariableDefinition();
             }
@@ -846,23 +853,24 @@ public class SyntaxTree
     {
         assertThenNext(TokenType.ENUM);
         String identifier = assertGetThenNext(TokenType.IDENTIFIER);
-        assertThenNext(TokenType.LSQUIGLY);
+        String superClass = "object";
         
-        List<Expression> members = parseEnumMembers();
-        
-        if (currentToken.getType() == TokenType.RSQUIGLY)
+        if (currentToken.getType() == TokenType.EXTENDS)
         {
-            nextToken();
-            return new EnumExpression(identifier, members, new BlockExpression(List.of()));
+            assertThenNext(TokenType.EXTENDS);
+            superClass = assertGetThenNext(TokenType.IDENTIFIER);
         }
         
+        List<Expression> members = parseEnumMembers();
         List<Expression> methods = parseExpressionList();
+        
         assertThenNext(TokenType.RSQUIGLY);
-        return new EnumExpression(identifier, members, new BlockExpression(methods));
+        return new EnumExpression(identifier, superClass, members, new BlockExpression(methods));
     }
     
     private List<Expression> parseEnumMembers()
     {
+        assertThenNext(TokenType.LSQUIGLY);
         List<Expression> members = new ArrayList<>();
         while (currentToken.getType() != TokenType.SEMICOLON)
         {
@@ -900,7 +908,7 @@ public class SyntaxTree
             }
         }
         
-        nextToken();
+        assertGetThenNext(TokenType.SEMICOLON);
         return members;
     }
     

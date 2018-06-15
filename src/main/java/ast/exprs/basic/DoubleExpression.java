@@ -2,7 +2,7 @@ package ast.exprs.basic;
 
 import ast.exprs.Expression;
 
-public class DoubleExpression extends Expression
+public class DoubleExpression implements Expression
 {
     private double val;
     

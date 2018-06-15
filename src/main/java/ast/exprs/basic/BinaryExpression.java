@@ -3,7 +3,7 @@ package ast.exprs.basic;
 import ast.exprs.Expression;
 import lexer.Token;
 
-public class BinaryExpression extends Expression
+public class BinaryExpression implements Expression
 {
     private Token      op;
     private Expression left;
@@ -35,5 +35,11 @@ public class BinaryExpression extends Expression
     public String codegen()
     {
         return null;
+    }
+    
+    @Override
+    public int getSortOrder()
+    {
+        return 2;
     }
 }

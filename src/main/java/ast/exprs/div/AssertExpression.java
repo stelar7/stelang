@@ -2,7 +2,7 @@ package ast.exprs.div;
 
 import ast.exprs.Expression;
 
-public class AssertExpression extends Expression
+public class AssertExpression implements Expression
 {
     private Expression condition;
     

@@ -2,7 +2,7 @@ package ast.exprs.div;
 
 import ast.exprs.Expression;
 
-public class ImportExpression extends Expression
+public class ImportExpression implements Expression
 {
     private String classname;
     private String location;

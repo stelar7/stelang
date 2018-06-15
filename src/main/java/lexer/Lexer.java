@@ -141,8 +141,8 @@ public class Lexer
         // parse comments
         if (isComment(it.current()) && isComment(it.peek()))
         {
+            StringBuilder comment = new StringBuilder(it.current());
             it.next();
-            StringBuilder comment = new StringBuilder();
             while (!it.current().equals("\n"))
             {
                 comment.append(it.current());

@@ -4,7 +4,7 @@ import ast.exprs.Expression;
 
 import java.util.List;
 
-public class ArrayExpression extends Expression
+public class ArrayExpression implements Expression
 {
     private List<Object> params;
     

@@ -5,7 +5,7 @@ import ast.exprs.basic.NullExpression;
 
 import java.util.List;
 
-public class EnumMemberExpression extends Expression
+public class EnumMemberExpression implements Expression
 {
     private String           name;
     private List<Expression> params;
