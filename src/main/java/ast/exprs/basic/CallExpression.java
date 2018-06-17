@@ -6,13 +6,23 @@ import java.util.List;
 
 public class CallExpression implements Expression
 {
-    private String           caller;
+    private String           metodName;
     private List<Expression> arguments;
     
     public CallExpression(String caller, List<Expression> arguments)
     {
-        this.caller = caller;
+        this.metodName = caller;
         this.arguments = arguments;
+    }
+    
+    public String getMetodName()
+    {
+        return metodName;
+    }
+    
+    public List<Expression> getArguments()
+    {
+        return arguments;
     }
     
     @Override

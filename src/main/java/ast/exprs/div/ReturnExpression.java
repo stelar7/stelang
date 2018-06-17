@@ -11,6 +11,11 @@ public class ReturnExpression implements Expression
         this.value = value;
     }
     
+    public Expression getReturnValue()
+    {
+        return value;
+    }
+    
     @Override
     public String codegen()
     {

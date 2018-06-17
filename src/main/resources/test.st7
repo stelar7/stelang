@@ -21,6 +21,22 @@ class test {
 
     function testVoidReturn() {}
 
+    function testMethodCall() {
+
+        testVoidReturn();
+        testvoidreturn();
+
+        testAssert(n,j);
+        testAssert((1+2),(j+8));
+
+        testPure();
+        testGlobal();
+
+        const testing = test();
+        test.testPure();
+        testing.testGlobal();
+    }
+
     function testAssert(int:a, int:b):int {
         assert a;
         assert b;

@@ -2,12 +2,13 @@ package semantic;
 
 import ast.SyntaxTree;
 import ast.exprs.Expression;
-import ast.exprs.basic.BinaryExpression;
+import ast.exprs.basic.*;
 import ast.exprs.clazz.*;
 import ast.exprs.control.*;
 import ast.exprs.div.*;
 import div.Utils;
 import lexer.*;
+import semantic.TypeMapList.TypeMap;
 
 import java.util.*;
 
@@ -25,7 +26,7 @@ public class SemanticParser
     public void postProcess()
     {
         ast.addAll(generateDefaultTypeAST());
-        Set<String>                                  types   = buildTypeList(ast, new HashSet<>(List.of("const", "var")));
+        TypeMapList                                  types   = buildTypeList(ast, new TypeMapList());
         Map<String, Map<String, List<ParameterMap>>> methods = buildMethodList(ast);
         validateTypes(ast, types);
     }
@@ -107,7 +108,7 @@ public class SemanticParser
     }
     
     
-    private void validateTypes(List<Expression> ast, Set<String> types)
+    private void validateTypes(List<Expression> ast, TypeMapList types)
     {
         for (Expression e : ast)
         {
@@ -127,26 +128,23 @@ public class SemanticParser
             {
                 if (be instanceof FunctionExpression)
                 {
-                    validateFunction(c, (FunctionExpression) be, types, typeMap);
+                    validateFunction(c, (FunctionExpression) be, types, c, typeMap);
                 }
                 
                 if (be instanceof VariableDefinitionExpression)
                 {
-                    validateVariableDefinition(be, types, null, typeMap);
+                    validateVariableDefinition(be, types, null, c, typeMap);
                 }
                 
                 if (be instanceof BinaryExpression)
                 {
-                    if (((BinaryExpression) be).getLeft() instanceof VariableDefinitionExpression)
-                    {
-                        validateVariableDefinition(((BinaryExpression) be).getLeft(), types, null, typeMap);
-                    }
+                    validateBinaryExpression((BinaryExpression) be, types, null, c, typeMap);
                 }
             }
         }
     }
     
-    private void validateVariableDefinition(Expression be, Set<String> types, PrototypeExpression proto, Map<String, String> typeMap)
+    private void validateVariableDefinition(Expression be, TypeMapList types, PrototypeExpression proto, ClassExpression c, Map<String, String> typeMap)
     {
         VariableDefinitionExpression pe = ((VariableDefinitionExpression) be);
         
@@ -172,31 +170,106 @@ public class SemanticParser
         }
     }
     
-    private void validateBlock(BlockExpression ble, Set<String> knownTypes, PrototypeExpression pe, Map<String, String> usedVariables)
+    private void validateBlock(BlockExpression ble, TypeMapList knownTypes, PrototypeExpression pe, ClassExpression c, Map<String, String> usedVariables)
     {
         for (Expression bex : ble.getBody())
         {
             if (bex instanceof VariableDefinitionExpression)
             {
-                validateVariableDefinition(bex, knownTypes, pe, usedVariables);
+                validateVariableDefinition(bex, knownTypes, pe, c, usedVariables);
             }
             
             if (bex instanceof BinaryExpression)
             {
-                if (((BinaryExpression) bex).getLeft() instanceof VariableDefinitionExpression)
-                {
-                    validateVariableDefinition(((BinaryExpression) bex).getLeft(), knownTypes, pe, usedVariables);
-                }
+                validateBinaryExpression(((BinaryExpression) bex), knownTypes, pe, c, usedVariables);
             }
             
             if (bex instanceof BlockExpression)
             {
-                validateBlock((BlockExpression) bex, knownTypes, pe, new HashMap<>(usedVariables));
+                validateBlock((BlockExpression) bex, knownTypes, pe, c, new HashMap<>(usedVariables));
+            }
+            
+            if (bex instanceof CallExpression)
+            {
+                validateCallExpression((CallExpression) bex, knownTypes, pe, c, usedVariables);
+            }
+            
+            if (bex instanceof ReturnExpression)
+            {
+                validateReturnExpression((ReturnExpression) bex, knownTypes, pe, c, usedVariables);
             }
         }
     }
     
-    private void validateFunction(ClassExpression c, FunctionExpression be, Set<String> types, Map<String, String> typeMap)
+    private void validateReturnExpression(ReturnExpression bex, TypeMapList knownTypes, PrototypeExpression pe, ClassExpression c, Map<String, String> usedVariables)
+    {
+        validateBlock(new BlockExpression(List.of(bex.getReturnValue())), knownTypes, pe, c, usedVariables);
+    }
+    
+    private void validateBinaryExpression(BinaryExpression b, TypeMapList knownTypes, PrototypeExpression pe, ClassExpression c, Map<String, String> usedVariables)
+    {
+        if (b.getLeft() instanceof VariableDefinitionExpression)
+        {
+            validateVariableDefinition(b.getLeft(), knownTypes, pe, c, usedVariables);
+        }
+        
+        if (b.getRight() instanceof BinaryExpression)
+        {
+            validateBinaryExpression((BinaryExpression) b.getRight(), knownTypes, pe, c, usedVariables);
+        }
+        
+        if (b.getRight() instanceof CallExpression)
+        {
+            validateCallExpression((CallExpression) b.getRight(), knownTypes, pe, c, usedVariables);
+        }
+    }
+    
+    private void validateCallExpression(CallExpression exp, TypeMapList knownTypes, PrototypeExpression pe, ClassExpression c, Map<String, String> usedVariables)
+    {
+        List<String> parameterTypes = resolveToType(knownTypes, exp.getArguments());
+        for (String type : parameterTypes)
+        {
+            if (!knownTypes.contains(type))
+            {
+                logSemanticError("Unknown type in method call: " + type);
+            }
+        }
+        
+        TypeMap classMap = knownTypes.get(c.getClassname());
+        // TODO if the op of the parent binary is a . we need to join the left and right to find the correct callee
+        
+        
+    }
+    
+    private List<String> resolveToType(TypeMapList knownTypes, List<Expression> arguments)
+    {
+        List<String> returnTypes = new ArrayList<>();
+        
+        for (Expression argument : arguments)
+        {
+            if (argument instanceof DoubleExpression)
+            {
+                returnTypes.add("double");
+                continue;
+            }
+            
+            if (argument instanceof TextExpression)
+            {
+                returnTypes.add("double");
+                continue;
+            }
+            
+            if (argument instanceof CallExpression)
+            {
+                CallExpression ce = (CallExpression) argument;
+                // TODO
+            }
+        }
+        
+        return returnTypes;
+    }
+    
+    private void validateFunction(ClassExpression c, FunctionExpression be, TypeMapList types, ClassExpression classExpression, Map<String, String> typeMap)
     {
         PrototypeExpression pe = be.getPrototype();
         if (!types.contains(pe.getReturnType()))
@@ -235,10 +308,10 @@ public class SemanticParser
             }
         }
         
-        validateBlock(be.getBlock(), types, pe, functionTypes);
+        validateBlock(be.getBlock(), types, pe, c, functionTypes);
     }
     
-    private Set<String> buildTypeList(List<Expression> ast, Set<String> types)
+    private TypeMapList buildTypeList(List<Expression> ast, TypeMapList types)
     {
         List<ImportExpression> imports = new ArrayList<>();
         for (Expression e : ast)
@@ -250,8 +323,38 @@ public class SemanticParser
             
             if (e instanceof ClassExpression)
             {
-                ClassExpression c = (ClassExpression) e;
-                types.add(c.getClassname());
+                ClassExpression c   = (ClassExpression) e;
+                TypeMap         map = new TypeMapList.TypeMap(c.getClassname());
+                for (Expression x : c.getBody())
+                {
+                    if (x instanceof FunctionExpression)
+                    {
+                        FunctionExpression fx = (FunctionExpression) x;
+                        switch (fx.getVisibility())
+                        {
+                            case "global":
+                            {
+                                map.globals.add(fx.getPrototype());
+                                continue;
+                            }
+                            case "function":
+                            {
+                                map.functions.add(fx.getPrototype());
+                                continue;
+                            }
+                            case "operator":
+                            {
+                                map.operators.add(fx.getPrototype());
+                                continue;
+                            }
+                            case "pure":
+                            {
+                                map.pures.add(fx.getPrototype());
+                            }
+                        }
+                    }
+                }
+                types.add(map);
             }
         }
         
@@ -261,7 +364,7 @@ public class SemanticParser
             {
                 String     source     = Utils.readFileExternal(e.getLocation());
                 SyntaxTree syntaxTree = new SyntaxTree(lexer.parse(source));
-                types.addAll(buildTypeList(syntaxTree.getAST(), types));
+                buildTypeList(syntaxTree.getAST(), types);
             }
         }
         
