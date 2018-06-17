@@ -19,8 +19,7 @@ public class Lexer
         return tokens;
     }
     
-    int lineNumber = 1;
-    int lineIndex  = 0;
+    FileLocation line = new FileLocation(1, 1);
     
     private Token getNextToken(TextIterator it)
     {
@@ -29,18 +28,17 @@ public class Lexer
         {
             if (it.current().equals("\n"))
             {
-                lineNumber++;
-                lineIndex = 0;
+                line.nextLine();
             }
             
-            lineIndex += it.current().length();
+            line.moveIndex(it.current().length());
             it.next();
         }
         
         // read identifiers
         if (isIdentifier(it.current()))
         {
-            lineIndex += it.current().length();
+            line.moveIndex(it.current().length());
             StringBuilder id = new StringBuilder(it.current());
             while (isIdentifier(id.toString()))
             {
@@ -50,29 +48,29 @@ public class Lexer
                 }
                 
                 id.append(it.current());
-                lineIndex += it.current().length();
+                line.moveIndex(it.current().length());
             }
             
             Token keyword = getKeyword(id.toString());
-            return keyword != null ? keyword : new Token(id.toString(), TokenType.IDENTIFIER, lineNumber, lineIndex - id.toString().length());
+            return keyword != null ? keyword : new Token(id.toString(), TokenType.IDENTIFIER, line.newWithOffset(-id.toString().length()));
         }
         
         // read digits
         if (isDigit(it.current()))
         {
-            lineIndex += it.current().length();
+            line.moveIndex(it.current().length());
             StringBuilder num = new StringBuilder(it.current());
             
             String type = it.next();
-            lineIndex += it.current().length();
+            line.moveIndex(it.current().length());
             if (type.equals(".") && it.peek().equals("."))
             {
                 it.next();
                 it.next();
-                lineIndex += 2;
+                line.moveIndex(2);
                 String startIndex = num.toString();
                 String endIndex   = getNextToken(it).getContent();
-                return new Token(startIndex + ".." + endIndex, TokenType.DOTDOT, lineNumber, lineIndex - (startIndex.length() + 2 + endIndex.length()));
+                return new Token(startIndex + ".." + endIndex, TokenType.DOTDOT, line.newWithOffset(startIndex.length() + 2 + endIndex.length()));
             }
             
             // Allow _ in numbers
@@ -81,7 +79,7 @@ public class Lexer
                 num.append(type);
                 while (isDigit(it.next()) || it.current().equals("_") || it.current().equals("."))
                 {
-                    lineIndex += it.current().length();
+                    line.moveIndex(it.current().length());
                     num.append(it.current());
                 }
                 
@@ -93,10 +91,10 @@ public class Lexer
                         numb = numb.replaceFirst("\\.", "");
                     }
                     
-                    return new Token(numb, TokenType.FLOAT, lineNumber, lineIndex - num.toString().length());
+                    return new Token(numb, TokenType.FLOAT, line.newWithOffset(-num.toString().length()));
                 }
                 
-                return new Token(numb, TokenType.NUMBER, lineNumber, lineIndex - num.toString().length());
+                return new Token(numb, TokenType.NUMBER, line.newWithOffset(-num.toString().length()));
             }
             
             // allow binary digits
@@ -104,11 +102,11 @@ public class Lexer
             {
                 while (isBinary(it.next()))
                 {
-                    lineIndex += it.current().length();
+                    line.moveIndex(it.current().length());
                     num.append(it.current());
                 }
                 
-                return new Token(String.valueOf(Long.parseUnsignedLong(num.toString(), 2)), TokenType.NUMBER, lineNumber, lineIndex - num.toString().length());
+                return new Token(String.valueOf(Long.parseUnsignedLong(num.toString(), 2)), TokenType.NUMBER, line.newWithOffset(-num.toString().length()));
             }
             
             // allow hex digits
@@ -116,11 +114,11 @@ public class Lexer
             {
                 while (isHex(it.next()))
                 {
-                    lineIndex += it.current().length();
+                    line.moveIndex(it.current().length());
                     num.append(it.current());
                 }
                 
-                return new Token(String.valueOf(Long.parseUnsignedLong(num.toString(), 16)), TokenType.NUMBER, lineNumber, lineIndex - num.toString().length());
+                return new Token(String.valueOf(Long.parseUnsignedLong(num.toString(), 16)), TokenType.NUMBER, line.newWithOffset(-num.toString().length()));
             }
             
             // allow octal digits
@@ -128,14 +126,14 @@ public class Lexer
             {
                 while (isOctal(it.next()))
                 {
-                    lineIndex += it.current().length();
+                    line.moveIndex(it.current().length());
                     num.append(it.current());
                 }
                 
-                return new Token(String.valueOf(Long.parseUnsignedLong(num.toString(), 8)), TokenType.NUMBER, lineNumber, lineIndex - num.toString().length());
+                return new Token(String.valueOf(Long.parseUnsignedLong(num.toString(), 8)), TokenType.NUMBER, line.newWithOffset(-num.toString().length()));
             }
             
-            return new Token(num.toString(), TokenType.NUMBER, lineNumber, lineIndex - num.toString().length());
+            return new Token(num.toString(), TokenType.NUMBER, line.newWithOffset(-num.toString().length()));
         }
         
         if (isBlockCommentStart(it.current() + it.peek()))
@@ -145,13 +143,13 @@ public class Lexer
             while (!isBlockCommentEnd(it.current() + it.peek()))
             {
                 comment.append(it.current());
-                lineIndex += it.current().length();
+                line.moveIndex(it.current().length());
                 it.next();
             }
             it.next();
             it.next();
             
-            return new Token(comment.toString(), TokenType.COMMENT, lineNumber, lineIndex - comment.toString().length());
+            return new Token(comment.toString(), TokenType.COMMENT, line.newWithOffset(-comment.toString().length()));
         }
         
         if (isSingleLineComment(it.current()) && isSingleLineComment(it.peek()))
@@ -161,11 +159,11 @@ public class Lexer
             while (!it.current().equals("\n"))
             {
                 comment.append(it.current());
-                lineIndex += it.current().length();
+                line.moveIndex(it.current().length());
                 it.next();
             }
             
-            return new Token(comment.toString(), TokenType.COMMENT, lineNumber, lineIndex - comment.toString().length());
+            return new Token(comment.toString(), TokenType.COMMENT, line.newWithOffset(-comment.toString().length()));
         }
         
         // parse text
@@ -175,31 +173,32 @@ public class Lexer
             if (isDoubleQuote(it.current()) && !isDoubleQuote(it.peek()))
             {
                 it.next();
-                lineIndex += 2;
-                return new Token("", TokenType.TEXT, lineNumber, lineIndex);
+                line.moveIndex(2);
+                return new Token("", TokenType.TEXT, line.copy());
             } else if (!isDoubleQuote(it.current()))
             {
                 StringBuilder sb = new StringBuilder();
                 while (!isDoubleQuote(it.current()))
                 {
                     sb.append(it.current());
-                    lineIndex += it.current().length();
+                    line.moveIndex(it.current().length());
                     if (it.current().equals("\n"))
                     {
-                        lineNumber++;
-                        lineIndex = 0;
+                        line.nextLine();
                     }
                     
                     it.next();
                 }
-                
                 it.next();
-                return new Token(sb.toString(), TokenType.TEXT, lineNumber, lineIndex);
+                
+                line.moveIndex(2);
+                return new Token(sb.toString(), TokenType.TEXT, line.copy());
             } else if (isDoubleQuote(it.current()) && isDoubleQuote(it.peek()))
             {
                 StringBuilder sb = new StringBuilder();
                 it.next();
                 it.next();
+                line.moveIndex(2);
                 
                 boolean condition = !(isDoubleQuote(it.current()) &&
                                       isDoubleQuote(it.peek()) &&
@@ -209,11 +208,10 @@ public class Lexer
                 {
                     sb.append(it.current());
                     
-                    lineIndex += it.current().length();
+                    line.moveIndex(it.current().length());
                     if (it.current().equals("\n"))
                     {
-                        lineNumber++;
-                        lineIndex = 0;
+                        line.nextLine();
                     }
                     
                     it.next();
@@ -226,7 +224,8 @@ public class Lexer
                 it.next();
                 it.next();
                 it.next();
-                return new Token(sb.toString(), TokenType.TEXT, lineNumber, lineIndex);
+                line.moveIndex(3);
+                return new Token(sb.toString(), TokenType.TEXT, line.copy());
             }
         }
         
@@ -245,8 +244,8 @@ public class Lexer
                 nval = it.current();
             }
         }
-        lineIndex += it.current().length();
-        return new Token(val.toString(), TokenType.from(val.toString()), lineNumber, lineIndex - val.toString().length());
+        line.moveIndex(it.current().length());
+        return new Token(val.toString(), TokenType.from(val.toString()), line.newWithOffset(-val.toString().length()));
     }
     
     private boolean isDoubleQuote(String str)
@@ -320,7 +319,7 @@ public class Lexer
             return null;
         }
         
-        return new Token(str, type, lineNumber, lineIndex);
+        return new Token(str, type, line.copy());
     }
     
     private boolean isIdentifier(String str)

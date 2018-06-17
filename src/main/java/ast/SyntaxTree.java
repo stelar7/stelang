@@ -119,6 +119,13 @@ public class SyntaxTree
         System.err.println(currentToken);
     }
     
+    private void logParseError(String s, Expression e)
+    {
+        System.err.println(s);
+        System.err.print("Current expression is: ");
+        System.err.println(e);
+    }
+    
     private void nextToken()
     {
         if (tokenIndex + 1 > tokens.size())
@@ -228,9 +235,42 @@ public class SyntaxTree
             superClass = assertGetThenNext(TokenType.IDENTIFIER);
         }
         
-        BlockExpression body = parseBlockExpression();
+        BlockExpression body = parseClassBlockExpression();
         return new ClassExpression(classname, body, superClass);
     }
+    
+    private BlockExpression parseClassBlockExpression()
+    {
+        assertThenNext(TokenType.LSQUIGLY);
+        List<Expression> body = parseClassExpressionList();
+        assertThenNext(TokenType.RSQUIGLY);
+        return new BlockExpression(body);
+    }
+    
+    private List<Expression> parseClassExpressionList()
+    {
+        List<Expression> b = new ArrayList<>();
+        while (currentToken.getType() != TokenType.RSQUIGLY)
+        {
+            Expression e = parseExpression();
+            
+            if (e instanceof BinaryExpression)
+            {
+                if (!TokenType.isSetType(((BinaryExpression) e).getOp()))
+                {
+                    logParseError("Binary expressions are not allowed here");
+                }
+            }
+            
+            b.add(e);
+            if (!(e instanceof ControlExpression))
+            {
+                assertThenNext(TokenType.SEMICOLON);
+            }
+        }
+        return b;
+    }
+    
     
     private List<Expression> handleClassBody()
     {
@@ -1091,8 +1131,7 @@ public class SyntaxTree
     
     private Expression parseExpressionImpl(Expression left)
     {
-        Expression bin = parseBinaryOps(0, left);
-        return bin;
+        return parseBinaryOps(0, left);
     }
     
     private PrototypeExpression parseOperatorPrototype(String visibility, String identifier)
