@@ -32,6 +32,6 @@ public class ClassExpression implements Expression
     @Override
     public String codegen()
     {
-        return null;
+        return String.format("class %s extends %s {\n%s\n}", classname, superClass, body.codegen());
     }
 }

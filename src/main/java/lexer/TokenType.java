@@ -81,4 +81,19 @@ public enum TokenType
     {
         return currentToken.getType().token.startsWith("=") && currentToken.getType() != EQUAL;
     }
+    
+    public TokenType toFirstToken()
+    {
+        if (this == PLUSPLUS)
+        {
+            return PLUS;
+        }
+        
+        if (this == MINUSMINUS)
+        {
+            return MINUS;
+        }
+        
+        return UNKNOWN;
+    }
 }

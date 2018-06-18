@@ -3,7 +3,9 @@ package ast.exprs.clazz;
 import ast.exprs.Expression;
 import ast.exprs.control.*;
 
+import java.security.cert.CollectionCertStoreParameters;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class FunctionExpression extends ControlExpression
 {
@@ -46,7 +48,7 @@ public class FunctionExpression extends ControlExpression
     @Override
     public String codegen()
     {
-        return null;
+        return String.format("function %s(%s) {\n\t%s\n}", prototype.getName(), prototype.getParameters().stream().map(PrototypeParameter::getType).collect(Collectors.joining(",")), body.codegen());
     }
     
 }

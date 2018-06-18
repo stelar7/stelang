@@ -18,7 +18,7 @@ public class SwitchExpression implements Expression
     @Override
     public String codegen()
     {
-        return null;
+        return "switch {}";
     }
 }
 

@@ -1,7 +1,7 @@
 package ast.exprs.basic;
 
 import ast.exprs.Expression;
-import lexer.Token;
+import lexer.*;
 
 public class BinaryExpression implements Expression
 {
@@ -60,7 +60,7 @@ public class BinaryExpression implements Expression
             }
         }
         
-        return null;
+        return leftCode + op.getType() + rightCode;
     }
     
     @Override

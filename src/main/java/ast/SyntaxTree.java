@@ -158,24 +158,26 @@ public class SyntaxTree
         return tokens.get(tokenIndex + (offset - 1));
     }
     
-    private void assertType(TokenType... identifier)
+    private TokenType assertType(TokenType... identifier)
     {
         for (TokenType type : identifier)
         {
             if (currentToken.getType() == type)
             {
-                return;
+                return type;
             }
         }
         
         System.err.print("Expected token " + Arrays.toString(identifier) + ", Current: " + currentToken);
         System.exit(0);
+        return TokenType.UNKNOWN;
     }
     
-    private void assertThenNext(TokenType... type)
+    private TokenType assertThenNext(TokenType... type)
     {
-        assertType(type);
+        TokenType returnType = assertType(type);
         nextToken();
+        return returnType;
     }
     
     private String assertGetThenNext(TokenType... type)
@@ -377,9 +379,10 @@ public class SyntaxTree
                 return parseDo();
             case IDENTIFIER:
             {
+                Token next = peekToken(1);
                 if (allowTernary)
                 {
-                    if ((peekToken(1).getType() == TokenType.QUESTIONMARK) || (peekToken(1).getType() == TokenType.QUESTIONMARKCOLON))
+                    if ((next.getType() == TokenType.QUESTIONMARK) || (next.getType() == TokenType.QUESTIONMARKCOLON))
                     {
                         return parseTernary();
                     }
@@ -387,14 +390,24 @@ public class SyntaxTree
                 
                 if (allowVariableDeclaration)
                 {
-                    if (peekToken(1).getType() == TokenType.COLON)
+                    if (next.getType() == TokenType.COLON)
                     {
                         return parseVariableDefinition();
                     }
                 }
                 
+                
+                if (next.getType() == TokenType.PLUSPLUS || next.getType() == TokenType.MINUSMINUS)
+                {
+                    return parsePrePostOP();
+                }
+                
                 return parseIdentifier();
             }
+            case PLUSPLUS:
+            case MINUSMINUS:
+                return parsePrePostOP();
+            
             case DOTDOT:
                 return parseDotdot();
             case FLOAT:
@@ -410,10 +423,7 @@ public class SyntaxTree
                 return parseAssert();
             case RETURN:
             {
-                nextToken();
-                Expression parsed = parseExpression();
-                Expression value  = new ReturnExpression(parsed);
-                return value;
+                return parseReturn();
             }
             case CONST:
             case VAR:
@@ -437,6 +447,28 @@ public class SyntaxTree
             default:
                 return null;
         }
+    }
+    
+    private Expression parsePrePostOP()
+    {
+        if (currentToken.getType() == TokenType.PLUSPLUS || currentToken.getType() == TokenType.MINUSMINUS)
+        {
+            TokenType type = assertThenNext(TokenType.PLUSPLUS, TokenType.MINUSMINUS);
+            Expression variable = parseIdentifier();
+            return new PostOpExpression(variable, type);
+        } else
+        {
+            Expression variable = parseIdentifier();
+            TokenType type = assertThenNext(TokenType.PLUSPLUS, TokenType.MINUSMINUS);
+            return new PreOpExpression(variable, type);
+        }
+    }
+    
+    private Expression parseReturn()
+    {
+        assertThenNext(TokenType.RETURN);
+        Expression parsed = parseExpression();
+        return new ReturnExpression(parsed);
     }
     
     private Expression parseText()
@@ -1119,19 +1151,13 @@ public class SyntaxTree
     private Expression parseExpression(boolean ternary, boolean allowVarDec)
     {
         Expression left = parsePrimary(ternary, allowVarDec);
-        return parseExpressionImpl(left);
+        return parseBinaryOps(0, left);
     }
     
     
     private Expression parseExpression()
     {
-        Expression left = parsePrimary(true, true);
-        return parseExpressionImpl(left);
-    }
-    
-    private Expression parseExpressionImpl(Expression left)
-    {
-        return parseBinaryOps(0, left);
+        return parseExpression(true, true);
     }
     
     private PrototypeExpression parseOperatorPrototype(String visibility, String identifier)

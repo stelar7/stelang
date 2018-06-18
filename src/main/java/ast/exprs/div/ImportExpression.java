@@ -26,6 +26,6 @@ public class ImportExpression implements Expression
     @Override
     public String codegen()
     {
-        return null;
+        return String.format("import %s from %s", classname, location);
     }
 }

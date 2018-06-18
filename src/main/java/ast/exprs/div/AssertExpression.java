@@ -14,6 +14,6 @@ public class AssertExpression implements Expression
     @Override
     public String codegen()
     {
-        return null;
+        return "assert " + condition.codegen();
     }
 }

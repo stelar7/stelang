@@ -14,6 +14,6 @@ public class VariableExpression implements Expression
     @Override
     public String codegen()
     {
-        return null;
+        return String.format("%%%s", name);
     }
 }

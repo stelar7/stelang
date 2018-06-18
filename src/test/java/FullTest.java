@@ -1,4 +1,5 @@
 import ast.*;
+import ast.exprs.Expression;
 import div.Utils;
 import lexer.*;
 import semantic.SemanticParser;
@@ -17,5 +18,10 @@ public class FullTest
         
         SyntaxTree     syntaxTree = new SyntaxTree(tokens);
         SemanticParser semantics  = new SemanticParser(syntaxTree);
+        
+        for (Expression expression : syntaxTree.getAST())
+        {
+            System.out.println(expression.codegen());
+        }
     }
 }

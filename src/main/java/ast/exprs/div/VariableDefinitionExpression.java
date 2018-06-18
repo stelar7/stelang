@@ -27,7 +27,7 @@ public class VariableDefinitionExpression implements Expression
     @Override
     public String codegen()
     {
-        return null;
+        return String.format("%%%s = 0", identifier);
     }
     
     @Override

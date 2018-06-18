@@ -19,6 +19,6 @@ public class ReturnExpression implements Expression
     @Override
     public String codegen()
     {
-        return null;
+        return "return " + value.codegen();
     }
 }

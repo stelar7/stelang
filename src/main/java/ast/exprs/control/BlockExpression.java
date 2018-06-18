@@ -3,6 +3,7 @@ package ast.exprs.control;
 import ast.exprs.Expression;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class BlockExpression extends ControlExpression
 {
@@ -21,6 +22,6 @@ public class BlockExpression extends ControlExpression
     @Override
     public String codegen()
     {
-        return null;
+        return body.stream().map(Expression::codegen).collect(Collectors.joining(";\n\t"));
     }
 }
