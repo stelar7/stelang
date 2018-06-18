@@ -14,6 +14,6 @@ public class DoubleExpression implements Expression
     @Override
     public String codegen()
     {
-        return null;
+        return "double " + val;
     }
 }

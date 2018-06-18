@@ -13,4 +13,12 @@ public class DoWhileThenExpression extends DoWhileExpression
         super(condition, doStatements);
         this.thenStatements = thenStatements;
     }
+    
+    @Override
+    public String codegen()
+    {
+        String sup = super.codegen();
+        
+        return sup;
+    }
 }

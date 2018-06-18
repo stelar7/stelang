@@ -14,7 +14,7 @@ public class LongExpression implements Expression
     @Override
     public String codegen()
     {
-        return null;
+        return "i64 " + val;
     }
     
 }

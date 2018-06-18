@@ -13,4 +13,12 @@ public class ForEachThenExpression extends ForEachExpression
         super(init, collection, doStatements);
         this.thenStatements = thenStatements;
     }
+    
+    @Override
+    public String codegen()
+    {
+        String sup = super.codegen();
+        
+        return sup;
+    }
 }

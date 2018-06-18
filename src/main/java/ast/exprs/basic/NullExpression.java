@@ -7,6 +7,6 @@ public class NullExpression implements Expression
     @Override
     public String codegen()
     {
-        return null;
+        return "void";
     }
 }

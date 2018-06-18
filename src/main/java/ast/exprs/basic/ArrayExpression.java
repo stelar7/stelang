@@ -16,6 +16,6 @@ public class ArrayExpression implements Expression
     @Override
     public String codegen()
     {
-        return null;
+        return String.format("[%s x i32]", params.size());
     }
 }

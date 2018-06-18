@@ -20,6 +20,6 @@ public class BooleanExpression implements Expression
     @Override
     public String codegen()
     {
-        return null;
+        return String.valueOf(result);
     }
 }

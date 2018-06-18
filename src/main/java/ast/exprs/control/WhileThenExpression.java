@@ -13,4 +13,12 @@ public class WhileThenExpression extends WhileExpression
         super(condition, doStatements);
         this.thenStatements = thenStatements;
     }
+    
+    @Override
+    public String codegen()
+    {
+        String sup = super.codegen();
+        
+        return sup;
+    }
 }

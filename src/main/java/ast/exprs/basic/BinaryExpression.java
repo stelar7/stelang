@@ -34,6 +34,32 @@ public class BinaryExpression implements Expression
     @Override
     public String codegen()
     {
+        String leftCode  = left.codegen();
+        String rightCode = right.codegen();
+        
+        switch (op.getType())
+        {
+            case PLUS:
+            {
+                return "add i32 " + leftCode + ", " + rightCode;
+            }
+            
+            case MINUS:
+            {
+                return "sub i32 " + leftCode + ", " + rightCode;
+            }
+            
+            case ASTERISK:
+            {
+                return "mul i32 " + leftCode + ", " + rightCode;
+            }
+            
+            case SLASH:
+            {
+                return "udiv i32 " + leftCode + ", " + rightCode;
+            }
+        }
+        
         return null;
     }
     

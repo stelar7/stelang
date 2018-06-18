@@ -3,6 +3,7 @@ package ast.exprs.control;
 import ast.exprs.Expression;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class IfExpression extends ControlExpression
 {
@@ -21,6 +22,13 @@ public class IfExpression extends ControlExpression
     @Override
     public String codegen()
     {
-        return null;
+        String value = condition.codegen();
+        
+        String ifCond    = "fcmp one double " + value;
+        String thenVal   = trueExpressions.stream().map(Expression::codegen).collect(Collectors.joining(";"));
+        String elseVal   = falseExpressions.stream().map(Expression::codegen).collect(Collectors.joining(";"));
+        String returnVal = String.format("br i1 %s, label %s, label %s", ifCond, thenVal, elseVal);
+        
+        return returnVal;
     }
 }
