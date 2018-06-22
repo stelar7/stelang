@@ -2,8 +2,6 @@ package ast.exprs.div;
 
 import ast.exprs.Expression;
 
-import java.util.List;
-
 public class TernaryExpression implements Expression
 {
     private Expression condition;
@@ -21,6 +19,13 @@ public class TernaryExpression implements Expression
     @Override
     public String codegen()
     {
-        return null;
+        String value = condition.codegen();
+        
+        String ifCond    = "fcmp one double " + value;
+        String thenVal   = trueExpression.codegen();
+        String elseVal   = falseExpression.codegen();
+        String returnVal = String.format("br i1 %s, label %s, label %s", ifCond, thenVal, elseVal);
+        
+        return returnVal;
     }
 }

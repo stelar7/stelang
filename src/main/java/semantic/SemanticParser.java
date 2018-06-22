@@ -308,6 +308,15 @@ public class SemanticParser
             }
         }
         
+        if (!pe.getReturnType().equals("void"))
+        {
+            long count = be.getBody().stream().filter(e -> e instanceof ReturnExpression).count();
+            if (count != 1)
+            {
+                logSemanticError("Expected one return statement, got " + count);
+            }
+        }
+        
         validateBlock(be.getBlock(), types, pe, c, functionTypes);
     }
     

@@ -60,7 +60,7 @@ public class BinaryExpression implements Expression
             }
         }
         
-        return leftCode + op.getType() + rightCode;
+        return String.format("%s %s %s", leftCode, op.getType(), rightCode);
     }
     
     @Override
