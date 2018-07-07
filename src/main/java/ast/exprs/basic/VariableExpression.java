@@ -16,4 +16,9 @@ public class VariableExpression implements Expression
     {
         return String.format("%%%s", name);
     }
+    
+    public String getName()
+    {
+        return name;
+    }
 }

@@ -450,9 +450,38 @@ public class SyntaxTree
             {
                 return parseOperatorDeclaration();
             }
+            case CAST:
+            {
+                return parseCastDeclaration();
+            }
             default:
                 return null;
         }
+    }
+    
+    private Expression parseCastDeclaration()
+    {
+        assertThenNext(TokenType.CAST);
+        List<Expression> casts = parseCastPrototype();
+        BlockExpression  block = parseBlockExpression();
+        return new CastExpression(casts, block);
+    }
+    
+    private List<Expression> parseCastPrototype()
+    {
+        List<Expression> casts = new ArrayList<>();
+        assertThenNext(TokenType.LPAREN);
+        while (currentToken.getType() != TokenType.RPAREN)
+        {
+            Expression parsed = parseExpression();
+            casts.add(parsed);
+            if (currentToken.getType() != TokenType.RPAREN)
+            {
+                assertThenNext(TokenType.SEMICOLON);
+            }
+        }
+        assertThenNext(TokenType.RPAREN);
+        return casts;
     }
     
     private Expression parsePrePostOP()

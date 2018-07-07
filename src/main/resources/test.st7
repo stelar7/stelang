@@ -44,6 +44,18 @@ class test {
         testing.testGlobal();
     }
 
+
+    function testCast(int:a, int:b):int {
+        cast (int:c = b) {
+            return b + c;
+        }
+
+        cast (text:c = b) {
+            return b + c;
+        }
+        return a;
+    }
+
     function testAssert(int:a, int:b):int {
         assert a;
         assert b;

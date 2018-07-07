@@ -48,7 +48,10 @@ public class FunctionExpression extends ControlExpression
     @Override
     public String codegen()
     {
-        return String.format("function %s(%s) {\n\t%s\n}", prototype.getName(), prototype.getParameters().stream().map(PrototypeParameter::getType).collect(Collectors.joining(",")), body.codegen());
+        return String.format("function %s(%s) {\n\t%s\n}",
+                             prototype.getName(),
+                             prototype.getParameters().stream().map(c -> c.getType() + ":" + c.getName()).collect(Collectors.joining(",")),
+                             body.codegen());
     }
     
 }
