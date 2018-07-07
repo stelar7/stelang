@@ -5,6 +5,7 @@ import ast.exprs.Expression;
 import ast.exprs.control.BlockExpression;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class EnumExpression extends ClassExpression
 {
@@ -19,6 +20,6 @@ public class EnumExpression extends ClassExpression
     @Override
     public String codegen()
     {
-        return null;
+        return String.format("enum %s extends %s \n{\n%s\n%s\n}", getClassname(), getSuperClass(), members.stream().map(Object::toString).collect(Collectors.joining()), getBody());
     }
 }

@@ -19,6 +19,11 @@ public class ClassExpression implements Expression
         this.body = body;
     }
     
+    public String getSuperClass()
+    {
+        return superClass;
+    }
+    
     public String getClassname()
     {
         return classname;

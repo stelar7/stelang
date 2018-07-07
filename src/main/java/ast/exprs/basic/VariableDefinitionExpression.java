@@ -1,4 +1,4 @@
-package ast.exprs.div;
+package ast.exprs.basic;
 
 
 import ast.exprs.Expression;

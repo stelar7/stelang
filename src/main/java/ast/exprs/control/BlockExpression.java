@@ -24,4 +24,10 @@ public class BlockExpression extends ControlExpression
     {
         return body.stream().map(Expression::codegen).collect(Collectors.joining(";\n\t"));
     }
+    
+    @Override
+    public String toString()
+    {
+        return codegen();
+    }
 }

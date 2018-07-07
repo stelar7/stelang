@@ -51,6 +51,7 @@ public enum TokenType
     FOR("for"), THEN("then"),
     SWITCH("switch"), CASE("case"), DEFAULT("default"),
     RETURN("return"), ASSERT("assert"),
+    CAST("cast"),
     
     // modifiers
     CONST("const"), VAR("var"),

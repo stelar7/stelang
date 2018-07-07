@@ -19,6 +19,12 @@ public class EnumMemberExpression implements Expression
     @Override
     public String codegen()
     {
-        return null;
+        return String.format("%s(%s),\n", name, params);
+    }
+    
+    @Override
+    public String toString()
+    {
+        return codegen();
     }
 }

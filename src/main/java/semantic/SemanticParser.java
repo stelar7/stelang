@@ -140,6 +140,11 @@ public class SemanticParser
                 {
                     validateBinaryExpression((BinaryExpression) be, types, null, c, typeMap);
                 }
+                
+                if (be instanceof BlockExpression)
+                {
+                    validateBlock((BlockExpression) be, types, null, c, typeMap);
+                }
             }
         }
     }
@@ -197,6 +202,11 @@ public class SemanticParser
             if (bex instanceof ReturnExpression)
             {
                 validateReturnExpression((ReturnExpression) bex, knownTypes, pe, c, usedVariables);
+            }
+            
+            if (bex instanceof FunctionExpression)
+            {
+                validateFunction(c, (FunctionExpression) bex, knownTypes, c, usedVariables);
             }
         }
     }
@@ -297,9 +307,12 @@ public class SemanticParser
                 logSemanticError(String.format("%s \"%s\" in class \"%s\" has unknown type for parameter \"%s\": \"%s\"", type, pe.getName(), c.getClassname(), par.getName(), par.getType()));
             }
             
-            if (functionTypes.containsKey(par.getName()))
+            if(be.getBody().size() > 1 || !(be.getBody().get(0) instanceof NullExpression))
             {
-                logSemanticError(String.format("Parameter named \"%s\" is already defined in scope", par.getName()));
+                if (functionTypes.containsKey(par.getName()))
+                {
+                    logSemanticError(String.format("(%s %s) Parameter named \"%s\" is already defined in scope", c.getClassname(), be.getPrototype().getName(), par.getName()));
+                }
             }
             
             if (!functionTypes.containsKey(par.getName()))
@@ -308,12 +321,12 @@ public class SemanticParser
             }
         }
         
-        if (!pe.getReturnType().equals("void"))
+        if (!type.equals("Constructor") && !pe.getReturnType().equals("void"))
         {
             long count = be.getBody().stream().filter(e -> e instanceof ReturnExpression).count();
             if (count != 1)
             {
-                logSemanticError("Expected one return statement, got " + count);
+                logSemanticError(String.format("Expected one return statement in %s %s, got %s", type, pe.getName(), count));
             }
         }
         

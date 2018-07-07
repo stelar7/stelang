@@ -296,7 +296,13 @@ public class SyntaxTree
         if (currentToken.getType() == TokenType.SEMICOLON)
         {
             assertGetThenNext(TokenType.SEMICOLON);
-            return new ConstructorExpression(visibility, f, new BlockExpression(List.of()));
+            List<Expression> list = new ArrayList<>();
+            for (PrototypeParameter parameter : f.getParameters())
+            {
+                list.add(new VariableDefinitionExpression(parameter.getName(), parameter.getType()));
+            }
+            list.add(new ConstructorExpression(visibility, f, new BlockExpression(List.of(new NullExpression()))));
+            return new BlockExpression(list);
         }
         
         BlockExpression b = parseBlockExpression();
@@ -453,13 +459,13 @@ public class SyntaxTree
     {
         if (currentToken.getType() == TokenType.PLUSPLUS || currentToken.getType() == TokenType.MINUSMINUS)
         {
-            TokenType type = assertThenNext(TokenType.PLUSPLUS, TokenType.MINUSMINUS);
+            TokenType  type     = assertThenNext(TokenType.PLUSPLUS, TokenType.MINUSMINUS);
             Expression variable = parseIdentifier();
             return new PostOpExpression(variable, type);
         } else
         {
             Expression variable = parseIdentifier();
-            TokenType type = assertThenNext(TokenType.PLUSPLUS, TokenType.MINUSMINUS);
+            TokenType  type     = assertThenNext(TokenType.PLUSPLUS, TokenType.MINUSMINUS);
             return new PreOpExpression(variable, type);
         }
     }
@@ -1176,22 +1182,11 @@ public class SyntaxTree
                 params.add(new PrototypeParameter(clazz, name));
             }
         } while (currentToken.getType() == TokenType.COMMA);
-        nextToken();
+        assertThenNext(TokenType.RPAREN);
         
-        if (visibility.equals("constructor"))
+        if (currentToken.getType() == TokenType.LSQUIGLY || currentToken.getType() == TokenType.RETURN)
         {
-            if (currentToken.getType() == TokenType.SEMICOLON)
-            {
-                return new PrototypeExpression(identifier, params, identifier);
-            }
-        }
-        
-        if (visibility.equals("operator"))
-        {
-            if (currentToken.getType() == TokenType.LSQUIGLY || currentToken.getType() == TokenType.RETURN)
-            {
-                return new PrototypeExpression(identifier, params, "");
-            }
+            return new PrototypeExpression(identifier, params, "");
         }
         
         assertThenNext(TokenType.COLON);

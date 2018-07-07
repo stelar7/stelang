@@ -1,4 +1,4 @@
-package ast.exprs.div;
+package ast.exprs.basic;
 
 import ast.exprs.Expression;
 
@@ -14,6 +14,12 @@ public class TextExpression implements Expression
     @Override
     public String codegen()
     {
-        return null;
+        return "\"" + content + "\"";
+    }
+    
+    @Override
+    public String toString()
+    {
+        return codegen();
     }
 }
