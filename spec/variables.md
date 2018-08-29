@@ -7,7 +7,7 @@ Variables without a keyword are dynamic by default
 
 ## Initialization
 ```
-Int:value = 31;
+Int: value = 31;
 ```
 
 ## Constants

@@ -3,22 +3,58 @@
 
 ## Bool
 ```
-// TODO?
+.toggle()
+.TRUE
+.FALSE
 ```
 
 ## Text
 ```
-// TODO?
+.at(int)
+.concat(text)
+.contains(text)
+.endsWith(RegEx)
+.equalsIgnoreCase(text)
+.format(text...)
+.indexOf(text)
+.replace(text, text)
+.reverse()
+.substring(int)
+.substring(int, int)
+.startsWith(RegEx)
+.size()
+.split(RegEx)
+.trim()
+.toUpperCase()
+.toLowerCase()
+.toTitleCase()
 ```
 
 ## Int
 ```
-// TODO?
+.INFINITY
+.isInfinite()
+.oneBits()
+.totalBits()
+.leadingZeroBits()
+.trailingZeroBits()
+.toHex()
+.toOctal()
+.toBinary()
+.highestOneBit()
+.sign()
+.rotateLeft()
+.rotateRight()
 ```
 
 ## Float
 ```
-// TODO?
+.INFINITY
+.isInfinite()
+.isNaN()
+.toHex()
+.toOctal()
+.toBinary()
 ```
 
 ## Class

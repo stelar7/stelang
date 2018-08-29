@@ -6,9 +6,9 @@ function name(type: name, type2: name2): return_type {
     // code
 }
 ```
-Functions have optional generic parameters
+Functions can have generic parameters (see classes.md)
 ```
-function name<T>(T: name): T {
+function name(T: name): T {
     // code
 }
 ```

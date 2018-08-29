@@ -10,6 +10,18 @@ class MyClass {
 ```
 
 
+Classes can have generic parameters
+```
+class <X, Y> myClass 
+{
+    function add(X:x, Y:y) 
+    {
+        return x + y;
+    }
+}
+```
+
+
 Enums are classes with `pure` variables
 ```
 enum MyEnum {
@@ -29,6 +41,19 @@ enum MyEnum3 {
 enum MyEnum4 {
     A(2), B(5), C(8), D(2);
     MyEnum4(Int:value);
+}
+
+enum MyEnum5 extends MyEnum4 {
+    E(2), F(5), G(8), H(2);
+}
+
+enum MyEnum6 extends MyEnum4 {
+    E("asd"), F("asd"), G("asd"), H("ASd");
+    
+    MyEnum6(Text: value) 
+    {
+        super(2);
+    }
 }
 
 

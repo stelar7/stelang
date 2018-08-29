@@ -11,6 +11,16 @@
 <=> Comparison (-1 if less, 0 if equal, 1 if greater)
 ```
 
+##### Chained Comparison
+```
+a == b == c
+a != b != c
+a > b > c
+a >= b >= c
+a < b < c
+a =< b =< c
+```
+
 ## Arithmetic
 
 Arithmatic operators allow overflow
@@ -26,8 +36,8 @@ Arithmatic operators allow overflow
 Arithmatic operators have an implicit 0 prefix;
 this allows you to do:
 
-+5 == 0 + 5 == 5
--5 == 0 - 5 == -5
++5, which is equal to 0 + 5 == 5
+-5, which is equal to 0 - 5 == -5
 ```
 
 ```
@@ -40,10 +50,15 @@ i-- postfix decrement
 
 {
     i = 0;
-    i = i++ + ++3; 
-    // 3 + 1 + i;
-    // i + 1
-    i == 5;
+    i = i++ + 3; 
+    // i = 0 + 3;
+    // i = i + 1
+    
+    i = i++ + 3;
+    // i = 1 + 3;
+    // i = i + 1
+    
+    // i is now == 5;
 }
 
 ```
@@ -64,6 +79,8 @@ i-- postfix decrement
 
 << Shift left
 >> Shift right
+
+// shifts always shifts in 0s
 ```
 
 

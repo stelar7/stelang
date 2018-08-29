@@ -43,14 +43,16 @@ for (val i = 0; i < 100; i++)
 {
     // some stuff
 } then {
-    Console.output("Done counting to 100");
+    Console.output("Done counting to i");
+    // prints "Done counting to 99"
 }
 
 for (val i = 0; i < 100; i++) 
 {
     if (i > 50) break;
 } then {
-    Console.output("We stopped at 50 this time");
+    Console.output("We stopped at i this time");
+    // prints "We stopped at 51 this time"
 }
 ```
 
@@ -82,7 +84,7 @@ Exits the loop
 ### Special keywords after FOR and WHILE
 ```
 // then {}
-Always ran after the end of the loop
+Always ran after the end of the loop, and has access to the parameters defined inside the loop
 ```
 
 
@@ -116,7 +118,8 @@ switch(a) {
         Console.output(a);
     };
     
-    case {Text: "test"}: {
+    // Text object or "test" constant
+    case {Text, "test"}: {
         Console.output(a);
     };
 }
