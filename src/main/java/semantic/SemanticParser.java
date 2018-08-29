@@ -23,7 +23,7 @@ public class SemanticParser
         postProcess();
     }
     
-    public void postProcess()
+    private void postProcess()
     {
         ast.addAll(generateDefaultTypeAST());
         TypeMapList                                  types   = buildTypeList(ast, new TypeMapList());
@@ -307,7 +307,7 @@ public class SemanticParser
                 logSemanticError(String.format("%s \"%s\" in class \"%s\" has unknown type for parameter \"%s\": \"%s\"", type, pe.getName(), c.getClassname(), par.getName(), par.getType()));
             }
             
-            if(be.getBody().size() > 1 || !(be.getBody().get(0) instanceof NullExpression))
+            if (be.getBody().size() > 1 || !(be.getBody().get(0) instanceof NullExpression))
             {
                 if (functionTypes.containsKey(par.getName()))
                 {
@@ -347,6 +347,13 @@ public class SemanticParser
             {
                 ClassExpression c   = (ClassExpression) e;
                 TypeMap         map = new TypeMapList.TypeMap(c.getClassname());
+                
+                for (VariableExpression s : c.getGenericParameters())
+                {
+                    types.add(new TypeMapList.TypeMap(s.getName()));
+                }
+                
+                
                 for (Expression x : c.getBody())
                 {
                     if (x instanceof FunctionExpression)

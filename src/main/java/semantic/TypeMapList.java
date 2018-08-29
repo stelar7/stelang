@@ -1,5 +1,6 @@
 package semantic;
 
+import ast.exprs.Expression;
 import ast.exprs.control.PrototypeExpression;
 
 import java.util.*;
@@ -55,5 +56,6 @@ public class TypeMapList
         List<PrototypeExpression> functions = new ArrayList<>();
         List<PrototypeExpression> globals   = new ArrayList<>();
         List<PrototypeExpression> pures     = new ArrayList<>();
+        List<Expression>          generics  = new ArrayList<>();
     }
 }

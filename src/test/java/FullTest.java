@@ -11,7 +11,7 @@ public class FullTest
     
     public static void main(String[] args)
     {
-        String data = Utils.readFile("test.st7");
+        String data = Utils.readFile("test3.st7");
         
         Lexer       lexer  = new Lexer();
         List<Token> tokens = lexer.parse(data);
@@ -19,9 +19,12 @@ public class FullTest
         SyntaxTree     syntaxTree = new SyntaxTree(tokens);
         SemanticParser semantics  = new SemanticParser(syntaxTree);
         
+        
+        /*
         for (Expression expression : syntaxTree.getAST())
         {
             System.out.println(expression.codegen());
         }
+        */
     }
 }

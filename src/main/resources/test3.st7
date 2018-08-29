@@ -1,0 +1,7 @@
+class <X, Y> test3 {
+
+    function testChainCompare(X:x, Y:y) {
+        return x + y;
+    }
+
+}

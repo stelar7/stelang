@@ -21,4 +21,10 @@ public class VariableExpression implements Expression
     {
         return name;
     }
+    
+    @Override
+    public String toString()
+    {
+        return name;
+    }
 }

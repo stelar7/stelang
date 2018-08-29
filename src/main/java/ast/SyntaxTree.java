@@ -228,6 +228,13 @@ public class SyntaxTree
     private Expression parseClass()
     {
         assertThenNext(TokenType.CLASS);
+        
+        List<VariableExpression> generic = List.of();
+        if (currentToken.getType() == TokenType.LANGLE)
+        {
+            generic = parseGenericsExpression();
+        }
+        
         String classname  = assertGetThenNext(TokenType.IDENTIFIER);
         String superClass = "object";
         
@@ -238,7 +245,26 @@ public class SyntaxTree
         }
         
         BlockExpression body = parseClassBlockExpression();
-        return new ClassExpression(classname, body, superClass);
+        return new ClassExpression(classname, body, superClass, generic);
+    }
+    
+    private List<VariableExpression> parseGenericsExpression()
+    {
+        List<VariableExpression> list = new ArrayList<>();
+        
+        assertThenNext(TokenType.LANGLE);
+        while (currentToken.getType() != TokenType.RANGLE)
+        {
+            list.add((VariableExpression) parseIdentifier());
+            if (currentToken.getType() != TokenType.COMMA)
+            {
+                break;
+            }
+            nextToken();
+        }
+        nextToken();
+        
+        return list;
     }
     
     private BlockExpression parseClassBlockExpression()
@@ -557,7 +583,7 @@ public class SyntaxTree
         if (currentToken.getType() == TokenType.NUMBER)
         {
             String content = assertGetThenNext(TokenType.NUMBER);
-            Long   num     = Long.parseUnsignedLong(content, 10);
+            long   num     = Long.parseUnsignedLong(content, 10);
             return new LongExpression(num);
         }
         
@@ -1052,6 +1078,27 @@ public class SyntaxTree
         }
     }
     
+    private Expression parseChainOps(Expression left, Token op)
+    {
+        List<Expression> exps = new ArrayList<>();
+        exps.add(left);
+        nextToken();
+        
+        while (true)
+        {
+            exps.add(parseIdentifier());
+            
+            if (currentToken.getType() != op.getType())
+            {
+                break;
+            }
+            
+            assertThenNext(op.getType());
+        }
+        
+        return new ChainCompareExpression(exps, op);
+    }
+    
     private Expression parseParenthesis()
     {
         assertThenNext(TokenType.LPAREN);
@@ -1186,6 +1233,12 @@ public class SyntaxTree
     private Expression parseExpression(boolean ternary, boolean allowVarDec)
     {
         Expression left = parsePrimary(ternary, allowVarDec);
+        
+        if (TokenType.isChainable(currentToken))
+        {
+            return parseChainOps(left, currentToken);
+        }
+        
         return parseBinaryOps(0, left);
     }
     

@@ -1,5 +1,6 @@
 package lexer;
 
+import java.util.Arrays;
 import java.util.stream.Stream;
 
 public enum TokenType
@@ -81,6 +82,16 @@ public enum TokenType
     public static boolean isSetType(Token currentToken)
     {
         return currentToken.getType().token.startsWith("=") && currentToken.getType() != EQUAL;
+    }
+    
+    public static boolean isChainable(Token op)
+    {
+        return Arrays.asList(LANGLE, RANGLE, EQUAL, NOTEQL, GREATEREQL, LESSEQL).contains(op.getType());
+    }
+    
+    public String getTokenChars()
+    {
+        return token;
     }
     
     public TokenType toFirstToken()
