@@ -100,8 +100,8 @@
 .floor(a)
 .round(a)
 
-.max(a..)
-.min(a..)
+.max(a...)
+.min(a...)
 
 .sign(a)
 
