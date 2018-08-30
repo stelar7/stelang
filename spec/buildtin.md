@@ -19,10 +19,12 @@
 .indexOf(text)
 .replace(text, text)
 .reverse()
+.repeat(int)            // repeats the text int times
 .substring(int)
 .substring(int, int)
 .startsWith(RegEx)
 .size()
+.stretch(int)           // repeats the text untill its int characters long (might also shorten it)
 .split(RegEx)
 .trim()
 .toUpperCase()
@@ -268,9 +270,12 @@
 .parse(text)
 
 .write(text)
-.write(Int[])
-
+.write(Int[]) // writes the ints as binary, so 255 is written as the raw byte 11111111
 .read()
+
+.parent()
+.resolve()
+.filename()
 ```
 
 ## HTTP
@@ -401,3 +406,15 @@ FOREVER
 .pattern()
 ```
 
+
+## Crypto
+```
+.to/from
+
+A1Z26
+Base64
+Caesar
+Vigenere
+
+
+```
