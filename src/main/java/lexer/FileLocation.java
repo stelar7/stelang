@@ -2,11 +2,13 @@ package lexer;
 
 public class FileLocation
 {
-    private int line;
-    private int index;
+    private int    line;
+    private int    index;
+    private String filename;
     
-    public FileLocation(int line, int index)
+    public FileLocation(String filename, int line, int index)
     {
+        this.filename = filename;
         this.line = line;
         this.index = index;
     }
@@ -14,12 +16,12 @@ public class FileLocation
     
     public FileLocation newWithOffset(int index)
     {
-        return new FileLocation(line, this.index + index);
+        return new FileLocation(filename, line, this.index + index);
     }
     
     public FileLocation copy()
     {
-        return new FileLocation(line, index);
+        return new FileLocation(filename, line, index);
     }
     
     public void nextLine()
@@ -46,7 +48,7 @@ public class FileLocation
     @Override
     public String toString()
     {
-        return String.format("%s (%s)", line, index);
+        return String.format("%s (column %s; file: %s)", line, index, filename);
     }
     
 }

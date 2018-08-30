@@ -1,14 +1,19 @@
 package lexer;
 
+import div.Utils;
+
 import java.util.*;
 import java.util.regex.*;
 
 public class Lexer
 {
     
-    public List<Token> parse(String text)
+    FileLocation line;
+    
+    public List<Token> parse(String filename, String data)
     {
-        TextIterator it     = new TextIterator(text);
+        this.line = new FileLocation(filename, 1, 1);
+        TextIterator it     = new TextIterator(data);
         List<Token>  tokens = new ArrayList<>();
         
         while (it.hasNext())
@@ -18,8 +23,6 @@ public class Lexer
         
         return tokens;
     }
-    
-    FileLocation line = new FileLocation(1, 1);
     
     private Token getNextToken(TextIterator it)
     {

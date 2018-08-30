@@ -17,6 +17,16 @@ public class ChainCompareExpression implements Expression
         this.op = op;
     }
     
+    public Token getOperator()
+    {
+        return op;
+    }
+    
+    public List<Expression> getExpressions()
+    {
+        return exps;
+    }
+    
     @Override
     public String codegen()
     {

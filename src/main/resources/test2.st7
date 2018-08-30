@@ -1,12 +1,25 @@
 class test2 {
 
 
-    function testChainCompare() {
+    function testChainCompare(): bool {
         return a < b < c;
     }
 
-    function testChainCompareNested() {
-            return (a < b < c) && (a > b > c) && (a != b != c) && (a == b == c) && (a <= b <= c) && (a >= b >= c);
-        }
+    function testChainCompareNested():bool {
+        return (a < b < c) && (a > b > c) && (a != b != c) && (a == b == c) && (a <= b <= c) && (a >= b >= c);
+    }
+
+    function testOperator(): float {
+        test2: a = test2();
+        test2: b = test2();
+
+        return a /% b;
+    }
+
+
+    operator/%(test2:self, test2:other): float {
+        return self - (self.floor(other) * other);
+    }
+
 
 }

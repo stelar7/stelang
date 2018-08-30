@@ -2,6 +2,7 @@ package semantic;
 
 import ast.exprs.Expression;
 import ast.exprs.control.PrototypeExpression;
+import lexer.Token;
 
 import java.util.*;
 
@@ -57,5 +58,17 @@ public class TypeMapList
         List<PrototypeExpression> globals   = new ArrayList<>();
         List<PrototypeExpression> pures     = new ArrayList<>();
         List<Expression>          generics  = new ArrayList<>();
+        
+        public boolean hasOperator(Token op)
+        {
+            for (PrototypeExpression operator : operators)
+            {
+                if (operator.getName().equals(op.getContent()))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 }

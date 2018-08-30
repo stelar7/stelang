@@ -11,10 +11,11 @@ public class FullTest
     
     public static void main(String[] args)
     {
-        String data = Utils.readFile("test3.st7");
+        String filename = "test2.st7";
+        String data = Utils.readFile(filename);
         
         Lexer       lexer  = new Lexer();
-        List<Token> tokens = lexer.parse(data);
+        List<Token> tokens = lexer.parse(filename, data);
         
         SyntaxTree     syntaxTree = new SyntaxTree(tokens);
         SemanticParser semantics  = new SemanticParser(syntaxTree);

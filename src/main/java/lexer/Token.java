@@ -14,6 +14,7 @@ public class Token
         this.line = line;
     }
     
+    
     public String getContent()
     {
         return content;

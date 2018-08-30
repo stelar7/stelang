@@ -278,6 +278,18 @@
 .filename()
 ```
 
+####RandomAccessReader
+```
+.readBoolean()
+.readBytes(int)
+.readInt()
+.readText(int)  // read int bytes of text
+.readText()     // reads the remaining of the reader as a text string
+
+
+
+```
+
 ## HTTP
 ```
 // URL

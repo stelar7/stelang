@@ -40,7 +40,7 @@ public class SemanticParser
         for (String file : files)
         {
             String      data       = Utils.readFile("defaults/" + file);
-            List<Token> tokens     = lexer.parse(data);
+            List<Token> tokens     = lexer.parse(data, data);
             SyntaxTree  syntaxTree = new SyntaxTree(tokens);
             
             expressions.addAll(syntaxTree.getAST());
@@ -99,7 +99,7 @@ public class SemanticParser
             if (returnData.get(e.getClassname()) != null)
             {
                 String     source     = Utils.readFileExternal(e.getLocation());
-                SyntaxTree syntaxTree = new SyntaxTree(lexer.parse(source));
+                SyntaxTree syntaxTree = new SyntaxTree(lexer.parse(e.getLocation(), source));
                 returnData.putAll(buildMethodList(syntaxTree.getAST()));
             }
         }
@@ -139,6 +139,11 @@ public class SemanticParser
                 if (be instanceof BinaryExpression)
                 {
                     validateBinaryExpression((BinaryExpression) be, types, null, c, typeMap);
+                }
+                
+                if (be instanceof ChainCompareExpression)
+                {
+                    validateChainCompareExpression((ChainCompareExpression) be, types, null, c, typeMap);
                 }
                 
                 if (be instanceof BlockExpression)
@@ -189,6 +194,11 @@ public class SemanticParser
                 validateBinaryExpression(((BinaryExpression) bex), knownTypes, pe, c, usedVariables);
             }
             
+            if (bex instanceof ChainCompareExpression)
+            {
+                validateChainCompareExpression((ChainCompareExpression) bex, knownTypes, pe, c, usedVariables);
+            }
+            
             if (bex instanceof BlockExpression)
             {
                 validateBlock((BlockExpression) bex, knownTypes, pe, c, new HashMap<>(usedVariables));
@@ -211,6 +221,25 @@ public class SemanticParser
         }
     }
     
+    private void validateChainCompareExpression(ChainCompareExpression bex, TypeMapList knownTypes, PrototypeExpression pe, ClassExpression c, Map<String, String> usedVariables)
+    {
+        
+        // TODO
+            /*
+        for (Expression e : bex.getExpressions())
+        {
+            if (!knownTypes.get(e.getReturnType()).hasOperator(bex.getOperator()))
+            {
+                System.err.println("unknown operator: " + bex.getOperator());
+            }
+        }
+            */
+        if (!knownTypes.get(c.getClassname()).hasOperator(bex.getOperator()))
+        {
+            System.err.println("unknown operator: " + bex.getOperator());
+        }
+    }
+    
     private void validateReturnExpression(ReturnExpression bex, TypeMapList knownTypes, PrototypeExpression pe, ClassExpression c, Map<String, String> usedVariables)
     {
         validateBlock(new BlockExpression(List.of(bex.getReturnValue())), knownTypes, pe, c, usedVariables);
@@ -223,14 +252,39 @@ public class SemanticParser
             validateVariableDefinition(b.getLeft(), knownTypes, pe, c, usedVariables);
         }
         
+        if (b.getLeft() instanceof BinaryExpression)
+        {
+            validateBinaryExpression((BinaryExpression) b.getLeft(), knownTypes, pe, c, usedVariables);
+        }
+        
+        if (b.getLeft() instanceof ChainCompareExpression)
+        {
+            validateChainCompareExpression((ChainCompareExpression) b.getLeft(), knownTypes, pe, c, usedVariables);
+        }
+        
+        if (b.getLeft() instanceof CallExpression)
+        {
+            validateCallExpression((CallExpression) b.getLeft(), knownTypes, pe, c, usedVariables);
+        }
+        
         if (b.getRight() instanceof BinaryExpression)
         {
             validateBinaryExpression((BinaryExpression) b.getRight(), knownTypes, pe, c, usedVariables);
         }
         
+        if (b.getRight() instanceof ChainCompareExpression)
+        {
+            validateChainCompareExpression((ChainCompareExpression) b.getRight(), knownTypes, pe, c, usedVariables);
+        }
+        
         if (b.getRight() instanceof CallExpression)
         {
             validateCallExpression((CallExpression) b.getRight(), knownTypes, pe, c, usedVariables);
+        }
+        
+        if (!knownTypes.get(c.getClassname()).hasOperator(b.getOp()))
+        {
+            System.err.println("unknown operator: " + b.getOp());
         }
     }
     
@@ -392,7 +446,7 @@ public class SemanticParser
             if (!types.contains(e.getClassname()))
             {
                 String     source     = Utils.readFileExternal(e.getLocation());
-                SyntaxTree syntaxTree = new SyntaxTree(lexer.parse(source));
+                SyntaxTree syntaxTree = new SyntaxTree(lexer.parse(e.getLocation(), source));
                 buildTypeList(syntaxTree.getAST(), types);
             }
         }

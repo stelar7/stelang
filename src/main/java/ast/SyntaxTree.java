@@ -337,16 +337,15 @@ public class SyntaxTree
     
     private Expression parseOperatorDeclaration()
     {
-        String visibility = assertGetThenNext(TokenType.OPERATOR);
-        String identifier = currentToken.getContent();
-        nextToken();
-        if (TokenType.from(identifier) == TokenType.UNKNOWN)
+        String        visibility = assertGetThenNext(TokenType.OPERATOR);
+        StringBuilder identifier = new StringBuilder();
+        do
         {
-            logParseError("Unknown operator attempted overload");
-        }
+            identifier.append(currentToken.getContent());
+            nextToken();
+        } while (currentToken.getType() != TokenType.LPAREN);
         
-        
-        PrototypeExpression prototype = parseOperatorPrototype(visibility, identifier);
+        PrototypeExpression prototype = parseOperatorPrototype(visibility, identifier.toString());
         BlockExpression     body      = parseBlockExpression();
         return new OperatorExpression(visibility, prototype, body);
     }
@@ -1063,10 +1062,16 @@ public class SyntaxTree
                 return left;
             }
             
-            Token op = currentToken;
-            nextToken();
+            StringBuilder opb = new StringBuilder();
+            do
+            {
+                opb.append(currentToken.getContent());
+                nextToken();
+            } while (currentToken.getType() != TokenType.LPAREN && currentToken.getType() != TokenType.IDENTIFIER);
             
-            Expression right = parseExpression();
+            TokenType  useType = TokenType.from(opb.toString());
+            Token      op      = new Token(opb.toString(), useType, currentToken.getTokenLocation());
+            Expression right   = parseExpression();
             
             int next = getPrecedence();
             if (precedence < next)
