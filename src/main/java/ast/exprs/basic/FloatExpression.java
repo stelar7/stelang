@@ -2,11 +2,11 @@ package ast.exprs.basic;
 
 import ast.exprs.Expression;
 
-public class DoubleExpression implements Expression
+public class FloatExpression implements Expression
 {
     private double val;
     
-    public DoubleExpression(double val)
+    public FloatExpression(double val)
     {
         this.val = val;
     }

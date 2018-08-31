@@ -311,7 +311,7 @@ public class SemanticParser
         
         for (Expression argument : arguments)
         {
-            if (argument instanceof DoubleExpression)
+            if (argument instanceof FloatExpression)
             {
                 returnTypes.add("double");
                 continue;

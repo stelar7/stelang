@@ -11,7 +11,7 @@ public class FullTest
     
     public static void main(String[] args)
     {
-        String filename = "test2.st7";
+        String filename = "test.st7";
         String data = Utils.readFile(filename);
         
         Lexer       lexer  = new Lexer();

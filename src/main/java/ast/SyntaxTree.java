@@ -583,12 +583,12 @@ public class SyntaxTree
         {
             String content = assertGetThenNext(TokenType.NUMBER);
             long   num     = Long.parseUnsignedLong(content, 10);
-            return new LongExpression(num);
+            return new NumberExpression(num);
         }
         
         String content = assertGetThenNext(TokenType.FLOAT);
         double num     = Double.parseDouble(content);
-        return new DoubleExpression(num);
+        return new FloatExpression(num);
     }
     
     private Expression parseTernary()
@@ -1062,12 +1062,19 @@ public class SyntaxTree
                 return left;
             }
             
-            StringBuilder opb = new StringBuilder();
+            // parse custom operators
+            List<TokenType> stopTypes = Arrays.asList(TokenType.LPAREN, TokenType.IDENTIFIER, TokenType.NUMBER, TokenType.FLOAT, TokenType.SWITCH, TokenType.FOR, TokenType.WHILE);
+            StringBuilder   opb       = new StringBuilder();
             do
             {
+                if (opb.length() + currentToken.getContent().length() > 2)
+                {
+                    break;
+                }
+                
                 opb.append(currentToken.getContent());
                 nextToken();
-            } while (currentToken.getType() != TokenType.LPAREN && currentToken.getType() != TokenType.IDENTIFIER);
+            } while (!stopTypes.contains(currentToken.getType()) && opb.length() != 2);
             
             TokenType  useType = TokenType.from(opb.toString());
             Token      op      = new Token(opb.toString(), useType, currentToken.getTokenLocation());

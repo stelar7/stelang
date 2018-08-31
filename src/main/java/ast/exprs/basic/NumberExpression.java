@@ -2,11 +2,11 @@ package ast.exprs.basic;
 
 import ast.exprs.Expression;
 
-public class LongExpression implements Expression
+public class NumberExpression implements Expression
 {
     private long val;
     
-    public LongExpression(long val)
+    public NumberExpression(long val)
     {
         this.val = val;
     }

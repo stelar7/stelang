@@ -32,12 +32,13 @@
 .toTitleCase()
 ```
 
-## Int
+## Num
 ```
 .INFINITY
 .isInfinite()
 .oneBits()
 .totalBits()
+.flipBits()
 .leadingZeroBits()
 .trailingZeroBits()
 .toHex()
@@ -116,19 +117,19 @@
 
 ## Random
 ```
-.int()          // random int between Int.min and Int.max 
-.intP()         // random int between 0 and Int.max
-.intN()         // random int between Int.min and -0 
-.intP(max)      // random int between 0 and max
-.intN(min)      // random int between min and -0
-.int(min, max)  // random int between min and max
+.num()          // random number between Num.min and Num.max 
+.numP()         // random number between 0 and Num.max
+.numN()         // random number between Num.min and -0 
+.numP(max)      // random number between 0 and max
+.numN(min)      // random number between min and -0
+.num(min, max)  // random number between min and max
 
-.ints()         // infinite stream of ints 
-.intsP()
-.intsN()
-.intsP(max)
-.intsN(min)
-.ints(min, max)
+.nums()         // infinite stream of numbers 
+.numsP()
+.numsN()
+.numsP(max)
+.numsN(min)
+.nums(min, max)
 
 
 .text()
@@ -253,7 +254,7 @@
 .set(text, value)
 
 .asText()
-.asInt()
+.asNum()
 .asFloat()
 .asBool()
 .asArray()
@@ -270,7 +271,7 @@
 .parse(text)
 
 .write(text)
-.write(Int[]) // writes the ints as binary, so 255 is written as the raw byte 11111111
+.write(num[]) // writes the numbers as binary, so 255 is written as the raw byte 11111111
 .read()
 
 .parent()
@@ -281,9 +282,9 @@
 ####RandomAccessReader
 ```
 .readBoolean()
-.readBytes(int)
-.readInt()
-.readText(int)  // read int bytes of text
+.readBytes(num)
+.readnum()
+.readText(num)  // read num bytes of text
 .readText()     // reads the remaining of the reader as a text string
 
 
@@ -348,7 +349,7 @@
 // DateTime
 .now()
 .of(instant)
-.ofEpoch(int)
+.ofEpoch(num)
 
 .get(field)
 .set(field, value)

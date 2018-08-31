@@ -16,10 +16,8 @@ class test2 {
         return a /% b;
     }
 
-
     operator/%(test2:self, test2:other): float {
         return self - (self.floor(other) * other);
     }
-
 
 }
