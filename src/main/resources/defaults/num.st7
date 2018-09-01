@@ -1,1 +1,159 @@
-class num {}
+class num {
+
+    num:MAX =  0x7FFFFFFFFFFFFFFF;
+    num:MIN = -0x7FFFFFFFFFFFFFFF;
+
+    num:value;
+
+    operator=(num:self, num:other): num {
+        return externCcall("set64", self, other);
+    }
+
+    operator+(num:self, num:other): num {
+        return externCcall("add64", self, other);
+    }
+
+    operator-(num:self, num:other): num {
+        return externCcall("sub64", self, other);
+    }
+
+    operator*(num:self, num:other): num {
+        return externCcall("mul64", self, other);
+    }
+
+    operator/(num:self, num:other): num {
+        return externCcall("div64", self, other);
+    }
+
+    operator%(num:self, num:other): num {
+        return externCcall("mod64", self, other);
+    }
+
+    operator~(num:self, num:other): num {
+        return externCcall("negate64", self, other);
+    }
+
+    operator&(num:self, num:other): num {
+        return externCcall("and64", self, other);
+    }
+
+    operator>>(num:self, num:other): num {
+        return externCcall("shiftRight64", self, other);
+    }
+
+    operator<<(num:self, num:other): num {
+        return externCcall("shiftLeft64", self, other);
+    }
+
+    function oneBits():num {
+        num:clone = val;
+        num:count;
+
+        while(clone) {
+            count =+ clone & 1;
+            clone =>> 1;
+        }
+
+        return count;
+    }
+
+    function bitCount():num {
+        num:clone = val;
+        num:count;
+
+        while(n) {
+            count =+ n % 2;
+            n =>> 1;
+        }
+
+        return count;
+    }
+
+    function leadingZeroBits():num {
+        num:clone = val;
+        num:count;
+
+        for (num:i = 1; i < 64; i++) {
+            if (clone < 0) break;
+            count++;
+            clone =<< 1;
+        }
+
+        return count;
+    }
+
+    function trailingZeroBits():num {
+        num:clone = val;
+        num:count;
+
+        while(!(clone & 1)) {
+            clone =>> 1;
+            count++;
+        }
+
+        return count;
+    }
+
+    function highestOneBit():num {
+        return externCcall("_BitScanForward()", null, null);
+    }
+
+    function sign():num {
+        if(x > 0) return 1;
+        if(x < 0) return -1;
+        return 0;
+    }
+
+    function rotateLeft(num:n):num {
+        num:clone = val;
+        return (clone << n) | (clone >> (32 - n)) & ~((-1 >> n) << n);
+    }
+
+
+    function rotateRight(num:n):num {
+        num:clone = val;
+        return ((clone >> n) % 32) | (clone << (64-n) % 64);
+    }
+
+    function toHex():text {
+        num:clone = val;
+        text:result;
+        num:index;
+
+        while(clone) {
+            result[i] =  text(clone % 16) + "0";
+            clone =/ 16;
+        }
+
+        return result.reverse();
+    }
+
+    function toOctal():text {
+         num:clone = val;
+         num:counter = 0;
+         text:result = 0;
+
+         while(clone) {
+             num:temp = (clone % 8) * (10).pow(counter);
+
+             counter++;
+             result =+ text(temp);
+
+             clone =/ 8;
+         }
+
+         return result;
+    }
+
+    function toBinary():text {
+        num:clone = val;
+        text:result;
+
+        while(clone) {
+            result = text(clone & 1);
+            clone =>> 1;
+        }
+
+        return result.reverse();
+    }
+}

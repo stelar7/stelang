@@ -39,8 +39,9 @@ public class SemanticParser
         List<String> files = Utils.readFolder("defaults");
         for (String file : files)
         {
-            String      data       = Utils.readFile("defaults/" + file);
-            List<Token> tokens     = lexer.parse(data, data);
+            String      filename   = "defaults/" + file;
+            String      data       = Utils.readFile(filename);
+            List<Token> tokens     = lexer.parse(filename, data);
             SyntaxTree  syntaxTree = new SyntaxTree(tokens);
             
             expressions.addAll(syntaxTree.getAST());
@@ -313,13 +314,13 @@ public class SemanticParser
         {
             if (argument instanceof FloatExpression)
             {
-                returnTypes.add("double");
+                returnTypes.add("float");
                 continue;
             }
             
             if (argument instanceof TextExpression)
             {
-                returnTypes.add("double");
+                returnTypes.add("text");
                 continue;
             }
             

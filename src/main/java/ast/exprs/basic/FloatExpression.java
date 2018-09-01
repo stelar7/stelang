@@ -16,4 +16,10 @@ public class FloatExpression implements Expression
     {
         return "double " + val;
     }
+    
+    @Override
+    public String toString()
+    {
+        return String.valueOf(val);
+    }
 }

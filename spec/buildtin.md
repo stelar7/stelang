@@ -34,11 +34,10 @@
 
 ## Num
 ```
-.INFINITY
-.isInfinite()
+.MAX
+.MIN
 .oneBits()
-.totalBits()
-.flipBits()
+.bitCount()
 .leadingZeroBits()
 .trailingZeroBits()
 .toHex()
@@ -46,8 +45,8 @@
 .toBinary()
 .highestOneBit()
 .sign()
-.rotateLeft()
-.rotateRight()
+.rotateLeft(num)
+.rotateRight(num)
 ```
 
 ## Float

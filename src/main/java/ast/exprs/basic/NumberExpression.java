@@ -20,6 +20,6 @@ public class NumberExpression implements Expression
     @Override
     public String toString()
     {
-        return codegen();
+        return String.valueOf(val);
     }
 }

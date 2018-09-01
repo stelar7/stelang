@@ -77,6 +77,7 @@ public class SyntaxTree
         
         put(TokenType.RANGLE, 50);
         put(TokenType.LANGLE, 50);
+        put(TokenType.PERCENT, 50);
         put(TokenType.LESSEQL, 50);
         put(TokenType.GREATEREQL, 50);
         
@@ -84,6 +85,8 @@ public class SyntaxTree
         put(TokenType.NOTEQL, 60);
         
         put(TokenType.AMPERSAND, 70);
+        put(TokenType.RSHIFT, 70);
+        put(TokenType.LSHIFT, 70);
         put(TokenType.CARET, 80);
         put(TokenType.BAR, 90);
         put(TokenType.AMPERSANDAMPERSAND, 100);
@@ -396,6 +399,8 @@ public class SyntaxTree
     {
         switch (currentToken.getType())
         {
+            case NOT:
+                return parseNotExpression();
             case LSQUIGLY:
                 return parseBlockExpression();
             case SWITCH:
@@ -408,6 +413,10 @@ public class SyntaxTree
                 return parseWhile();
             case DO:
                 return parseDo();
+            case BREAK:
+                return parseBreak();
+            case CONTINUE:
+                return parseContinue();
             case IDENTIFIER:
             {
                 Token next = peekToken(1);
@@ -431,6 +440,11 @@ public class SyntaxTree
                 if (next.getType() == TokenType.PLUSPLUS || next.getType() == TokenType.MINUSMINUS)
                 {
                     return parsePrePostOP();
+                }
+                
+                if (next.getType() == TokenType.LBRACKET)
+                {
+                    return parseArrayAccess();
                 }
                 
                 return parseIdentifier();
@@ -482,6 +496,35 @@ public class SyntaxTree
             default:
                 return null;
         }
+    }
+    
+    private Expression parseArrayAccess()
+    {
+        Expression variable = parseIdentifier();
+        assertThenNext(TokenType.LBRACKET);
+        Expression index = parseExpression();
+        assertThenNext(TokenType.RBRACKET);
+        
+        return new ArrayAccessExpression(variable, index);
+    }
+    
+    private Expression parseNotExpression()
+    {
+        assertThenNext(TokenType.NOT);
+        Expression negateMe = parseExpression();
+        return new NotExpression(negateMe);
+    }
+    
+    private Expression parseBreak()
+    {
+        assertThenNext(TokenType.BREAK);
+        return new BreakStatement();
+    }
+    
+    private Expression parseContinue()
+    {
+        assertThenNext(TokenType.CONTINUE);
+        return new ContinueStatement();
     }
     
     private Expression parseCastDeclaration()
@@ -933,15 +976,15 @@ public class SyntaxTree
     
     private List<Expression> parseCommaSeparatedExpressions(TokenType... endTokens)
     {
-        List.of(endTokens);
-        List<Expression> data = new ArrayList<>();
+        List<TokenType>  ending = List.of(endTokens);
+        List<Expression> data   = new ArrayList<>();
         
-        while (!List.of(endTokens).contains(currentToken.getType()))
+        while (!ending.contains(currentToken.getType()))
         {
             Expression parsed = parseExpression();
             data.add(parsed);
             
-            if (List.of(endTokens).contains(currentToken.getType()))
+            if (ending.contains(currentToken.getType()))
             {
                 nextToken();
                 return data;
@@ -1067,7 +1110,7 @@ public class SyntaxTree
             StringBuilder   opb       = new StringBuilder();
             do
             {
-                if (opb.length() + currentToken.getContent().length() > 2)
+                if (opb.length() != 0 && opb.length() + currentToken.getContent().length() > 2)
                 {
                     break;
                 }
@@ -1098,7 +1141,7 @@ public class SyntaxTree
         
         while (true)
         {
-            exps.add(parseIdentifier());
+            exps.add(parseExpression());
             
             if (currentToken.getType() != op.getType())
             {
