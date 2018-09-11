@@ -14,7 +14,7 @@ public class EnumExpression extends ClassExpression
     
     public EnumExpression(String classname, String superClass, List<Expression> members, ClassBlockExpression body)
     {
-        super(classname, body, superClass, List.of());
+        super(classname, body, superClass);
         this.members = members;
     }
     

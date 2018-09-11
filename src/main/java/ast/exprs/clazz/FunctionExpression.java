@@ -2,7 +2,9 @@ package ast.exprs.clazz;
 
 import ast.exprs.Expression;
 import ast.exprs.control.*;
+import ast.exprs.div.ReturnExpression;
 import ast.exprs.util.UtilHander;
+import org.bytedeco.javacpp.PointerPointer;
 
 import static org.bytedeco.javacpp.LLVM.*;
 
@@ -55,18 +57,12 @@ public class FunctionExpression extends ControlExpression
         
         String functionName = prototype.getName();
         
-        LLVMTypeRef   returnType = UtilHander.getLLVMStruct(prototype.getReturnType(), null);
-        LLVMTypeRef[] arguments  = prototype.getParametersAsTypeRefs();
-        LLVMTypeRef   functionPrototype;
-        if (arguments.length != 0)
-        {
-            functionPrototype = LLVMFunctionType(returnType, arguments[0], arguments.length, 0);
-        } else
-        {
-            functionPrototype = LLVMFunctionType(returnType, LLVMVoidType(), 1, 0);
-        }
+        LLVMTypeRef    returnType = UtilHander.getLLVMStruct(prototype.getReturnType(), null);
+        LLVMTypeRef[]  arguments  = prototype.getParametersAsTypeRefs();
+        PointerPointer args       = new PointerPointer(arguments);
         
-        LLVMValueRef function = UtilHander.addLLVMMethod(functionName, LLVMAddFunction(parent, functionName, functionPrototype));
+        LLVMTypeRef  functionPrototype = LLVMFunctionType(returnType, args, arguments.length, 0);
+        LLVMValueRef function          = UtilHander.addLLVMMethod(functionName, LLVMAddFunction(parent, functionName, functionPrototype));
         LLVMSetFunctionCallConv(function, LLVMCCallConv);
         
         Map<String, LLVMValueRef> params = new HashMap<>();
@@ -77,6 +73,10 @@ public class FunctionExpression extends ControlExpression
         }
         
         body.codegen(function, builder, params);
+        if (body.getBody().stream().noneMatch(b -> b instanceof ReturnExpression))
+        {
+            LLVMBuildRet(builder, LLVMConstNull(returnType));
+        }
         
         if (functionName.equals(UtilHander.mainMethodName))
         {

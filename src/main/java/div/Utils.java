@@ -46,6 +46,10 @@ public class Utils
     {
         InputStream  file      = Utils.class.getClassLoader().getResourceAsStream(filename);
         List<String> filenames = new ArrayList<>();
+        if (file == null)
+        {
+            return filenames;
+        }
         
         try (Scanner scanner = new Scanner(file))
         {

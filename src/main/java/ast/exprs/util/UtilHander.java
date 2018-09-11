@@ -30,21 +30,20 @@ public class UtilHander
     
     public static LLVMTypeRef getLLVMStruct(String clazz, ClassExpression exp)
     {
-        return classPointerTable.computeIfAbsent(clazz, (key) -> generateRef(exp));
-    }
-    
-    private static LLVMTypeRef generateRef(ClassExpression clazz)
-    {
-        LLVMTypeRef ref = LLVMStructCreateNamed(LLVMGetGlobalContext(), clazz.getClassname());
+        if (classPointerTable.get(clazz) != null)
+        {
+            return classPointerTable.get(clazz);
+        }
         
-        LLVMTypeRef[] types = clazz.getParameterTypes();
+        LLVMTypeRef   ref   = classPointerTable.computeIfAbsent(clazz, (key) -> LLVMStructCreateNamed(LLVMGetGlobalContext(), exp.getClassname()));
+        LLVMTypeRef[] types = exp.getParameterTypes();
         if (types.length != 0)
         {
             LLVMStructSetBody(ref, types[0], types.length, 0);
         }
-        
         return ref;
     }
+    
     
     public static LLVMValueRef generateVariable(LLVMBuilderRef builder, String identifier, String type)
     {

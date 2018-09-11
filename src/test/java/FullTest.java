@@ -54,7 +54,7 @@ public class FullTest
         // LLVMAddDemoteMemoryToRegisterPass(pass); // Demotes every possible value to memory
         LLVMAddGVNPass(pass);
         LLVMAddCFGSimplificationPass(pass);
-        LLVMRunPassManager(pass, module);
+        //LLVMRunPassManager(pass, module);
         LLVMDumpModule(module);
         
         LLVMGenericValueRef exec_args = LLVMCreateGenericValueOfInt(LLVMInt32Type(), 10, 0);

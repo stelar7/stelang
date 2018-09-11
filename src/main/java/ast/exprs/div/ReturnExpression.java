@@ -3,6 +3,8 @@ package ast.exprs.div;
 import ast.exprs.Expression;
 import org.bytedeco.javacpp.LLVM.*;
 
+import static org.bytedeco.javacpp.LLVM.*;
+
 public class ReturnExpression implements Expression
 {
     Expression value;
@@ -24,6 +26,8 @@ public class ReturnExpression implements Expression
         LLVMValueRef   parent  = (LLVMValueRef) obj[0];
         LLVMBuilderRef builder = (LLVMBuilderRef) obj[1];
         
-        return "return " + value.codegen(obj);
+        LLVMValueRef valueRef = (LLVMValueRef) value.codegen(obj);
+        LLVMBuildRet(builder, valueRef);
+        return null;
     }
 }

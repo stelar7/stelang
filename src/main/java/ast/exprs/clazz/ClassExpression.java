@@ -2,28 +2,27 @@ package ast.exprs.clazz;
 
 
 import ast.exprs.Expression;
-import ast.exprs.basic.VariableExpression;
+import ast.exprs.basic.*;
 import ast.exprs.control.BlockExpression;
 import ast.exprs.util.UtilHander;
 import org.bytedeco.javacpp.LLVM.LLVMModuleRef;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.bytedeco.javacpp.LLVM.*;
 
 public class ClassExpression implements Expression
 {
-    private String                   classname;
-    private String                   superClass;
-    private ClassBlockExpression     body;
-    private List<VariableExpression> generic;
+    private String               classname;
+    private String               superClass;
+    private ClassBlockExpression body;
     
-    public ClassExpression(String classname, ClassBlockExpression body, String superClass, List<VariableExpression> generic)
+    public ClassExpression(String classname, ClassBlockExpression body, String superClass)
     {
         this.superClass = superClass;
         this.classname = classname;
         this.body = body;
-        this.generic = generic;
     }
     
     
@@ -35,11 +34,6 @@ public class ClassExpression implements Expression
     public String getClassname()
     {
         return classname;
-    }
-    
-    public List<VariableExpression> getGenericParameters()
-    {
-        return generic;
     }
     
     public List<Expression> getBody()
@@ -54,7 +48,6 @@ public class ClassExpression implements Expression
         LLVMBuilderRef builder = (LLVMBuilderRef) obj[1];
         
         LLVMTypeRef classRef = UtilHander.getLLVMStruct(classname, this);
-        generic.forEach(variableExpression -> variableExpression.codegen(classRef, builder, module));
         body.codegen(module, builder, classRef);
         
         return null;
@@ -62,10 +55,13 @@ public class ClassExpression implements Expression
     
     public LLVMTypeRef[] getParameterTypes()
     {
-        LLVMTypeRef[] vals = new LLVMTypeRef[generic.size()];
-        for (int i = 0; i < generic.size(); i++)
+        List<Expression> vars = getBody().stream().filter(b -> (b instanceof VariableDefinitionExpression)).collect(Collectors.toList());
+        
+        LLVMTypeRef[] vals = new LLVMTypeRef[vars.size()];
+        for (int i = 0; i < vals.length; i++)
         {
-            vals[i] = UtilHander.getLLVMStruct((UtilHander.lookupVariableType(generic.get(i).getName())), null);
+            VariableDefinitionExpression var = (VariableDefinitionExpression) vars.get(i);
+            vals[i] = UtilHander.getLLVMStruct(var.getType(), null);
         }
         return vals;
     }

@@ -231,13 +231,6 @@ public class SyntaxTree
     private Expression parseClass()
     {
         assertThenNext(TokenType.CLASS);
-        
-        List<VariableExpression> generic = List.of();
-        if (currentToken.getType() == TokenType.LANGLE)
-        {
-            generic = parseGenericsExpression();
-        }
-        
         String classname  = assertGetThenNext(TokenType.IDENTIFIER);
         String superClass = "object";
         
@@ -248,7 +241,7 @@ public class SyntaxTree
         }
     
         ClassBlockExpression body = parseClassBlockExpression();
-        return new ClassExpression(classname, body, superClass, generic);
+        return new ClassExpression(classname, body, superClass);
     }
     
     private List<VariableExpression> parseGenericsExpression()

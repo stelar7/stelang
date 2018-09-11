@@ -47,7 +47,7 @@ public class BinaryExpression implements Expression
         
         LLVMValueRef   method       = UtilHander.getLLVMMethod(left, op.getContent());
         LLVMValueRef[] call_op_args = {leftCode, rightCode};
-        LLVMValueRef   call_op      = LLVMBuildCall(builder, method, new PointerPointer(call_op_args), 2, "a op b");
+        LLVMValueRef   call_op      = LLVMBuildCall(builder, method, new PointerPointer(call_op_args), 2, String.format("a %s b", op.getContent()));
         
         return call_op;
     }

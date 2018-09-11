@@ -1,11 +1,16 @@
 class test_simple {
 
-    function application_start():void {
-        num:x = 1;
-        num:y = 10;
-        num:z = x + y;
+    function application_start():test_simple {
+        test_simple:x = 1;
+        test_simple:y = 10;
+        test_simple:z = x + y;
 
         return z;
     }
+
+    test_simple:xy;
+
+    operator+(test_simple:self,test_simple:other):test_simple  {return xy;}
+    operator=(test_simple:self,test_simple:other):test_simple  {return xy;}
 }
 
