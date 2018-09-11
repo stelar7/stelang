@@ -246,8 +246,8 @@ public class SyntaxTree
             assertThenNext(TokenType.EXTENDS);
             superClass = assertGetThenNext(TokenType.IDENTIFIER);
         }
-        
-        BlockExpression body = parseClassBlockExpression();
+    
+        ClassBlockExpression body = parseClassBlockExpression();
         return new ClassExpression(classname, body, superClass, generic);
     }
     
@@ -270,12 +270,12 @@ public class SyntaxTree
         return list;
     }
     
-    private BlockExpression parseClassBlockExpression()
+    private ClassBlockExpression parseClassBlockExpression()
     {
         assertThenNext(TokenType.LSQUIGLY);
         List<Expression> body = parseClassExpressionList();
         assertThenNext(TokenType.RSQUIGLY);
-        return new BlockExpression(body);
+        return new ClassBlockExpression(body);
     }
     
     private List<Expression> parseClassExpressionList()
@@ -1045,7 +1045,7 @@ public class SyntaxTree
         List<Expression> methods = parseExpressionList();
         
         assertThenNext(TokenType.RSQUIGLY);
-        return new EnumExpression(identifier, superClass, members, new BlockExpression(methods));
+        return new EnumExpression(identifier, superClass, members, new ClassBlockExpression(methods));
     }
     
     private List<Expression> parseEnumMembers()

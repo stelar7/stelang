@@ -38,7 +38,7 @@ public class PrototypeExpression
         LLVMTypeRef[] refs = new LLVMTypeRef[parameters.size()];
         for (int i = 0; i < parameters.size(); i++)
         {
-            refs[i] = UtilHander.getLLVMType(parameters.get(i));
+            refs[i] = UtilHander.getLLVMStruct(parameters.get(i).getType(), null);
         }
         return refs;
     }

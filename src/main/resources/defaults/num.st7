@@ -1,9 +1,14 @@
 class num {
 
+/*
+
     num:MAX =  0x7FFFFFFFFFFFFFFF;
     num:MIN = -0x7FFFFFFFFFFFFFFF;
 
+    */
+
     num:value;
+
 
     operator.(num:self, num:other): num {
         return externCcall("access", self, other);
@@ -46,6 +51,14 @@ class num {
         return externCcall("and64", self, other);
     }
 
+    operator>(num:self, num:other): num {
+        return externCcall("cmpGT64", self, other);
+    }
+
+    operator<(num:self, num:other): num {
+        return externCcall("cmpLS64", self, other);
+    }
+
     operator>>(num:self, num:other): num {
         return externCcall("shiftRight64", self, other);
     }
@@ -55,7 +68,7 @@ class num {
     }
 
     function oneBits():num {
-        num:clone = val;
+        num:clone = value;
         num:count;
 
         while(clone) {
@@ -67,7 +80,7 @@ class num {
     }
 
     function bitCount():num {
-        num:clone = val;
+        num:clone = value;
         num:count;
 
         while(n) {
@@ -79,7 +92,7 @@ class num {
     }
 
     function leadingZeroBits():num {
-        num:clone = val;
+        num:clone = value;
         num:count;
 
         for (num:i = 1; i < 64; i++) {
@@ -92,7 +105,7 @@ class num {
     }
 
     function trailingZeroBits():num {
-        num:clone = val;
+        num:clone = value;
         num:count;
 
         while(!(clone & 1)) {
@@ -108,24 +121,24 @@ class num {
     }
 
     function sign():num {
-        if(x > 0) return 1;
-        if(x < 0) return -1;
+        if(value > 0) return 1;
+        if(value < 0) return -1;
         return 0;
     }
 
     function rotateLeft(num:n):num {
-        num:clone = val;
+        num:clone = value;
         return (clone << n) | (clone >> (32 - n)) & ~((-1 >> n) << n);
     }
 
 
     function rotateRight(num:n):num {
-        num:clone = val;
+        num:clone = value;
         return ((clone >> n) % 32) | (clone << (64-n) % 64);
     }
 
     function toHex():text {
-        num:clone = val;
+        num:clone = value;
         text:result;
         num:index;
 
@@ -138,7 +151,7 @@ class num {
     }
 
     function toOctal():text {
-         num:clone = val;
+         num:clone = value;
          num:counter = 0;
          text:result = 0;
 
@@ -155,7 +168,7 @@ class num {
     }
 
     function toBinary():text {
-        num:clone = val;
+        num:clone = value;
         text:result;
 
         while(clone) {

@@ -2,7 +2,10 @@ package ast.exprs.basic;
 
 import ast.exprs.Expression;
 import ast.exprs.clazz.ClassExpression;
+import ast.exprs.util.UtilHander;
 import org.bytedeco.javacpp.LLVM.*;
+
+import java.util.Map;
 
 public class VariableExpression implements Expression
 {
@@ -24,6 +27,21 @@ public class VariableExpression implements Expression
         LLVMValueRef   parent  = (LLVMValueRef) obj[0];
         LLVMBuilderRef builder = (LLVMBuilderRef) obj[1];
         
-        return String.format("%%%s", name);
+        if (obj[2] instanceof Map)
+        {
+            LLVMValueRef val = ((Map<String, LLVMValueRef>) obj[2]).get(name);
+            if (val != null)
+            {
+                return val;
+            }
+        }
+        
+        LLVMValueRef local = UtilHander.getVariable(name);
+        if (local != null)
+        {
+            return local;
+        }
+        
+        return UtilHander.getGlobal(name);
     }
 }

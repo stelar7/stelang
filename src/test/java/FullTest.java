@@ -25,7 +25,8 @@ public class FullTest
         
         LLVMBuilderRef builder = LLVMCreateBuilder();
         LLVMModuleRef  module  = LLVMModuleCreateWithName("test_module");
-        semantics.getAst().get(0).codegen(module, builder);//.forEach(e -> e.codegen(module, builder));
+        semantics.preInit(module, builder);
+        semantics.codegen(module, builder);
         
         BytePointer error = new BytePointer((Pointer) null); // Used to retrieve messages from functions
         LLVMLinkInMCJIT();

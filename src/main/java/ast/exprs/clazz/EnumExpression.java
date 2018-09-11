@@ -12,7 +12,7 @@ public class EnumExpression extends ClassExpression
 {
     private List<Expression> members;
     
-    public EnumExpression(String classname, String superClass, List<Expression> members, BlockExpression body)
+    public EnumExpression(String classname, String superClass, List<Expression> members, ClassBlockExpression body)
     {
         super(classname, body, superClass, List.of());
         this.members = members;

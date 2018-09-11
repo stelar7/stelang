@@ -3,6 +3,8 @@ package ast.exprs.basic;
 import ast.exprs.Expression;
 import org.bytedeco.javacpp.LLVM.*;
 
+import static org.bytedeco.javacpp.LLVM.*;
+
 public class NullExpression implements Expression
 {
     @Override
@@ -11,7 +13,6 @@ public class NullExpression implements Expression
         LLVMValueRef   parent  = (LLVMValueRef) obj[0];
         LLVMBuilderRef builder = (LLVMBuilderRef) obj[1];
         
-        
-        return "void";
+        return LLVMConstInt(LLVMInt1Type(), 0, 0);
     }
 }

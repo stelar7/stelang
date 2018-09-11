@@ -1,6 +1,7 @@
 package ast.exprs.util;
 
-import ast.exprs.control.PrototypeParameter;
+import ast.exprs.Expression;
+import ast.exprs.clazz.ClassExpression;
 import org.bytedeco.javacpp.LLVM.LLVMTypeRef;
 
 import java.util.*;
@@ -9,9 +10,13 @@ import static org.bytedeco.javacpp.LLVM.*;
 
 public class UtilHander
 {
-    private static Map<String, LLVMTypeRef> classPointerTable = new HashMap<>();
-    private static LLVMValueRef             mainMethod;
-    public static  String                   mainMethodName    = "application_start";
+    private static Map<String, LLVMTypeRef>  classPointerTable    = new HashMap<>();
+    private static Map<String, LLVMValueRef> classMethodTable     = new HashMap<>();
+    private static Map<String, LLVMValueRef> variablePointerTable = new HashMap<>();
+    private static Map<String, LLVMValueRef> globalPointerTable   = new HashMap<>();
+    private static Map<String, String>       variableTypeTable    = new HashMap<>();
+    private static LLVMValueRef              mainMethod;
+    public static  String                    mainMethodName       = "application_start";
     
     public static LLVMValueRef getMainMethod()
     {
@@ -23,23 +28,60 @@ public class UtilHander
         UtilHander.mainMethod = mainMethod;
     }
     
-    public static LLVMTypeRef getLLVMStruct(String clazz)
+    public static LLVMTypeRef getLLVMStruct(String clazz, ClassExpression exp)
     {
-        return classPointerTable.computeIfAbsent(clazz, (key) -> generateRef(clazz));
+        return classPointerTable.computeIfAbsent(clazz, (key) -> generateRef(exp));
     }
     
-    private static LLVMTypeRef generateRef(String clazz)
+    private static LLVMTypeRef generateRef(ClassExpression clazz)
     {
-        LLVMTypeRef ref = LLVMStructCreateNamed(LLVMGetGlobalContext(), clazz);
+        LLVMTypeRef ref = LLVMStructCreateNamed(LLVMGetGlobalContext(), clazz.getClassname());
         
-        // todo set the content of the struct correctly...
-        // LLVMStructSetBody(ref, ???, count, 0);
+        LLVMTypeRef[] types = clazz.getParameterTypes();
+        if (types.length != 0)
+        {
+            LLVMStructSetBody(ref, types[0], types.length, 0);
+        }
         
         return ref;
     }
     
-    public static LLVMTypeRef getLLVMType(PrototypeParameter param)
+    public static LLVMValueRef generateVariable(LLVMBuilderRef builder, String identifier, String type)
     {
-        return getLLVMStruct(param.getType());
+        variableTypeTable.put(identifier, type);
+        LLVMValueRef value = LLVMBuildAlloca(builder, getLLVMStruct(type, null), identifier);
+        variablePointerTable.put(identifier, value);
+        return value;
+    }
+    
+    public static String lookupVariableType(String name)
+    {
+        return variableTypeTable.get(name);
+    }
+    
+    public static LLVMValueRef getLLVMMethod(Expression left, String methodName)
+    {
+        return classMethodTable.get(methodName);
+    }
+    
+    public static LLVMValueRef setLLVMMethod(String functionName, LLVMValueRef function)
+    {
+        return classMethodTable.computeIfAbsent(functionName, (key) -> function);
+    }
+    
+    public static LLVMValueRef getVariable(String name)
+    {
+        return variablePointerTable.get(name);
+    }
+    
+    public static LLVMValueRef generateGlobal(LLVMModuleRef module, String identifier, String type)
+    {
+        LLVMValueRef var = LLVMAddGlobal(module, getLLVMStruct(type, null), identifier);
+        return globalPointerTable.computeIfAbsent(identifier, (key) -> var);
+    }
+    
+    public static LLVMValueRef getGlobal(String name)
+    {
+        return globalPointerTable.get(name);
     }
 }

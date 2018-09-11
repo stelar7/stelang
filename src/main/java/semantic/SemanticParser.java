@@ -9,6 +9,7 @@ import ast.exprs.div.*;
 import ast.exprs.util.UtilHander;
 import div.Utils;
 import lexer.*;
+import org.bytedeco.javacpp.LLVM.*;
 import semantic.TypeMapList.TypeMap;
 
 import java.util.*;
@@ -32,10 +33,18 @@ public class SemanticParser
         validateTypes(ast, types);
     }
     
-    public List<Expression> getAst()
+    public void preInit(LLVMModuleRef module, LLVMBuilderRef builder)
     {
-        return ast;
+        generateDefaultTypeAST().forEach(e -> e.codegen(module, builder));
     }
+    
+    public void codegen(LLVMModuleRef module, LLVMBuilderRef builder)
+    {
+        List<Expression> astLocal = new ArrayList<>(ast);
+        astLocal.removeAll(generateDefaultTypeAST());
+        astLocal.forEach(e -> e.codegen(module, builder));
+    }
+    
     
     private Collection<? extends Expression> generateDefaultTypeAST()
     {
@@ -52,7 +61,6 @@ public class SemanticParser
             
             expressions.addAll(syntaxTree.getAST());
         }
-        
         return expressions;
     }
     
@@ -493,4 +501,5 @@ public class SemanticParser
     {
         System.err.println(s);
     }
+    
 }

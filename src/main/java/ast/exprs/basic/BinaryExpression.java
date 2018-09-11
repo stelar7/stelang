@@ -1,8 +1,12 @@
 package ast.exprs.basic;
 
 import ast.exprs.Expression;
+import ast.exprs.util.UtilHander;
 import lexer.*;
 import org.bytedeco.javacpp.LLVM.*;
+import org.bytedeco.javacpp.PointerPointer;
+
+import static org.bytedeco.javacpp.LLVM.*;
 
 public class BinaryExpression implements Expression
 {
@@ -13,8 +17,8 @@ public class BinaryExpression implements Expression
     public BinaryExpression(Token op, Expression left, Expression right)
     {
         this.op = op;
-        this.left = left;
-        this.right = right;
+        this.left = left == null ? new NullExpression() : left;
+        this.right = right == null ? new NullExpression() : right;
     }
     
     public Token getOp()
@@ -38,33 +42,14 @@ public class BinaryExpression implements Expression
         LLVMValueRef   parent  = (LLVMValueRef) obj[0];
         LLVMBuilderRef builder = (LLVMBuilderRef) obj[1];
         
-        String leftCode  = (String) left.codegen(obj);
-        String rightCode = (String) right.codegen(obj);
+        LLVMValueRef leftCode  = (LLVMValueRef) left.codegen(obj);
+        LLVMValueRef rightCode = (LLVMValueRef) right.codegen(obj);
         
-        switch (op.getType())
-        {
-            case PLUS:
-            {
-                return "add i32 " + leftCode + ", " + rightCode;
-            }
-            
-            case MINUS:
-            {
-                return "sub i32 " + leftCode + ", " + rightCode;
-            }
-            
-            case ASTERISK:
-            {
-                return "mul i32 " + leftCode + ", " + rightCode;
-            }
-            
-            case SLASH:
-            {
-                return "udiv i32 " + leftCode + ", " + rightCode;
-            }
-        }
+        LLVMValueRef   method       = UtilHander.getLLVMMethod(left, op.getContent());
+        LLVMValueRef[] call_op_args = {leftCode, rightCode};
+        LLVMValueRef   call_op      = LLVMBuildCall(builder, method, new PointerPointer(call_op_args), 2, "a op b");
         
-        return String.format("%s %s %s", leftCode, op.getType().getTokenChars(), rightCode);
+        return call_op;
     }
     
     @Override

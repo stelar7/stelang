@@ -3,6 +3,8 @@ package ast.exprs.basic;
 import ast.exprs.Expression;
 import org.bytedeco.javacpp.LLVM.*;
 
+import static org.bytedeco.javacpp.LLVM.*;
+
 public class NumberExpression implements Expression
 {
     private long val;
@@ -17,8 +19,8 @@ public class NumberExpression implements Expression
     {
         LLVMValueRef   parent  = (LLVMValueRef) obj[0];
         LLVMBuilderRef builder = (LLVMBuilderRef) obj[1];
-        
-        return "i64 " + val;
+    
+        return LLVMConstInt(LLVMInt64Type(), val, 0);
     }
     
     @Override

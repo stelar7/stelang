@@ -1,7 +1,12 @@
 package ast.exprs.control;
 
 import ast.exprs.Expression;
+import ast.exprs.basic.ChainCompareExpression;
+import ast.exprs.util.UtilHander;
 import org.bytedeco.javacpp.LLVM.*;
+import org.bytedeco.javacpp.PointerPointer;
+
+import static org.bytedeco.javacpp.LLVM.*;
 
 public class IfContitionExpression implements Expression
 {
@@ -17,7 +22,6 @@ public class IfContitionExpression implements Expression
         LLVMValueRef   parent  = (LLVMValueRef) obj[0];
         LLVMBuilderRef builder = (LLVMBuilderRef) obj[1];
         
-        
-        return null;
+        return cond.codegen(obj);
     }
 }

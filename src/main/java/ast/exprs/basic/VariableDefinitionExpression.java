@@ -2,6 +2,7 @@ package ast.exprs.basic;
 
 
 import ast.exprs.Expression;
+import ast.exprs.util.UtilHander;
 import org.bytedeco.javacpp.LLVM.*;
 
 public class VariableDefinitionExpression implements Expression
@@ -28,10 +29,15 @@ public class VariableDefinitionExpression implements Expression
     @Override
     public Object codegen(Object... obj)
     {
-        LLVMValueRef   parent  = (LLVMValueRef) obj[0];
-        LLVMBuilderRef builder = (LLVMBuilderRef) obj[1];
+        if (obj[0] instanceof LLVMValueRef)
+        {
+            LLVMValueRef   parent  = (LLVMValueRef) obj[0];
+            LLVMBuilderRef builder = (LLVMBuilderRef) obj[1];
+            return UtilHander.generateVariable(builder, identifier, type);
+        }
         
-        return String.format("%%%s", identifier);
+        LLVMModuleRef module = (LLVMModuleRef) obj[0];
+        return UtilHander.generateGlobal(module, identifier, type);
     }
     
     @Override
