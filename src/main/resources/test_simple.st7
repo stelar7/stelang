@@ -1,10 +1,11 @@
 class test_simple {
 
-    function application_start(num:b):void {
+    function application_start():void {
         num:x = 1;
         num:y = 10;
+        num:z = x + y;
 
-        return x + y;
+        return z;
     }
 }
 

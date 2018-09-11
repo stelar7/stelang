@@ -338,7 +338,7 @@ public class SemanticParser
         {
             if (!knownTypes.contains(type))
             {
-                logSemanticError("Unknown type in method call: " + type);
+                logSemanticError(String.format("Unknown type(%s) in method %s (in class %s)", type, pe.getName(), c.getClassname()));
             }
         }
         
