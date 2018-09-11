@@ -58,7 +58,6 @@ public class FunctionExpression extends ControlExpression
         LLVMTypeRef   returnType = UtilHander.getLLVMStruct(prototype.getReturnType(), null);
         LLVMTypeRef[] arguments  = prototype.getParametersAsTypeRefs();
         LLVMTypeRef   functionPrototype;
-        
         if (arguments.length != 0)
         {
             functionPrototype = LLVMFunctionType(returnType, arguments[0], arguments.length, 0);
@@ -67,17 +66,14 @@ public class FunctionExpression extends ControlExpression
             functionPrototype = LLVMFunctionType(returnType, LLVMVoidType(), 1, 0);
         }
         
-        LLVMValueRef function = LLVMAddFunction(parent, functionName, functionPrototype);
+        LLVMValueRef function = UtilHander.addLLVMMethod(functionName, LLVMAddFunction(parent, functionName, functionPrototype));
         LLVMSetFunctionCallConv(function, LLVMCCallConv);
-        UtilHander.setLLVMMethod(functionName, function);
         
-        Map<String, LLVMValueRef> params     = new HashMap<>();
-        List<PrototypeParameter>  parameters = prototype.getParameters();
-        for (int i = 0; i < parameters.size(); i++)
+        Map<String, LLVMValueRef> params = new HashMap<>();
+        for (int i = 0; i < arguments.length; i++)
         {
-            PrototypeParameter parameter = parameters.get(i);
-            LLVMValueRef       value     = LLVMGetParam(function, i);
-            params.put(parameter.getName(), value);
+            LLVMValueRef ref = LLVMGetParam(function, i);
+            params.put(prototype.getParameters().get(i).getName(), ref);
         }
         
         body.codegen(function, builder, params);

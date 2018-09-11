@@ -64,7 +64,7 @@ public class UtilHander
         return classMethodTable.get(methodName);
     }
     
-    public static LLVMValueRef setLLVMMethod(String functionName, LLVMValueRef function)
+    public static LLVMValueRef addLLVMMethod(String functionName, LLVMValueRef function)
     {
         return classMethodTable.computeIfAbsent(functionName, (key) -> function);
     }

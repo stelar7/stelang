@@ -27,7 +27,7 @@ public class VariableExpression implements Expression
         LLVMValueRef   parent  = (LLVMValueRef) obj[0];
         LLVMBuilderRef builder = (LLVMBuilderRef) obj[1];
         
-        if (obj[2] instanceof Map)
+        if (obj.length >= 3 && obj[2] instanceof Map)
         {
             LLVMValueRef val = ((Map<String, LLVMValueRef>) obj[2]).get(name);
             if (val != null)
