@@ -1,9 +1,13 @@
 package ast.exprs.control;
 
 import ast.exprs.Expression;
+import ast.exprs.clazz.ClassExpression;
+import org.bytedeco.javacpp.LLVM.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static org.bytedeco.javacpp.LLVM.*;
 
 public class BlockExpression extends ControlExpression
 {
@@ -19,15 +23,13 @@ public class BlockExpression extends ControlExpression
         return body;
     }
     
-    @Override
-    public String codegen()
+    public Object codegen(Object... obj)
     {
-        return body.stream().map(Expression::codegen).collect(Collectors.joining(";\n\t"));
-    }
-    
-    @Override
-    public String toString()
-    {
-        return codegen();
+        /*
+        LLVMBasicBlockRef entry = LLVMAppendBasicBlock(LLVMConstNull(LLVMVoidType()), "entry");
+        LLVMPositionBuilderAtEnd(builder, entry);
+        */
+        body.forEach(b -> b.codegen(obj));
+        return null;
     }
 }

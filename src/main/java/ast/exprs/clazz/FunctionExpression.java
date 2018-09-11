@@ -2,10 +2,11 @@ package ast.exprs.clazz;
 
 import ast.exprs.Expression;
 import ast.exprs.control.*;
+import ast.exprs.util.UtilHander;
 
-import java.security.cert.CollectionCertStoreParameters;
+import static org.bytedeco.javacpp.LLVM.*;
+
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class FunctionExpression extends ControlExpression
 {
@@ -46,12 +47,28 @@ public class FunctionExpression extends ControlExpression
     }
     
     @Override
-    public String codegen()
+    public Object codegen(Object... obj)
     {
-        return String.format("function %s(%s) {\n\t%s\n}",
-                             prototype.getName(),
-                             prototype.getParameters().stream().map(c -> c.getType() + ":" + c.getName()).collect(Collectors.joining(",")),
-                             body.codegen());
+        LLVMModuleRef  parent  = (LLVMModuleRef) obj[0];
+        LLVMBuilderRef builder = (LLVMBuilderRef) obj[1];
+        LLVMTypeRef    clazz   = (LLVMTypeRef) obj[2];
+        
+        String functionName = prototype.getName();
+        
+        LLVMTypeRef   returnType        = UtilHander.getLLVMStruct(prototype.getReturnType());
+        LLVMTypeRef[] arguments         = prototype.getParametersAsTypeRefs();
+        LLVMTypeRef   functionPrototype = LLVMFunctionType(returnType, arguments[0], arguments.length, 0);
+        
+        LLVMValueRef function = LLVMAddFunction(parent, functionName, functionPrototype);
+        LLVMSetFunctionCallConv(function, LLVMCCallConv);
+        
+        body.codegen(function, builder);
+        
+        if (functionName.equals(UtilHander.mainMethodName))
+        {
+            UtilHander.setMainMethod(function);
+        }
+        
+        return null;
     }
-    
 }

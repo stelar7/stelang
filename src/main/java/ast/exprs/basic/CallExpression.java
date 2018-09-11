@@ -1,6 +1,7 @@
 package ast.exprs.basic;
 
 import ast.exprs.Expression;
+import org.bytedeco.javacpp.LLVM.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -26,9 +27,14 @@ public class CallExpression implements Expression
         return arguments;
     }
     
+    
     @Override
-    public String codegen()
+    public Object codegen(Object... obj)
     {
-        return String.format("call %s %s", methodName, arguments.stream().map(Expression::codegen).collect(Collectors.joining(",")));
+        LLVMValueRef   parent  = (LLVMValueRef) obj[0];
+        LLVMBuilderRef builder = (LLVMBuilderRef) obj[1];
+        
+        
+        return String.format("call %s %s", methodName, arguments.stream().map(Expression::toString).collect(Collectors.joining(",")));
     }
 }

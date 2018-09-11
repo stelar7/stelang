@@ -6,6 +6,7 @@ import ast.exprs.basic.*;
 import ast.exprs.clazz.*;
 import ast.exprs.control.*;
 import ast.exprs.div.*;
+import ast.exprs.util.UtilHander;
 import div.Utils;
 import lexer.*;
 import semantic.TypeMapList.TypeMap;
@@ -31,6 +32,11 @@ public class SemanticParser
         validateTypes(ast, types);
     }
     
+    public List<Expression> getAst()
+    {
+        return ast;
+    }
+    
     private Collection<? extends Expression> generateDefaultTypeAST()
     {
         List<Expression> expressions = new ArrayList<>();
@@ -54,6 +60,8 @@ public class SemanticParser
     private Map<String, Map<String, List<ParameterMap>>> buildMethodList(List<Expression> ast)
     {
         Map<String, Map<String, List<ParameterMap>>> returnData = new HashMap<>();
+        boolean                                      hasMain    = false;
+        
         
         List<ImportExpression> imports = new ArrayList<>();
         for (Expression e : ast)
@@ -90,6 +98,11 @@ public class SemanticParser
                     
                     methods.add(self);
                     classMap.put(func.getVisibility(), methods);
+                    
+                    if (proto.getName().equals(UtilHander.mainMethodName))
+                    {
+                        hasMain = true;
+                    }
                 }
                 returnData.put(c.getClassname(), classMap);
             }
@@ -103,6 +116,12 @@ public class SemanticParser
                 SyntaxTree syntaxTree = new SyntaxTree(lexer.parse(e.getLocation(), source));
                 returnData.putAll(buildMethodList(syntaxTree.getAST()));
             }
+        }
+        
+        if (!hasMain)
+        {
+            System.err.println("No main method found");
+            System.exit(0);
         }
         
         return returnData;
@@ -283,9 +302,24 @@ public class SemanticParser
             validateCallExpression((CallExpression) b.getRight(), knownTypes, pe, c, usedVariables);
         }
         
-        if (!knownTypes.get(c.getClassname()).hasOperator(b.getOp()))
+        String className = "";
+        
+        if (b.getLeft() instanceof VariableExpression)
         {
-            System.err.println("unknown operator: " + b.getOp());
+            className = usedVariables.get(((VariableExpression) b.getLeft()).getName());
+        }
+        
+        if (b.getLeft() instanceof VariableDefinitionExpression)
+        {
+            className = ((VariableDefinitionExpression) b.getLeft()).getType();
+        }
+        
+        if (!className.isEmpty())
+        {
+            if (!knownTypes.get(className).hasOperator(b.getOp()))
+            {
+                System.err.format("unknown operator: %s in class %s%n", b.getOp(), className);
+            }
         }
     }
     

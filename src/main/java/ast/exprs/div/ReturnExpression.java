@@ -1,6 +1,7 @@
 package ast.exprs.div;
 
 import ast.exprs.Expression;
+import org.bytedeco.javacpp.LLVM.*;
 
 public class ReturnExpression implements Expression
 {
@@ -16,9 +17,13 @@ public class ReturnExpression implements Expression
         return value;
     }
     
+    
     @Override
-    public String codegen()
+    public Object codegen(Object... obj)
     {
-        return "return " + value.codegen();
+        LLVMValueRef   parent  = (LLVMValueRef) obj[0];
+        LLVMBuilderRef builder = (LLVMBuilderRef) obj[1];
+        
+        return "return " + value.codegen(obj);
     }
 }

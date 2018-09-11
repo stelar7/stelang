@@ -1,31 +1,23 @@
 package ast.exprs.div;
 
 import ast.exprs.Expression;
+import ast.exprs.control.*;
+
+import java.util.List;
 
 public class TernaryExpression implements Expression
 {
-    private Expression condition;
-    private Expression trueExpression;
-    private Expression falseExpression;
+    private IfExpression expr;
     
     public TernaryExpression(Expression condition, Expression trueExpression, Expression falseExpression)
     {
-        this.condition = condition;
-        this.trueExpression = trueExpression;
-        this.falseExpression = falseExpression;
+        this.expr = new IfExpression((IfContitionExpression) condition, List.of(trueExpression), List.of(falseExpression));
     }
     
     
     @Override
-    public String codegen()
+    public Object codegen(Object... obj)
     {
-        String value = condition.codegen();
-        
-        String ifCond    = "fcmp one double " + value;
-        String thenVal   = trueExpression.codegen();
-        String elseVal   = falseExpression.codegen();
-        String returnVal = String.format("br i1 %s, label %s, label %s", ifCond, thenVal, elseVal);
-        
-        return returnVal;
+        return expr.codegen(obj);
     }
 }

@@ -1,6 +1,8 @@
 package ast.exprs.control;
 
 import ast.exprs.Expression;
+import ast.exprs.clazz.ClassExpression;
+import org.bytedeco.javacpp.LLVM.*;
 
 import java.util.List;
 
@@ -18,8 +20,11 @@ public class ForEachExpression extends ControlExpression
     }
     
     @Override
-    public String codegen()
+    public Object codegen(Object... obj)
     {
+        LLVMValueRef   parent  = (LLVMValueRef) obj[0];
+        LLVMBuilderRef builder = (LLVMBuilderRef) obj[1];
+        
         return null;
     }
 }

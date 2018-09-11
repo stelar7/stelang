@@ -2,7 +2,7 @@ package ast.exprs;
 
 public interface Expression
 {
-    String codegen();
+    Object codegen(Object... parent);
     
     default int getSortOrder()
     {

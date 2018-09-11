@@ -1,5 +1,8 @@
 package ast.exprs.control;
 
+import ast.exprs.util.UtilHander;
+import org.bytedeco.javacpp.LLVM.LLVMTypeRef;
+
 import java.util.List;
 
 public class PrototypeExpression
@@ -28,5 +31,15 @@ public class PrototypeExpression
     public String getReturnType()
     {
         return returnType;
+    }
+    
+    public LLVMTypeRef[] getParametersAsTypeRefs()
+    {
+        LLVMTypeRef[] refs = new LLVMTypeRef[parameters.size()];
+        for (int i = 0; i < parameters.size(); i++)
+        {
+            refs[i] = UtilHander.getLLVMType(parameters.get(i));
+        }
+        return refs;
     }
 }

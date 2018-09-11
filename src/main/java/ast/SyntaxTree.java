@@ -511,7 +511,7 @@ public class SyntaxTree
     private Expression parseNotExpression()
     {
         assertThenNext(TokenType.NOT);
-        Expression negateMe = parseExpression();
+        IfContitionExpression negateMe = parseIfConditionExpression();
         return new NotExpression(negateMe);
     }
     
@@ -664,7 +664,7 @@ public class SyntaxTree
         assertThenNext(TokenType.IF);
         assertThenNext(TokenType.LPAREN);
         
-        Expression condition = parseExpression();
+        IfContitionExpression condition = parseIfConditionExpression();
         
         assertThenNext(TokenType.RPAREN);
         
@@ -693,7 +693,12 @@ public class SyntaxTree
         }
     }
     
-    private Expression parseElse(Expression condition, List<Expression> trueStatements)
+    private IfContitionExpression parseIfConditionExpression()
+    {
+        return new IfContitionExpression(parseExpression());
+    }
+    
+    private Expression parseElse(IfContitionExpression condition, List<Expression> trueStatements)
     {
         if (currentToken.getType() != TokenType.ELSE)
         {

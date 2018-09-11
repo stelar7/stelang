@@ -1,31 +1,70 @@
 import ast.*;
 import ast.exprs.Expression;
+import ast.exprs.util.UtilHander;
 import div.Utils;
 import lexer.*;
+import org.bytedeco.javacpp.*;
 import semantic.SemanticParser;
 
 import java.util.*;
+
+import static org.bytedeco.javacpp.LLVM.*;
 
 public class FullTest
 {
     
     public static void main(String[] args)
     {
-        String filename = "test.st7";
-        String data = Utils.readFile(filename);
+        String filename = "test_simple.st7";
+        String data     = Utils.readFile(filename);
         
-        Lexer       lexer  = new Lexer();
-        List<Token> tokens = lexer.parse(filename, data);
-        
+        Lexer          lexer      = new Lexer();
+        List<Token>    tokens     = lexer.parse(filename, data);
         SyntaxTree     syntaxTree = new SyntaxTree(tokens);
         SemanticParser semantics  = new SemanticParser(syntaxTree);
         
+        LLVMBuilderRef builder = LLVMCreateBuilder();
+        LLVMModuleRef  module  = LLVMModuleCreateWithName("test_module");
+        semantics.getAst().get(0).codegen(module, builder);//.forEach(e -> e.codegen(module, builder));
         
-        /*
-        for (Expression expression : syntaxTree.getAST())
+        BytePointer error = new BytePointer((Pointer) null); // Used to retrieve messages from functions
+        LLVMLinkInMCJIT();
+        LLVMInitializeNativeAsmPrinter();
+        LLVMInitializeNativeAsmParser();
+        LLVMInitializeNativeDisassembler();
+        LLVMInitializeNativeTarget();
+        
+        LLVMVerifyModule(module, LLVMAbortProcessAction, error);
+        LLVMDisposeMessage(error); // Handler == LLVMAbortProcessAction -> No need to check errors
+        
+        
+        LLVMExecutionEngineRef engine = new LLVMExecutionEngineRef();
+        if (LLVMCreateJITCompilerForModule(engine, module, 2, error) != 0)
         {
-            System.out.println(expression.codegen());
+            System.err.println(error.getString());
+            LLVMDisposeMessage(error);
+            System.exit(-1);
         }
-        */
+        
+        LLVMPassManagerRef pass = LLVMCreatePassManager();
+        LLVMAddConstantPropagationPass(pass);
+        LLVMAddInstructionCombiningPass(pass);
+        LLVMAddPromoteMemoryToRegisterPass(pass);
+        // LLVMAddDemoteMemoryToRegisterPass(pass); // Demotes every possible value to memory
+        LLVMAddGVNPass(pass);
+        LLVMAddCFGSimplificationPass(pass);
+        LLVMRunPassManager(pass, module);
+        LLVMDumpModule(module);
+        
+        LLVMGenericValueRef exec_args = LLVMCreateGenericValueOfInt(LLVMInt32Type(), 10, 0);
+        LLVMGenericValueRef exec_res  = LLVMRunFunction(engine, UtilHander.getMainMethod(), 1, exec_args);
+        System.err.println();
+        System.err.format("; Running %s...%n", UtilHander.mainMethodName);
+        System.err.println("; Result: " + LLVMGenericValueToInt(exec_res, 0));
+        
+        LLVMDisposePassManager(pass);
+        LLVMDisposeBuilder(builder);
+        LLVMDisposeExecutionEngine(engine);
+        
     }
 }

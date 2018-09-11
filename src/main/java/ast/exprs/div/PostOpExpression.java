@@ -2,6 +2,7 @@ package ast.exprs.div;
 
 import ast.exprs.Expression;
 import lexer.*;
+import org.bytedeco.javacpp.LLVM.*;
 
 public class PostOpExpression implements Expression
 {
@@ -15,9 +16,14 @@ public class PostOpExpression implements Expression
     }
     
     @Override
-    public String codegen()
+    public Object codegen(Object... obj)
     {
-        String var = variable.codegen();
+        LLVMValueRef   parent  = (LLVMValueRef) obj[0];
+        LLVMBuilderRef builder = (LLVMBuilderRef) obj[1];
+        
+        
+        
+        String var = (String) variable.codegen();
         
         return String.format("%s = %s %s 1", var, var, operator);
     }

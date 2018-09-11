@@ -5,6 +5,10 @@ class num {
 
     num:value;
 
+    operator.(num:self, num:other): num {
+        return externCcall("access", self, other);
+    }
+
     operator=(num:self, num:other): num {
         return externCcall("set64", self, other);
     }
@@ -15,6 +19,11 @@ class num {
 
     operator-(num:self, num:other): num {
         return externCcall("sub64", self, other);
+    }
+
+    operator=-(num:self, num:other): num {
+        self = self - other;
+        return self;
     }
 
     operator*(num:self, num:other): num {

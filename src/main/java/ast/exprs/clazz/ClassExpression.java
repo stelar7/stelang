@@ -4,8 +4,12 @@ package ast.exprs.clazz;
 import ast.exprs.Expression;
 import ast.exprs.basic.VariableExpression;
 import ast.exprs.control.BlockExpression;
+import ast.exprs.util.UtilHander;
+import org.bytedeco.javacpp.LLVM.LLVMModuleRef;
 
 import java.util.List;
+
+import static org.bytedeco.javacpp.LLVM.*;
 
 public class ClassExpression implements Expression
 {
@@ -21,6 +25,7 @@ public class ClassExpression implements Expression
         this.body = body;
         this.generic = generic;
     }
+    
     
     public String getSuperClass()
     {
@@ -43,8 +48,15 @@ public class ClassExpression implements Expression
     }
     
     @Override
-    public String codegen()
+    public Object codegen(Object... obj)
     {
-        return String.format("class %s extends %s {\n%s\n}", classname, superClass, body.codegen());
+        LLVMModuleRef  module  = (LLVMModuleRef) obj[0];
+        LLVMBuilderRef builder = (LLVMBuilderRef) obj[1];
+        
+        LLVMTypeRef classRef = UtilHander.getLLVMStruct(classname);
+        generic.forEach(variableExpression -> variableExpression.codegen(classRef, builder, module));
+        body.codegen(module, builder, classRef);
+        
+        return null;
     }
 }

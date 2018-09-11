@@ -1,1 +1,13 @@
-class text {}
+class text {
+
+
+    operator.(num:self, num:other): num {
+        return externCcall("access", self, other);
+    }
+
+    operator=(num:self, num:other): num {
+        return externCcall("set64", self, other);
+    }
+
+
+}

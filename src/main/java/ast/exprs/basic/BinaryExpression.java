@@ -2,6 +2,7 @@ package ast.exprs.basic;
 
 import ast.exprs.Expression;
 import lexer.*;
+import org.bytedeco.javacpp.LLVM.*;
 
 public class BinaryExpression implements Expression
 {
@@ -32,10 +33,13 @@ public class BinaryExpression implements Expression
     }
     
     @Override
-    public String codegen()
+    public Object codegen(Object... obj)
     {
-        String leftCode  = left.codegen();
-        String rightCode = right.codegen();
+        LLVMValueRef   parent  = (LLVMValueRef) obj[0];
+        LLVMBuilderRef builder = (LLVMBuilderRef) obj[1];
+        
+        String leftCode  = (String) left.codegen(obj);
+        String rightCode = (String) right.codegen(obj);
         
         switch (op.getType())
         {

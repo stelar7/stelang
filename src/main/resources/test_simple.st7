@@ -1,0 +1,10 @@
+class test_simple {
+
+    function application_start(num:b):void {
+        num:x = 1;
+        num:y = 10;
+
+        return x + y;
+    }
+}
+
