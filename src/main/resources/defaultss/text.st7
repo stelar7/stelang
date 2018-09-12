@@ -1,12 +1,16 @@
 class text {
 
 
-    operator.(num:self, num:other): num {
-        return externCcall("access", self, other);
+    operator.(text:self, text:other): num {
+        return externCcall("access", "text", self, other);
     }
 
-    operator=(num:self, num:other): num {
-        return externCcall("set64", self, other);
+    operator=(text:self, text:other): num {
+        return externCcall("set64", "text", self, other);
+    }
+
+    operator+(text:self, text:other): num {
+        return externCcall("add64", "text", self, other);
     }
 
 

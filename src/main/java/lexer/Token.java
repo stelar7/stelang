@@ -35,7 +35,7 @@ public class Token
     {
         return "Token{" +
                "content='" + content + '\'' +
-               ", type=\"" + type.getTokenChars() +
+               ", type=\"" + type +
                "\", line=" + line +
                '}';
     }

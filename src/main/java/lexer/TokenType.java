@@ -94,6 +94,12 @@ public enum TokenType
         return token;
     }
     
+    @Override
+    public String toString()
+    {
+        return this.name();
+    }
+    
     public TokenType toFirstToken()
     {
         if (this == PLUSPLUS)

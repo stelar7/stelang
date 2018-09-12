@@ -7,6 +7,8 @@ import org.bytedeco.javacpp.LLVM.*;
 
 import java.util.Map;
 
+import static org.bytedeco.javacpp.LLVM.*;
+
 public class VariableExpression implements Expression
 {
     private String name;
@@ -22,26 +24,38 @@ public class VariableExpression implements Expression
     }
     
     @Override
+    public String toString()
+    {
+        return name;
+    }
+    
+    @Override
     public Object codegen(Object... obj)
     {
-        LLVMValueRef   parent  = (LLVMValueRef) obj[0];
-        LLVMBuilderRef builder = (LLVMBuilderRef) obj[1];
+        LLVMValueRef   parent  = (LLVMValueRef) obj[1];
+        LLVMBuilderRef builder = (LLVMBuilderRef) obj[2];
+        LLVMValueRef   ref     = null;
         
-        if (obj.length >= 3 && obj[2] instanceof Map)
+        if (obj.length >= 4 && obj[3] instanceof Map)
         {
-            LLVMValueRef val = ((Map<String, LLVMValueRef>) obj[2]).get(name);
-            if (val != null)
+            ref = ((Map<String, LLVMValueRef>) obj[3]).get(name);
+            if(ref != null)
             {
-                return val;
+                return ref;
             }
         }
         
-        LLVMValueRef local = UtilHander.getVariable(name);
-        if (local != null)
+        ref = UtilHander.getVariable(name);
+        if (ref != null)
         {
-            return local;
+            return ref;
         }
         
-        return UtilHander.getGlobal(name);
+        ref = UtilHander.getGlobal(name);
+        if (ref != null)
+        {
+            return LLVMBuildLoad(builder, ref, name);
+        }
+        return null;
     }
 }

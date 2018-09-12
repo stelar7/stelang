@@ -36,6 +36,7 @@ public class SemanticParser
     public void preInit(LLVMModuleRef module, LLVMBuilderRef builder)
     {
         generateDefaultTypeAST().forEach(e -> e.codegen(module, builder));
+        
     }
     
     public void codegen(LLVMModuleRef module, LLVMBuilderRef builder)

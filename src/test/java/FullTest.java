@@ -35,7 +35,7 @@ public class FullTest
         LLVMInitializeNativeDisassembler();
         LLVMInitializeNativeTarget();
         
-        LLVMVerifyModule(module, LLVMAbortProcessAction, error);
+        //LLVMVerifyModule(module, LLVMAbortProcessAction, error);
         LLVMDisposeMessage(error); // Handler == LLVMAbortProcessAction -> No need to check errors
         
         

@@ -23,8 +23,8 @@ public class ReturnExpression implements Expression
     @Override
     public Object codegen(Object... obj)
     {
-        LLVMValueRef   parent  = (LLVMValueRef) obj[0];
-        LLVMBuilderRef builder = (LLVMBuilderRef) obj[1];
+        LLVMValueRef   parent  = (LLVMValueRef) obj[1];
+        LLVMBuilderRef builder = (LLVMBuilderRef) obj[2];
         
         LLVMValueRef valueRef = (LLVMValueRef) value.codegen(obj);
         LLVMBuildRet(builder, valueRef);

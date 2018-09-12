@@ -15,8 +15,11 @@ public class UtilHander
     private static Map<String, LLVMValueRef> variablePointerTable = new HashMap<>();
     private static Map<String, LLVMValueRef> globalPointerTable   = new HashMap<>();
     private static Map<String, String>       variableTypeTable    = new HashMap<>();
-    private static LLVMValueRef              mainMethod;
-    public static  String                    mainMethodName       = "application_start";
+    
+    private static LLVMValueRef mainMethod;
+    
+    public static String mainMethodName   = "application_start";
+    public static String externalCallName = "externCcall";
     
     public static LLVMValueRef getMainMethod()
     {

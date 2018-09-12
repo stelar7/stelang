@@ -29,15 +29,21 @@ public class VariableDefinitionExpression implements Expression
     @Override
     public Object codegen(Object... obj)
     {
-        if (obj[0] instanceof LLVMValueRef)
+        if (obj[1] instanceof LLVMValueRef)
         {
-            LLVMValueRef   parent  = (LLVMValueRef) obj[0];
-            LLVMBuilderRef builder = (LLVMBuilderRef) obj[1];
+            LLVMValueRef   parent  = (LLVMValueRef) obj[1];
+            LLVMBuilderRef builder = (LLVMBuilderRef) obj[2];
             return UtilHander.generateVariable(builder, identifier, type);
         }
         
         LLVMModuleRef module = (LLVMModuleRef) obj[0];
         return UtilHander.generateGlobal(module, identifier, type);
+    }
+    
+    @Override
+    public String toString()
+    {
+        return String.format("%s:%s", type, identifier);
     }
     
     @Override

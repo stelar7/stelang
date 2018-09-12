@@ -39,17 +39,24 @@ public class BinaryExpression implements Expression
     @Override
     public Object codegen(Object... obj)
     {
-        LLVMValueRef   parent  = (LLVMValueRef) obj[0];
-        LLVMBuilderRef builder = (LLVMBuilderRef) obj[1];
+    
+        LLVMValueRef   parent  = (LLVMValueRef) obj[1];
+        LLVMBuilderRef builder = (LLVMBuilderRef) obj[2];
         
         LLVMValueRef leftCode  = (LLVMValueRef) left.codegen(obj);
         LLVMValueRef rightCode = (LLVMValueRef) right.codegen(obj);
         
         LLVMValueRef   method       = UtilHander.getLLVMMethod(left, op.getContent());
         LLVMValueRef[] call_op_args = {leftCode, rightCode};
-        LLVMValueRef   call_op      = LLVMBuildCall(builder, method, new PointerPointer(call_op_args), 2, String.format("a %s b", op.getContent()));
+        LLVMValueRef   call_op      = LLVMBuildCall(builder, method, new PointerPointer(call_op_args), 2, this.toString());
         
         return call_op;
+    }
+    
+    @Override
+    public String toString()
+    {
+        return String.format("%s %s %s", left.toString(), op.getContent(), right.toString());
     }
     
     @Override

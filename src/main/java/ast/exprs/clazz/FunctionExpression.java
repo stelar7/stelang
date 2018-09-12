@@ -72,7 +72,7 @@ public class FunctionExpression extends ControlExpression
             params.put(prototype.getParameters().get(i).getName(), ref);
         }
         
-        body.codegen(function, builder, params);
+        body.codegen(parent, function, builder, params);
         if (body.getBody().stream().noneMatch(b -> b instanceof ReturnExpression))
         {
             LLVMBuildRet(builder, LLVMConstNull(returnType));

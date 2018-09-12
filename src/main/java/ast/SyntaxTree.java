@@ -1104,7 +1104,7 @@ public class SyntaxTree
             }
             
             // parse custom operators
-            List<TokenType> stopTypes = Arrays.asList(TokenType.LPAREN, TokenType.IDENTIFIER, TokenType.NUMBER, TokenType.FLOAT, TokenType.SWITCH, TokenType.FOR, TokenType.WHILE);
+            List<TokenType> stopTypes = Arrays.asList(TokenType.LPAREN, TokenType.IDENTIFIER, TokenType.NUMBER, TokenType.TEXT, TokenType.FLOAT, TokenType.SWITCH, TokenType.FOR, TokenType.WHILE);
             StringBuilder   opb       = new StringBuilder();
             do
             {

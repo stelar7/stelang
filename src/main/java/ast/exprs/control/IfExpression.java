@@ -26,10 +26,10 @@ public class IfExpression extends ControlExpression
     @Override
     public Object codegen(Object... obj)
     {
-        LLVMValueRef   parent  = (LLVMValueRef) obj[0];
-        LLVMBuilderRef builder = (LLVMBuilderRef) obj[1];
+        LLVMValueRef   parent  = (LLVMValueRef) obj[1];
+        LLVMBuilderRef builder = (LLVMBuilderRef) obj[2];
         
-        LLVMValueRef value  = (LLVMValueRef) condition.codegen(parent, builder);
+        LLVMValueRef value  = (LLVMValueRef) condition.codegen(obj);
         LLVMValueRef ifStmt = LLVMBuildICmp(builder, LLVMIntUGE, value, LLVMConstInt(LLVMInt32Type(), 1, 0), "value >= 1");
         
         LLVMBasicBlockRef ifTrue  = LLVMAppendBasicBlock(parent, "ifTrue");
@@ -37,11 +37,11 @@ public class IfExpression extends ControlExpression
         LLVMBasicBlockRef end     = LLVMAppendBasicBlock(parent, "end");
         
         LLVMPositionBuilderAtEnd(builder, ifTrue);
-        trueExpressions.forEach(t -> t.codegen(parent, builder));
+        trueExpressions.forEach(t -> t.codegen(obj));
         LLVMBuildBr(builder, end);
         
         LLVMPositionBuilderAtEnd(builder, ifFalse);
-        falseExpressions.forEach(f -> f.codegen(parent, builder));
+        falseExpressions.forEach(f -> f.codegen(obj));
         LLVMBuildBr(builder, end);
         
         LLVMBuildCondBr(builder, ifStmt, ifTrue, ifFalse);

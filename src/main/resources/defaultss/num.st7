@@ -11,19 +11,19 @@ class num {
 
 
     operator.(num:self, num:other): num {
-        return externCcall("access", self, other);
+        return externCcall("access", "num", self, other);
     }
 
     operator=(num:self, num:other): num {
-        return externCcall("set64", self, other);
+        return externCcall("set64", "num", self, other);
     }
 
     operator+(num:self, num:other): num {
-        return externCcall("add64", self, other);
+        return externCcall("add64", "num", self, other);
     }
 
     operator-(num:self, num:other): num {
-        return externCcall("sub64", self, other);
+        return externCcall("sub64", "num", self, other);
     }
 
     operator=-(num:self, num:other): num {
@@ -32,39 +32,43 @@ class num {
     }
 
     operator*(num:self, num:other): num {
-        return externCcall("mul64", self, other);
+        return externCcall("mul64", "num", self, other);
     }
 
     operator/(num:self, num:other): num {
-        return externCcall("div64", self, other);
+        return externCcall("div64", "num", self, other);
     }
 
     operator%(num:self, num:other): num {
-        return externCcall("mod64", self, other);
+        return externCcall("mod64", "num", self, other);
     }
 
     operator~(num:self, num:other): num {
-        return externCcall("negate64", self, other);
+        return externCcall("negate64", "num", self, other);
     }
 
     operator&(num:self, num:other): num {
-        return externCcall("and64", self, other);
+        return externCcall("and64", "num", self, other);
     }
 
     operator>(num:self, num:other): num {
-        return externCcall("cmpGT64", self, other);
+        return externCcall("cmpGT64", "num", self, other);
     }
 
     operator<(num:self, num:other): num {
-        return externCcall("cmpLS64", self, other);
+        return externCcall("cmpLS64", "num", self, other);
     }
 
     operator>>(num:self, num:other): num {
-        return externCcall("shiftRight64", self, other);
+        return externCcall("shiftRight64", "num", self, other);
     }
 
     operator<<(num:self, num:other): num {
-        return externCcall("shiftLeft64", self, other);
+        return externCcall("shiftLeft64", "num", self, other);
+    }
+
+    function highestOneBit():num {
+        return externCcall("_BitScanForward()", "num");
     }
 
     function oneBits():num {
@@ -114,10 +118,6 @@ class num {
         }
 
         return count;
-    }
-
-    function highestOneBit():num {
-        return externCcall("_BitScanForward()", null, null);
     }
 
     function sign():num {
