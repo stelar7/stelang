@@ -15,4 +15,10 @@ public class NullExpression implements Expression
         
         return LLVMConstInt(LLVMInt1Type(), 0, 0);
     }
+    
+    @Override
+    public String toString()
+    {
+        return "null(0)";
+    }
 }

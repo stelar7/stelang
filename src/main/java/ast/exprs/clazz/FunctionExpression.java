@@ -9,9 +9,12 @@ import org.bytedeco.javacpp.PointerPointer;
 import static org.bytedeco.javacpp.LLVM.*;
 
 import java.util.*;
+import java.util.function.Supplier;
 
 public class FunctionExpression extends ControlExpression
 {
+    public static List<Supplier<Void>> bodies = new ArrayList<>();
+    
     private String              visibility;
     private PrototypeExpression prototype;
     private BlockExpression     body;
@@ -72,11 +75,14 @@ public class FunctionExpression extends ControlExpression
             params.put(prototype.getParameters().get(i).getName(), ref);
         }
         
+        // bodies.add(() -> {
         body.codegen(parent, function, builder, params);
         if (body.getBody().stream().noneMatch(b -> b instanceof ReturnExpression))
         {
             LLVMBuildRet(builder, LLVMConstNull(returnType));
         }
+        // return null;
+        // });
         
         if (functionName.equals(UtilHander.mainMethodName))
         {

@@ -10,7 +10,6 @@ class test_simple {
 
     test_simple:xy ;
 
-
     operator+(test_simple:self,test_simple:other):test_simple  {return xy;}
     operator=(test_simple:self,test_simple:other):test_simple  {return xy;}
 }

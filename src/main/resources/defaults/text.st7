@@ -13,5 +13,7 @@ class text {
         return externCcall("add64", "text", self, other);
     }
 
-
+    function reverse():text{
+        return "";
+    }
 }

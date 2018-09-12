@@ -51,7 +51,7 @@ public class ChainCompareExpression implements Expression
             
             LLVMValueRef   method       = UtilHander.getLLVMMethod(left, op.getContent());
             LLVMValueRef[] call_op_args = {leftCode, rightCode};
-            LLVMValueRef   call_op      = LLVMBuildCall(builder, method, new PointerPointer(call_op_args), 2, String.format("a %s b", op));
+            LLVMValueRef   call_op      = LLVMBuildCall(builder, method, new PointerPointer(call_op_args), 2, String.format("a %s b", op.getContent()));
             
             LLVMValueRef ifStmt = LLVMBuildICmp(builder, LLVMIntEQ, call_op, LLVMConstInt(LLVMInt1Type(), 1, 0), "value == 1");
             

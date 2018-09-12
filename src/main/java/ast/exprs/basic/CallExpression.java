@@ -81,4 +81,11 @@ public class CallExpression implements Expression
         
         return call_op;
     }
+    
+    @Override
+    public String toString()
+    {
+        String args = arguments.stream().map(Expression::toString).collect(Collectors.joining(","));
+        return String.format("%s(%s)", methodName, args);
+    }
 }

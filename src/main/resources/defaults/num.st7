@@ -51,6 +51,10 @@ class num {
         return externCcall("and64", "num", self, other);
     }
 
+    operator|(num:self, num:other): num {
+       return externCcall("or64", "num", self, other);
+    }
+
     operator>(num:self, num:other): num {
         return externCcall("cmpGT64", "num", self, other);
     }
@@ -70,6 +74,11 @@ class num {
     function highestOneBit():num {
         return externCcall("_BitScanForward()", "num");
     }
+
+        // this shouldnt be here, need to fix llvm
+        function reverse():text{
+            return "";
+        }
 
     function oneBits():num {
         num:clone = value;
@@ -128,13 +137,13 @@ class num {
 
     function rotateLeft(num:n):num {
         num:clone = value;
-        return (clone << n) | (clone >> (32 - n)) & ~((-1 >> n) << n);
+        return (clone << n) | (clone >> (32 - n)) & (~((-1 >> n) << n));
     }
 
 
     function rotateRight(num:n):num {
         num:clone = value;
-        return ((clone >> n) % 32) | (clone << (64-n) % 64);
+        return ((clone >> n) % 32) | (clone << (64 - n) % 64);
     }
 
     function toHex():text {
@@ -178,4 +187,5 @@ class num {
 
         return result.reverse();
     }
+
 }

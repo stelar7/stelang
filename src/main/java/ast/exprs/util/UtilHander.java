@@ -38,11 +38,14 @@ public class UtilHander
             return classPointerTable.get(clazz);
         }
         
-        LLVMTypeRef   ref   = classPointerTable.computeIfAbsent(clazz, (key) -> LLVMStructCreateNamed(LLVMGetGlobalContext(), exp.getClassname()));
-        LLVMTypeRef[] types = exp.getParameterTypes();
-        if (types.length != 0)
+        LLVMTypeRef ref = classPointerTable.computeIfAbsent(clazz, (key) -> LLVMStructCreateNamed(LLVMGetGlobalContext(), key));
+        if (exp != null)
         {
-            LLVMStructSetBody(ref, types[0], types.length, 0);
+            LLVMTypeRef[] types = exp.getParameterTypes();
+            if (types.length != 0)
+            {
+                LLVMStructSetBody(ref, types[0], types.length, 0);
+            }
         }
         return ref;
     }
