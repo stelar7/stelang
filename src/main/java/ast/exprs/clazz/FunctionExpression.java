@@ -75,14 +75,18 @@ public class FunctionExpression extends ControlExpression
             params.put(prototype.getParameters().get(i).getName(), ref);
         }
         
-        // bodies.add(() -> {
-        body.codegen(parent, function, builder, params);
-        if (body.getBody().stream().noneMatch(b -> b instanceof ReturnExpression))
-        {
-            LLVMBuildRet(builder, LLVMConstNull(returnType));
-        }
-        // return null;
-        // });
+        LLVMBasicBlockRef entry = LLVMAppendBasicBlock(function, functionName);
+        LLVMPositionBuilderAtEnd(builder, entry);
+        
+        bodies.add(() -> {
+            LLVMPositionBuilderAtEnd(builder, entry);
+            body.codegen(parent, function, builder, params);
+            if (body.getBody().stream().noneMatch(b -> b instanceof ReturnExpression))
+            {
+                LLVMBuildRet(builder, LLVMConstNull(returnType));
+            }
+            return null;
+        });
         
         if (functionName.equals(UtilHander.mainMethodName))
         {

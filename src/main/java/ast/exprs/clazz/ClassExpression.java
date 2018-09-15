@@ -7,6 +7,7 @@ import ast.exprs.util.UtilHander;
 import org.bytedeco.javacpp.LLVM.LLVMModuleRef;
 
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static org.bytedeco.javacpp.LLVM.*;
@@ -48,6 +49,8 @@ public class ClassExpression implements Expression
         
         LLVMTypeRef classRef = UtilHander.getLLVMStruct(classname, this);
         body.codegen(module, builder, classRef);
+        FunctionExpression.bodies.forEach(Supplier::get);
+        FunctionExpression.bodies.clear();
         
         return null;
     }

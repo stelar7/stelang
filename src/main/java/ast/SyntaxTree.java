@@ -46,14 +46,20 @@ public class SyntaxTree
             List<Expression> bl = c.getBody();
             for (Expression be : bl)
             {
-                if (!(be instanceof OperatorExpression))
+                if (be instanceof ConstructorExpression)
                 {
+                    ConstructorExpression ce  = (ConstructorExpression) be;
+                    PrototypeExpression   pex = ce.getPrototype();
+                    ce.setPrototype(new PrototypeExpression(pex.getName(), pex.getParameters(), c.getClassname()));
                     continue;
                 }
                 
-                OperatorExpression  oe = (OperatorExpression) be;
-                PrototypeExpression pe = oe.getPrototype();
-                oe.setPrototype(new PrototypeExpression(pe.getName(), pe.getParameters(), c.getClassname()));
+                if (be instanceof OperatorExpression)
+                {
+                    OperatorExpression  oe = (OperatorExpression) be;
+                    PrototypeExpression pe = oe.getPrototype();
+                    oe.setPrototype(new PrototypeExpression(pe.getName(), pe.getParameters(), c.getClassname()));
+                }
             }
         }
     }
@@ -210,7 +216,18 @@ public class SyntaxTree
                 }
                 case CLASS:
                 {
-                    s.add(parseClass());
+                    ClassExpression c = (ClassExpression) parseClass();
+                    for (Expression ex : new ArrayList<>(c.getBody()))
+                    {
+                        if (ex instanceof MultiExpression)
+                        {
+                            c.getBody().remove(ex);
+                            MultiExpression m = (MultiExpression) ex;
+                            c.getBody().addAll(m.getList());
+                        }
+                    }
+                    
+                    s.add(c);
                     break;
                 }
                 case ENUM:
@@ -239,7 +256,7 @@ public class SyntaxTree
             assertThenNext(TokenType.EXTENDS);
             superClass = assertGetThenNext(TokenType.IDENTIFIER);
         }
-    
+        
         ClassBlockExpression body = parseClassBlockExpression();
         return new ClassExpression(classname, body, superClass);
     }
@@ -312,8 +329,7 @@ public class SyntaxTree
     private Expression parseConstructorDeclaration()
     {
         String              visibility = assertGetThenNext(TokenType.CONSTRUCTOR);
-        String              identifier = assertGetThenNext(TokenType.IDENTIFIER);
-        PrototypeExpression f          = parsePrototype(visibility, identifier);
+        PrototypeExpression f          = parsePrototype(visibility, "constuctor");
         
         if (currentToken.getType() == TokenType.SEMICOLON)
         {
@@ -324,7 +340,7 @@ public class SyntaxTree
                 list.add(new VariableDefinitionExpression(parameter.getName(), parameter.getType()));
             }
             list.add(new ConstructorExpression(visibility, f, new BlockExpression(List.of(new NullExpression()))));
-            return new BlockExpression(list);
+            return new MultiExpression(list);
         }
         
         BlockExpression b = parseBlockExpression();
@@ -348,7 +364,7 @@ public class SyntaxTree
     
     private Expression parseFunctionDeclaration()
     {
-        String              visibility = assertGetThenNext(TokenType.FUNCTION, TokenType.PURE, TokenType.GLOBAL);
+        String              visibility = assertGetThenNext(TokenType.FUNCTION);
         String              identifier = assertGetThenNext(TokenType.IDENTIFIER);
         PrototypeExpression prototype  = parsePrototype(visibility, identifier);
         BlockExpression     body       = parseBlockExpression();
@@ -410,37 +426,13 @@ public class SyntaxTree
                 return parseBreak();
             case CONTINUE:
                 return parseContinue();
+            case CREATE:
+            {
+                return parseCreate();
+            }
             case IDENTIFIER:
             {
-                Token next = peekToken(1);
-                if (allowTernary)
-                {
-                    if ((next.getType() == TokenType.QUESTIONMARK) || (next.getType() == TokenType.QUESTIONMARKCOLON))
-                    {
-                        return parseTernary();
-                    }
-                }
-                
-                if (allowVariableDeclaration)
-                {
-                    if (next.getType() == TokenType.COLON)
-                    {
-                        return parseVariableDefinition();
-                    }
-                }
-                
-                
-                if (next.getType() == TokenType.PLUSPLUS || next.getType() == TokenType.MINUSMINUS)
-                {
-                    return parsePrePostOP();
-                }
-                
-                if (next.getType() == TokenType.LBRACKET)
-                {
-                    return parseArrayAccess();
-                }
-                
-                return parseIdentifier();
+                return parseIdentifierBlock(allowTernary, allowVariableDeclaration);
             }
             case PLUSPLUS:
             case MINUSMINUS:
@@ -468,8 +460,6 @@ public class SyntaxTree
             {
                 return parseVariableDefinition();
             }
-            case PURE:
-            case GLOBAL:
             case FUNCTION:
             {
                 return parseFunctionDeclaration();
@@ -489,6 +479,46 @@ public class SyntaxTree
             default:
                 return null;
         }
+    }
+    
+    private Expression parseIdentifierBlock(boolean allowTernary, boolean allowVariableDeclaration)
+    {
+        Token next = peekToken(1);
+        if (allowTernary)
+        {
+            if ((next.getType() == TokenType.QUESTIONMARK) || (next.getType() == TokenType.QUESTIONMARKCOLON))
+            {
+                return parseTernary();
+            }
+        }
+        
+        if (allowVariableDeclaration)
+        {
+            if (next.getType() == TokenType.COLON)
+            {
+                return parseVariableDefinition();
+            }
+        }
+        
+        
+        if (next.getType() == TokenType.PLUSPLUS || next.getType() == TokenType.MINUSMINUS)
+        {
+            return parsePrePostOP();
+        }
+        
+        if (next.getType() == TokenType.LBRACKET)
+        {
+            return parseArrayAccess();
+        }
+        
+        return parseIdentifier();
+    }
+    
+    private Expression parseCreate()
+    {
+        assertThenNext(TokenType.CREATE);
+        Expression parsed = parseExpression();
+        return new CreateExpression(parsed);
     }
     
     private Expression parseArrayAccess()

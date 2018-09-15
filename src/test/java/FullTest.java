@@ -35,7 +35,7 @@ public class FullTest
         LLVMInitializeNativeDisassembler();
         LLVMInitializeNativeTarget();
         
-        //LLVMVerifyModule(module, LLVMAbortProcessAction, error);
+        LLVMVerifyModule(module, LLVMAbortProcessAction, error);
         LLVMDisposeMessage(error); // Handler == LLVMAbortProcessAction -> No need to check errors
         
         
@@ -55,10 +55,11 @@ public class FullTest
         LLVMAddGVNPass(pass);
         LLVMAddCFGSimplificationPass(pass);
         //LLVMRunPassManager(pass, module);
-        LLVMDumpModule(module);
+        //LLVMDumpModule(module);
+        LLVMPrintModuleToFile(module, "test", error);
         
         LLVMGenericValueRef exec_args = LLVMCreateGenericValueOfInt(LLVMInt32Type(), 10, 0);
-        LLVMGenericValueRef exec_res  = LLVMRunFunction(engine, UtilHander.getMainMethod(), 1, exec_args);
+        LLVMGenericValueRef exec_res  = LLVMRunFunction(engine, UtilHander.getMainMethod(), 0, exec_args);
         System.err.println();
         System.err.format("; Running %s...%n", UtilHander.mainMethodName);
         System.err.println("; Result: " + LLVMGenericValueToInt(exec_res, 0));

@@ -3,6 +3,7 @@ package ast.exprs.util;
 import ast.exprs.Expression;
 import ast.exprs.clazz.ClassExpression;
 import org.bytedeco.javacpp.LLVM.LLVMTypeRef;
+import org.bytedeco.javacpp.PointerPointer;
 
 import java.util.*;
 
@@ -17,6 +18,7 @@ public class UtilHander
     private static Map<String, String>       variableTypeTable    = new HashMap<>();
     
     private static LLVMValueRef mainMethod;
+    public static  LLVMValueRef NULL;
     
     public static String mainMethodName   = "application_start";
     public static String externalCallName = "externCcall";
@@ -29,6 +31,23 @@ public class UtilHander
     public static void setMainMethod(LLVMValueRef mainMethod)
     {
         UtilHander.mainMethod = mainMethod;
+    }
+    
+    public static void computeLLVMStructs()
+    {
+        {
+            LLVMTypeRef    ref       = classPointerTable.computeIfAbsent("num", (key) -> LLVMStructCreateNamed(LLVMGetGlobalContext(), key));
+            LLVMTypeRef[]  types_arr = {LLVMInt64Type()};
+            PointerPointer types     = new PointerPointer(types_arr);
+            LLVMStructSetBody(ref, types, 1, 0);
+        }
+        {
+            LLVMTypeRef    ref       = classPointerTable.computeIfAbsent("null", (key) -> LLVMStructCreateNamed(LLVMGetGlobalContext(), key));
+            LLVMTypeRef[]  types_arr = {LLVMVoidType()};
+            PointerPointer types     = new PointerPointer(types_arr);
+            LLVMStructSetBody(ref, types, 1, 0);
+            NULL = LLVMConstNull(ref);
+        }
     }
     
     public static LLVMTypeRef getLLVMStruct(String clazz, ClassExpression exp)

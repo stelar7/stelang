@@ -8,9 +8,10 @@ class test_simple {
         return z;
     }
 
-    test_simple:xy ;
+    constructor(num:val);
 
-    operator+(test_simple:self,test_simple:other):test_simple  {return xy;}
-    operator=(test_simple:self,test_simple:other):test_simple  {return xy;}
+    operator+(test_simple:self,test_simple:other):test_simple  {return create test_simple(self.val+other.val);}
+    operator=(test_simple:self,num:other):test_simple  {return other;}
+    operator.(test_simple:self,num:other):test_simple  {return null;}
 }
 

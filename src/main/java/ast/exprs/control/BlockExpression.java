@@ -25,12 +25,6 @@ public class BlockExpression extends ControlExpression
     @Override
     public Object codegen(Object... obj)
     {
-        LLVMValueRef   parent  = (LLVMValueRef) obj[1];
-        LLVMBuilderRef builder = (LLVMBuilderRef) obj[2];
-        
-        LLVMBasicBlockRef entry = LLVMAppendBasicBlock(parent, "new_block");
-        LLVMPositionBuilderAtEnd(builder, entry);
-        
         body.forEach(b -> b.codegen(obj));
         return null;
     }

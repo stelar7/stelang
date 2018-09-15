@@ -40,7 +40,6 @@ public class BinaryExpression implements Expression
     public Object codegen(Object... obj)
     {
     
-        LLVMValueRef   parent  = (LLVMValueRef) obj[1];
         LLVMBuilderRef builder = (LLVMBuilderRef) obj[2];
         
         LLVMValueRef leftCode  = (LLVMValueRef) left.codegen(obj);

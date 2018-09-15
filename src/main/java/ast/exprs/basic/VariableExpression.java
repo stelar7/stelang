@@ -32,14 +32,18 @@ public class VariableExpression implements Expression
     @Override
     public Object codegen(Object... obj)
     {
-        LLVMValueRef   parent  = (LLVMValueRef) obj[1];
         LLVMBuilderRef builder = (LLVMBuilderRef) obj[2];
         LLVMValueRef   ref     = null;
+        
+        if (name.equals("null"))
+        {
+            return UtilHander.NULL;
+        }
         
         if (obj.length >= 4 && obj[3] instanceof Map)
         {
             ref = ((Map<String, LLVMValueRef>) obj[3]).get(name);
-            if(ref != null)
+            if (ref != null)
             {
                 return ref;
             }
@@ -56,6 +60,7 @@ public class VariableExpression implements Expression
         {
             return LLVMBuildLoad(builder, ref, name);
         }
+        
         return null;
     }
 }

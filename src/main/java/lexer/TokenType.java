@@ -52,11 +52,10 @@ public enum TokenType
     FOR("for"), THEN("then"),
     SWITCH("switch"), CASE("case"), DEFAULT("default"),
     RETURN("return"), ASSERT("assert"),
-    CAST("cast"),
+    CAST("cast"), CREATE("create"),
     
     // modifiers
     CONST("const"), VAR("var"),
-    GLOBAL("global"), PURE("pure"),
     
     // lexing
     IDENTIFIER(""), KEYWORD(""), NUMBER(""), FLOAT(""), TEXT(""),

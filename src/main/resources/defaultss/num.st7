@@ -75,11 +75,6 @@ class num {
         return externCcall("_BitScanForward()", "num");
     }
 
-        // this shouldnt be here, need to fix llvm
-        function reverse():text{
-            return "";
-        }
-
     function oneBits():num {
         num:clone = value;
         num:count;
@@ -87,18 +82,6 @@ class num {
         while(clone) {
             count =+ clone & 1;
             clone =>> 1;
-        }
-
-        return count;
-    }
-
-    function bitCount():num {
-        num:clone = value;
-        num:count;
-
-        while(n) {
-            count =+ n % 2;
-            n =>> 1;
         }
 
         return count;
