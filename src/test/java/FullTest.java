@@ -34,7 +34,8 @@ public class FullTest
         LLVMInitializeNativeAsmParser();
         LLVMInitializeNativeDisassembler();
         LLVMInitializeNativeTarget();
-        
+    
+        LLVMPrintModuleToFile(module, "test", error);
         LLVMVerifyModule(module, LLVMAbortProcessAction, error);
         LLVMDisposeMessage(error); // Handler == LLVMAbortProcessAction -> No need to check errors
         

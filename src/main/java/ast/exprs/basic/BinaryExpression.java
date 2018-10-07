@@ -39,8 +39,14 @@ public class BinaryExpression implements Expression
     @Override
     public Object codegen(Object... obj)
     {
-    
-        LLVMBuilderRef builder = (LLVMBuilderRef) obj[2];
+        
+        LLVMBuilderRef builder;
+        if (obj[1] instanceof LLVMBuilderRef)
+        {
+            builder = (LLVMBuilderRef) obj[1];
+        } else {
+            builder = (LLVMBuilderRef) obj[2];
+        }
         
         LLVMValueRef leftCode  = (LLVMValueRef) left.codegen(obj);
         LLVMValueRef rightCode = (LLVMValueRef) right.codegen(obj);

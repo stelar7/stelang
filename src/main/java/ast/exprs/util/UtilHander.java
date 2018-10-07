@@ -16,9 +16,9 @@ public class UtilHander
     private static Map<String, LLVMValueRef> variablePointerTable = new HashMap<>();
     private static Map<String, LLVMValueRef> globalPointerTable   = new HashMap<>();
     private static Map<String, String>       variableTypeTable    = new HashMap<>();
+    public static  Map<String, LLVMValueRef> NULLS                = new HashMap<>();
     
     private static LLVMValueRef mainMethod;
-    public static  LLVMValueRef NULL;
     
     public static String mainMethodName   = "application_start";
     public static String externalCallName = "externCcall";
@@ -46,8 +46,9 @@ public class UtilHander
             LLVMTypeRef[]  types_arr = {LLVMVoidType()};
             PointerPointer types     = new PointerPointer(types_arr);
             LLVMStructSetBody(ref, types, 1, 0);
-            NULL = LLVMConstNull(ref);
         }
+        
+        classPointerTable.forEach((key, value) -> NULLS.put(key, LLVMConstNull(value)));
     }
     
     public static LLVMTypeRef getLLVMStruct(String clazz, ClassExpression exp)
@@ -58,6 +59,8 @@ public class UtilHander
         }
         
         LLVMTypeRef ref = classPointerTable.computeIfAbsent(clazz, (key) -> LLVMStructCreateNamed(LLVMGetGlobalContext(), key));
+        NULLS.put(clazz, LLVMConstNull(ref));
+        
         if (exp != null)
         {
             LLVMTypeRef[] types = exp.getParameterTypes();

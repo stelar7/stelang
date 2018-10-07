@@ -37,7 +37,7 @@ public class VariableExpression implements Expression
         
         if (name.equals("null"))
         {
-            return UtilHander.NULL;
+            return UtilHander.NULLS.get("void");
         }
         
         if (obj.length >= 4 && obj[3] instanceof Map)

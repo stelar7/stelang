@@ -1,12 +1,7 @@
 class num {
 
-/*
-
     num:MAX =  0x7FFFFFFFFFFFFFFF;
     num:MIN = -0x7FFFFFFFFFFFFFFF;
-
-    */
-
     num:value;
 
 

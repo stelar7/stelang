@@ -30,6 +30,6 @@ public class CreateExpression implements Expression
         LLVMValueRef   elem         = LLVMBuildGEP(builder, valueRef, valuePointer, 1, "numberPtr");
         LLVMValueRef   store        = LLVMBuildStore(builder, LLVMConstInt(LLVMInt64Type(), val, 0), elem);
         */
-        return UtilHander.NULL;
+        return UtilHander.NULLS.get("null");
     }
 }

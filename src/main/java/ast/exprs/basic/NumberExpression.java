@@ -19,11 +19,19 @@ public class NumberExpression implements Expression
     @Override
     public Object codegen(Object... obj)
     {
-        LLVMBuilderRef builder      = (LLVMBuilderRef) obj[2];
+        LLVMBuilderRef builder;
+        if (obj[1] instanceof LLVMBuilderRef)
+        {
+            builder = (LLVMBuilderRef) obj[1];
+        } else
+        {
+            builder = (LLVMBuilderRef) obj[2];
+        }
+        
         LLVMTypeRef    typeRef      = UtilHander.getLLVMStruct("num", null);
         LLVMValueRef   valueRef     = LLVMBuildAlloca(builder, typeRef, "numberVal");
-        PointerPointer valuePointer = new PointerPointer(new LLVMValueRef[]{LLVMConstInt(LLVMInt64Type(), 1, 0)});
-        LLVMValueRef   elem         = LLVMBuildGEP(builder, valueRef, valuePointer, 1, "numberPtr");
+        PointerPointer valuePointer = new PointerPointer(new LLVMValueRef[]{LLVMConstInt(LLVMInt32Type(), 0, 0), LLVMConstInt(LLVMInt32Type(), 0, 0)});
+        LLVMValueRef   elem         = LLVMBuildInBoundsGEP(builder, valueRef, valuePointer, 2, "numberPtr");
         LLVMValueRef   store        = LLVMBuildStore(builder, LLVMConstInt(LLVMInt64Type(), val, 0), elem);
         
         return store;

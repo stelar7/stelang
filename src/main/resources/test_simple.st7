@@ -1,6 +1,7 @@
-class test_simple {
-
-    function application_start():test_simple {
+class test_simple
+{
+    function application_start():test_simple
+    {
         test_simple:x = 1;
         test_simple:y = 10;
         test_simple:z = x + y;
@@ -10,8 +11,14 @@ class test_simple {
 
     constructor(num:val);
 
-    operator+(test_simple:self,test_simple:other):test_simple  {return create test_simple(self.val+other.val);}
-    operator=(test_simple:self,num:other):test_simple  {return other;}
-    operator.(test_simple:self,num:other):test_simple  {return null;}
+    operator+(test_simple:self, test_simple:other):test_simple
+    {
+        return create test_simple(self.val + other.val);
+    }
+
+    operator=(test_simple:self, num:other):test_simple
+    {
+        return other;
+    }
 }
 
