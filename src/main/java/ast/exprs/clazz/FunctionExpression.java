@@ -4,7 +4,7 @@ import ast.exprs.Expression;
 import ast.exprs.control.*;
 import ast.exprs.div.ReturnExpression;
 import ast.exprs.util.UtilHander;
-import org.bytedeco.javacpp.PointerPointer;
+import org.bytedeco.javacpp.*;
 
 import static org.bytedeco.javacpp.LLVM.*;
 
@@ -13,7 +13,7 @@ import java.util.function.Supplier;
 
 public class FunctionExpression extends ControlExpression
 {
-    public static List<Supplier<Void>> bodies = new ArrayList<>();
+    public static List<Supplier<Optional<Void>>> bodies = new ArrayList<>();
     
     private String              visibility;
     private PrototypeExpression prototype;
@@ -63,7 +63,6 @@ public class FunctionExpression extends ControlExpression
         LLVMTypeRef    returnType = UtilHander.getLLVMStruct(prototype.getReturnType(), null);
         LLVMTypeRef[]  arguments  = prototype.getParametersAsTypeRefs();
         PointerPointer args       = new PointerPointer(arguments);
-        
         LLVMTypeRef  functionPrototype = LLVMFunctionType(returnType, args, arguments.length, 0);
         LLVMValueRef function          = UtilHander.addLLVMMethod(functionName, LLVMAddFunction(parent, functionName, functionPrototype));
         LLVMSetFunctionCallConv(function, LLVMCCallConv);
@@ -85,7 +84,7 @@ public class FunctionExpression extends ControlExpression
             {
                 LLVMBuildRet(builder, LLVMConstNull(returnType));
             }
-            return null;
+            return Optional.empty();
         });
         
         if (functionName.equals(UtilHander.mainMethodName))

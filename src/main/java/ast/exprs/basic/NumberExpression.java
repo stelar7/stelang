@@ -2,8 +2,8 @@ package ast.exprs.basic;
 
 import ast.exprs.Expression;
 import ast.exprs.util.UtilHander;
+import org.bytedeco.javacpp.*;
 import org.bytedeco.javacpp.LLVM.*;
-import org.bytedeco.javacpp.PointerPointer;
 
 import static org.bytedeco.javacpp.LLVM.*;
 
@@ -28,7 +28,7 @@ public class NumberExpression implements Expression
             builder = (LLVMBuilderRef) obj[2];
         }
         
-        LLVMTypeRef    typeRef      = UtilHander.getLLVMStruct("num", null);
+        LLVMTypeRef typeRef = UtilHander.getLLVMStruct("num", null);
         LLVMValueRef   valueRef     = LLVMBuildAlloca(builder, typeRef, "numberVal");
         PointerPointer valuePointer = new PointerPointer(new LLVMValueRef[]{LLVMConstInt(LLVMInt32Type(), 0, 0), LLVMConstInt(LLVMInt32Type(), 0, 0)});
         LLVMValueRef   elem         = LLVMBuildInBoundsGEP(builder, valueRef, valuePointer, 2, "numberPtr");

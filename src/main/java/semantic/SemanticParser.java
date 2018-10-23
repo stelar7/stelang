@@ -421,14 +421,32 @@ public class SemanticParser
         
         if (!type.equals("Constructor") && !pe.getReturnType().equals("void"))
         {
-            long count = be.getBody().stream().filter(e -> e instanceof ReturnExpression).count();
-            if (count != 1)
+            long count = getBottomMostStatement(be.getBody()).stream().filter(e -> e instanceof ReturnExpression).count();
+            if (count < 1)
             {
-                logSemanticError(String.format("Expected one return statement in %s %s, got %s", type, pe.getName(), count));
+                logSemanticError(String.format("Expected atleast one return statement in %s %s, got %s", type, pe.getName(), count));
             }
         }
         
         validateBlock(be.getBlock(), types, pe, c, functionTypes);
+    }
+    
+    private List<Expression> getBottomMostStatement(List<Expression> expressions)
+    {
+        List<Expression> returns = new ArrayList<>(expressions);
+        for (Expression expression : expressions)
+        {
+            if (expression instanceof IfExpression)
+            {
+                List<Expression> ifs = new ArrayList<>();
+                IfExpression     ie  = (IfExpression) expression;
+                ifs.addAll(ie.getTrueExpressions());
+                ifs.addAll(ie.getFalseExpressions());
+                returns.remove(expression);
+                returns.addAll(getBottomMostStatement(ifs));
+            }
+        }
+        return returns;
     }
     
     private TypeMapList buildTypeList(List<Expression> ast, TypeMapList types)

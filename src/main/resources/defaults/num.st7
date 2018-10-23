@@ -1,20 +1,26 @@
 class num {
 
-    num:MAX =  0x7FFFFFFFFFFFFFFF;
-    num:MIN = -0x7FFFFFFFFFFFFFFF;
+    //num:MAX =  0x7FFFFFFFFFFFFFFF;
+    //num:MIN = -0x7FFFFFFFFFFFFFFF;
     num:value;
 
 
-    operator.(num:self, num:other): num {
-        return externCcall("access", "num", self, other);
+    operator+(num:self, num:other): num {
+        return ~add64(self, other);
     }
 
     operator=(num:self, num:other): num {
-        return externCcall("set64", "num", self, other);
+        return ~set64(self, other);
     }
 
-    operator+(num:self, num:other): num {
-        return externCcall("add64", "num", self, other);
+    operator<(num:self, num:other): num {
+        return ~cmpLS64(self, other);
+    }
+
+    /*
+
+    operator.(num:self, num:other): num {
+        return externCcall("access", "num", self, other);
     }
 
     operator-(num:self, num:other): num {
@@ -52,10 +58,6 @@ class num {
 
     operator>(num:self, num:other): num {
         return externCcall("cmpGT64", "num", self, other);
-    }
-
-    operator<(num:self, num:other): num {
-        return externCcall("cmpLS64", "num", self, other);
     }
 
     operator>>(num:self, num:other): num {
@@ -165,5 +167,5 @@ class num {
 
         return result.reverse();
     }
-
+*/
 }

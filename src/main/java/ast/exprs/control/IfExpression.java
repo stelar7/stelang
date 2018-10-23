@@ -49,4 +49,19 @@ public class IfExpression extends ControlExpression
         
         return null;
     }
+    
+    public IfContitionExpression getCondition()
+    {
+        return condition;
+    }
+    
+    public List<Expression> getTrueExpressions()
+    {
+        return trueExpressions;
+    }
+    
+    public List<Expression> getFalseExpressions()
+    {
+        return falseExpressions;
+    }
 }

@@ -1,24 +1,20 @@
 class test_simple
 {
-    function application_start():test_simple
+    function application_start()
     {
-        test_simple:x = 1;
-        test_simple:y = 10;
-        test_simple:z = x + y;
+        num:x = 1;
+        num:y = 10;
+        num:z = x + y;
 
-        return z;
+        testIf(x,y,z);
     }
 
-    constructor(num:val);
-
-    operator+(test_simple:self, test_simple:other):test_simple
-    {
-        return create test_simple(self.val + other.val);
-    }
-
-    operator=(test_simple:self, num:other):test_simple
-    {
-        return other;
+    function testIf(num:x, num:y, num:z):num {
+        if (x < y < z) {
+            return 1;
+        } else {
+            return 0;
+        }
     }
 }
 

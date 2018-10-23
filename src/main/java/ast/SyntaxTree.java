@@ -408,6 +408,8 @@ public class SyntaxTree
     {
         switch (currentToken.getType())
         {
+            case SQUIGLY:
+                return parseIntrinsic();
             case NOT:
                 return parseNotExpression();
             case LSQUIGLY:
@@ -479,6 +481,27 @@ public class SyntaxTree
             default:
                 return null;
         }
+    }
+    
+    private Expression parseIntrinsic()
+    {
+        assertThenNext(TokenType.SQUIGLY);
+        String function = assertGetThenNext(TokenType.IDENTIFIER);
+        assertType(TokenType.LPAREN);
+        
+        List<String> params = new ArrayList<>();
+        do
+        {
+            nextToken();
+            if (currentToken.getType() != TokenType.RPAREN)
+            {
+                String name = assertGetThenNext(TokenType.IDENTIFIER);
+                params.add(name);
+            }
+        } while (currentToken.getType() == TokenType.COMMA);
+        nextToken();
+        
+        return new IntrinsicExpression(function, params);
     }
     
     private Expression parseIdentifierBlock(boolean allowTernary, boolean allowVariableDeclaration)

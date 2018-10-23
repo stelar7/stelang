@@ -1,5 +1,5 @@
 class text {
-
+/*
 
     operator.(text:self, text:other): num {
         return externCcall("access", "text", self, other);
@@ -16,4 +16,6 @@ class text {
     function reverse():text{
         return "";
     }
+
+    */
 }

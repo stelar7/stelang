@@ -3,8 +3,8 @@ package ast.exprs.basic;
 import ast.exprs.Expression;
 import ast.exprs.util.UtilHander;
 import lexer.*;
+import org.bytedeco.javacpp.*;
 import org.bytedeco.javacpp.LLVM.*;
-import org.bytedeco.javacpp.PointerPointer;
 
 import static org.bytedeco.javacpp.LLVM.*;
 
