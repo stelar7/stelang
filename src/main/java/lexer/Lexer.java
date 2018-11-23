@@ -1,7 +1,5 @@
 package lexer;
 
-import div.Utils;
-
 import java.util.*;
 import java.util.regex.*;
 
@@ -27,15 +25,19 @@ public class Lexer
     private Token getNextToken(TextIterator it)
     {
         // skip whitespace
-        while (isWhitespace(it.current()))
+        if (isWhitespace(it.current()))
         {
-            if (it.current().equals("\n"))
+            while (isWhitespace(it.current()))
             {
-                line.nextLine();
+                if (it.current().equals("\n"))
+                {
+                    line.nextLine();
+                }
+                
+                line.moveIndex(it.current().length());
+                it.next();
             }
-            
-            line.moveIndex(it.current().length());
-            it.next();
+            return new Token("", TokenType.WHITESPACE, line.copy());
         }
         
         // read identifiers

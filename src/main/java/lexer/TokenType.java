@@ -59,7 +59,7 @@ public enum TokenType
     
     // lexing
     IDENTIFIER(""), KEYWORD(""), NUMBER(""), FLOAT(""), TEXT(""),
-    COMMENT(""), UNKNOWN("");
+    COMMENT(""), UNKNOWN(""), WHITESPACE("");
     
     String token;
     

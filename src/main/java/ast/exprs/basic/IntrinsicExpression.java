@@ -3,7 +3,6 @@ package ast.exprs.basic;
 import ast.exprs.Expression;
 import ast.exprs.util.UtilHander;
 import org.bytedeco.javacpp.*;
-import org.bytedeco.javacpp.LLVM.*;
 
 import java.util.*;
 
@@ -27,7 +26,6 @@ public class IntrinsicExpression implements Expression
         // module, function, builder, params
         LLVMBuilderRef            builderRef = (LLVMBuilderRef) parent[2];
         Map<String, LLVMValueRef> paramRefs  = (Map<String, LLVMValueRef>) parent[3];
-        LLVMValueRef              LHS        = paramRefs.get(params.get(0));
         
         LLVMPrintModuleToFile((LLVMModuleRef) parent[0], "test", new BytePointer((Pointer) null));
         //LLVMVerifyModule((LLVMModuleRef) parent[0], LLVMAbortProcessAction, new BytePointer((Pointer) null));
@@ -36,30 +34,57 @@ public class IntrinsicExpression implements Expression
         {
             case "add64":
             {
+                LLVMValueRef LHS = paramRefs.get(params.get(0));
                 LLVMValueRef RHS = paramRefs.get(params.get(1));
-                return LLVM.LLVMBuildAdd(builderRef, LHS, RHS, "add64");
+                
+                LLVMValueRef LHSPtr = LLVMBuildInBoundsGEP(builderRef, LHS, UtilHander.firstElement, 2, "LHSPtr");
+                LLVMValueRef RHSPtr = LLVMBuildInBoundsGEP(builderRef, RHS, UtilHander.firstElement, 2, "RHSPtr");
+                
+                LLVMValueRef LHSVal = LLVMBuildLoad(builderRef, LHSPtr, "LHSval");
+                LLVMValueRef RHSVal = LLVMBuildLoad(builderRef, RHSPtr, "RHSval");
+                
+                LLVMValueRef resultVal = LLVMBuildAdd(builderRef, LHSVal, RHSVal, "add64");
+                
+                LLVMValueRef valueRef = LLVMBuildAlloca(builderRef, UtilHander.getLLVMStruct("num", null), "result");
+                LLVMValueRef elem     = LLVMBuildInBoundsGEP(builderRef, valueRef, UtilHander.firstElement, 2, "resultPtr");
+                LLVMValueRef store    = LLVMBuildStore(builderRef, resultVal, elem);
+                
+                return valueRef;
             }
             
             case "set64":
             {
+                LLVMValueRef LHS = paramRefs.get(params.get(0));
                 LLVMValueRef RHS = paramRefs.get(params.get(1));
-                LLVM.LLVMBuildStore(builderRef, RHS, LHS);
+                
+                LLVMValueRef LHSPtr = LLVMBuildInBoundsGEP(builderRef, LHS, UtilHander.firstElement, 2, "LHSPtr");
+                LLVMValueRef RHSPtr = LLVMBuildInBoundsGEP(builderRef, RHS, UtilHander.firstElement, 2, "RHSPtr");
+                
+                LLVMValueRef LHSVal = LLVMBuildLoad(builderRef, LHSPtr, "LHSval");
+                LLVMValueRef RHSVal = LLVMBuildLoad(builderRef, RHSPtr, "RHSval");
+                
+                LLVMBuildStore(builderRef, RHSVal, LHSPtr);
                 return LHS;
             }
             
             case "cmpLS64":
             {
-                LLVMValueRef RHS  = paramRefs.get(params.get(1));
-                LLVMTypeRef numType = UtilHander.getLLVMStruct("num", null);
+                LLVMValueRef LHS    = paramRefs.get(params.get(0));
+                LLVMValueRef RHS    = paramRefs.get(params.get(1));
                 
-                PointerPointer valuePointer = new PointerPointer(new LLVMValueRef[]{LLVMConstInt(LLVMInt32Type(), 0, 0), LLVMConstInt(LLVMInt32Type(), 0, 0)});
-                LLVMValueRef   LHSPtr       = LLVMBuildInBoundsGEP(builderRef, LHS, valuePointer, 2, "LHSPtr");
-                LLVMValueRef   LHSVal       = LLVM.LLVMBuildLoad(builderRef, LHSPtr, "loadLHS");
+                LLVMValueRef LHSPtr = LLVMBuildInBoundsGEP(builderRef, LHS, UtilHander.firstElement, 2, "LHSPtr");
+                LLVMValueRef RHSPtr = LLVMBuildInBoundsGEP(builderRef, RHS, UtilHander.firstElement, 2, "RHSPtr");
                 
-                LLVMValueRef RHSPtr = LLVMBuildInBoundsGEP(builderRef, RHS, valuePointer, 2, "RHSPtr");
-                LLVMValueRef RHSVal = LLVM.LLVMBuildLoad(builderRef, RHSPtr, "loadRHS");
+                LLVMValueRef LHSVal = LLVMBuildLoad(builderRef, LHSPtr, "LHSval");
+                LLVMValueRef RHSVal = LLVMBuildLoad(builderRef, RHSPtr, "RHSval");
                 
-                return LLVM.LLVMBuildICmp(builderRef, LLVM.LLVMIntSLT, LHSVal, RHSVal, "cmpLS64");
+                LLVMValueRef resultVal = LLVMBuildICmp(builderRef, LLVMIntSLT, LHSVal, RHSVal, "cmpLS64");
+    
+                LLVMValueRef valueRef = LLVMBuildAlloca(builderRef, UtilHander.getLLVMStruct("bool", null), "result");
+                LLVMValueRef elem     = LLVMBuildInBoundsGEP(builderRef, valueRef, UtilHander.firstElement, 2, "resultPtr");
+                LLVMValueRef store    = LLVMBuildStore(builderRef, resultVal, elem);
+                
+                return valueRef;
             }
         }
         return null;

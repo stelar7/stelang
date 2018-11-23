@@ -507,7 +507,6 @@ public class SemanticParser
             }
         }
         
-        types.add(new TypeMapList.TypeMap("num"));
         return types;
     }
     

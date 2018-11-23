@@ -5,6 +5,8 @@ import org.bytedeco.javacpp.LLVM.LLVMTypeRef;
 
 import java.util.List;
 
+import static org.bytedeco.javacpp.LLVM.*;
+
 public class PrototypeExpression
 {
     private String                   name;
@@ -41,5 +43,25 @@ public class PrototypeExpression
             refs[i] = UtilHander.getLLVMStruct(parameters.get(i).getType(), null);
         }
         return refs;
+    }
+    
+    public LLVMTypeRef[] getParametersAsPointerTypeRefs()
+    {
+        LLVMTypeRef[] refs = new LLVMTypeRef[parameters.size()];
+        for (int i = 0; i < parameters.size(); i++)
+        {
+            refs[i] = LLVMPointerType(UtilHander.getLLVMStruct(parameters.get(i).getType(), null), 0);
+        }
+        return refs;
+    }
+    
+    @Override
+    public String toString()
+    {
+        return "PrototypeExpression{" +
+               "name='" + name + '\'' +
+               ", parameters=" + parameters +
+               ", returnType='" + returnType + '\'' +
+               '}';
     }
 }

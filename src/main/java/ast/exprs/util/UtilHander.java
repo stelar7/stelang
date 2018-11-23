@@ -18,7 +18,8 @@ public class UtilHander
     private static Map<String, String>       variableTypeTable    = new HashMap<>();
     public static  Map<String, LLVMValueRef> NULLS                = new HashMap<>();
     
-    private static LLVMValueRef mainMethod;
+    private static LLVMValueRef   mainMethod;
+    public static  PointerPointer firstElement = new PointerPointer(new LLVMValueRef[]{LLVMConstInt(LLVMInt32Type(), 0, 0), LLVMConstInt(LLVMInt32Type(), 0, 0)});
     
     public static String mainMethodName   = "application_start";
     public static String externalCallName = "externCcall";
@@ -33,20 +34,20 @@ public class UtilHander
         UtilHander.mainMethod = mainMethod;
     }
     
+    private static void generateLLVMStruct(String name, LLVMTypeRef[] elems)
+    {
+        LLVMTypeRef    ref   = classPointerTable.computeIfAbsent(name, (key) -> LLVMStructCreateNamed(LLVMGetGlobalContext(), key));
+        PointerPointer types = new PointerPointer(elems);
+        LLVMStructSetBody(ref, types, elems.length, 0);
+    }
+    
     public static void computeLLVMStructs()
     {
-        {
-            LLVMTypeRef    ref       = classPointerTable.computeIfAbsent("num", (key) -> LLVMStructCreateNamed(LLVMGetGlobalContext(), key));
-            LLVMTypeRef[]  types_arr = {LLVMInt64Type()};
-            PointerPointer types     = new PointerPointer(types_arr);
-            LLVMStructSetBody(ref, types, 1, 0);
-        }
-        {
-            LLVMTypeRef    ref       = classPointerTable.computeIfAbsent("null", (key) -> LLVMStructCreateNamed(LLVMGetGlobalContext(), key));
-            LLVMTypeRef[]  types_arr = {LLVMVoidType()};
-            PointerPointer types     = new PointerPointer(types_arr);
-            LLVMStructSetBody(ref, types, 1, 0);
-        }
+        generateLLVMStruct("num", new LLVMTypeRef[]{LLVMInt64Type()});
+        generateLLVMStruct("float", new LLVMTypeRef[]{LLVMFloatType()});
+        generateLLVMStruct("object", new LLVMTypeRef[]{});
+        generateLLVMStruct("bool", new LLVMTypeRef[]{LLVMInt1Type()});
+        generateLLVMStruct("void", new LLVMTypeRef[]{LLVMVoidType()});
         
         classPointerTable.forEach((key, value) -> NULLS.put(key, LLVMConstNull(value)));
     }

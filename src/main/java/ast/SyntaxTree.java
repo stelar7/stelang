@@ -30,38 +30,6 @@ public class SyntaxTree
         nextToken();
         
         ast = validateSyntax();
-        updateOperatorReturnType(ast);
-    }
-    
-    private void updateOperatorReturnType(List<Expression> ast)
-    {
-        for (Expression e : ast)
-        {
-            if (!(e instanceof ClassExpression))
-            {
-                continue;
-            }
-            
-            ClassExpression  c  = (ClassExpression) e;
-            List<Expression> bl = c.getBody();
-            for (Expression be : bl)
-            {
-                if (be instanceof ConstructorExpression)
-                {
-                    ConstructorExpression ce  = (ConstructorExpression) be;
-                    PrototypeExpression   pex = ce.getPrototype();
-                    ce.setPrototype(new PrototypeExpression(pex.getName(), pex.getParameters(), c.getClassname()));
-                    continue;
-                }
-                
-                if (be instanceof OperatorExpression)
-                {
-                    OperatorExpression  oe = (OperatorExpression) be;
-                    PrototypeExpression pe = oe.getPrototype();
-                    oe.setPrototype(new PrototypeExpression(pe.getName(), pe.getParameters(), c.getClassname()));
-                }
-            }
-        }
     }
     
     private static Map<TokenType, Integer> binOps = new HashMap<>()
@@ -182,10 +150,28 @@ public class SyntaxTree
         return TokenType.UNKNOWN;
     }
     
+    private TokenType nextTokenSkippingWhitespace()
+    {
+        do
+        {
+            nextToken();
+        } while (currentToken.getType() == TokenType.WHITESPACE);
+        
+        return currentToken.getType();
+    }
+    
     private TokenType assertThenNext(TokenType... type)
     {
         TokenType returnType = assertType(type);
-        nextToken();
+        do
+        {
+            nextToken();
+            if (currentToken == null)
+            {
+                break;
+            }
+        } while (currentToken.getType() == TokenType.WHITESPACE);
+        
         return returnType;
     }
     
@@ -193,7 +179,11 @@ public class SyntaxTree
     {
         assertType(type);
         String content = currentToken.getContent();
-        nextToken();
+        do
+        {
+            nextToken();
+        } while (currentToken.getType() == TokenType.WHITESPACE);
+        
         return content;
     }
     
@@ -205,7 +195,7 @@ public class SyntaxTree
     public List<Expression> validateSyntax()
     {
         List<Expression> s = new ArrayList<>();
-        while (currentToken.getType() != TokenType.UNKNOWN)
+        while (currentToken != null)
         {
             switch (currentToken.getType())
             {
@@ -273,9 +263,9 @@ public class SyntaxTree
             {
                 break;
             }
-            nextToken();
+            nextTokenSkippingWhitespace();
         }
-        nextToken();
+        nextTokenSkippingWhitespace();
         
         return list;
     }
@@ -315,7 +305,7 @@ public class SyntaxTree
     
     private List<Expression> handleClassBody()
     {
-        nextToken();
+        nextTokenSkippingWhitespace();
         
         List<Expression> expressions = new ArrayList<>();
         while (currentToken.getType() != TokenType.RSQUIGLY)
@@ -355,7 +345,8 @@ public class SyntaxTree
         {
             identifier.append(currentToken.getContent());
             nextToken();
-        } while (currentToken.getType() != TokenType.LPAREN);
+        } while (currentToken.getType() != TokenType.WHITESPACE);
+        nextTokenSkippingWhitespace();
         
         PrototypeExpression prototype = parseOperatorPrototype(visibility, identifier.toString());
         BlockExpression     body      = parseBlockExpression();
@@ -392,7 +383,7 @@ public class SyntaxTree
     {
         String    visibility = currentToken.getContent();
         TokenType vType      = currentToken.getType();
-        nextToken();
+        nextTokenSkippingWhitespace();
         
         if (vType != TokenType.VAR && vType != TokenType.CONST)
         {
@@ -492,14 +483,14 @@ public class SyntaxTree
         List<String> params = new ArrayList<>();
         do
         {
-            nextToken();
+            nextTokenSkippingWhitespace();
             if (currentToken.getType() != TokenType.RPAREN)
             {
                 String name = assertGetThenNext(TokenType.IDENTIFIER);
                 params.add(name);
             }
         } while (currentToken.getType() == TokenType.COMMA);
-        nextToken();
+        nextTokenSkippingWhitespace();
         
         return new IntrinsicExpression(function, params);
     }
@@ -635,7 +626,7 @@ public class SyntaxTree
                  peekType(2, TokenType.DOUBLEQUOTE)))
         {
             sb.append(currentToken.getContent());
-            nextToken();
+            nextTokenSkippingWhitespace();
         }
         nextToken();
         nextToken();
@@ -686,7 +677,7 @@ public class SyntaxTree
         
         if (currentToken.getType() == TokenType.QUESTIONMARK)
         {
-            nextToken();
+            nextTokenSkippingWhitespace();
             Expression trueCond = parseExpression(true, false);
             assertThenNext(TokenType.COLON);
             Expression falseCond = parseExpression(true, false);
@@ -696,7 +687,7 @@ public class SyntaxTree
         
         if (currentToken.getType() == TokenType.QUESTIONMARKCOLON)
         {
-            nextToken();
+            nextTokenSkippingWhitespace();
             Expression falseCond = parseExpression();
             return new TernaryExpression(condition, condition, falseCond);
         }
@@ -724,7 +715,7 @@ public class SyntaxTree
             
         } else
         {
-            nextToken();
+            nextTokenSkippingWhitespace();
             List<Expression> trueStatements = new ArrayList<>();
             while (currentToken.getType() != TokenType.RSQUIGLY)
             {
@@ -733,7 +724,7 @@ public class SyntaxTree
                 
                 assertThenNext(TokenType.SEMICOLON);
             }
-            nextToken();
+            nextTokenSkippingWhitespace();
             
             return parseElse(condition, trueStatements);
         }
@@ -750,7 +741,7 @@ public class SyntaxTree
         {
             return new IfExpression(condition, trueStatements, List.of());
         }
-        nextToken();
+        nextTokenSkippingWhitespace();
         
         if (currentToken.getType() != TokenType.LSQUIGLY)
         {
@@ -761,7 +752,7 @@ public class SyntaxTree
             return new IfExpression(condition, trueStatements, List.of(falseStatement));
         } else
         {
-            nextToken();
+            nextTokenSkippingWhitespace();
             List<Expression> falseStatements = new ArrayList<>();
             while (currentToken.getType() != TokenType.RSQUIGLY)
             {
@@ -770,7 +761,7 @@ public class SyntaxTree
                 
                 assertThenNext(TokenType.SEMICOLON);
             }
-            nextToken();
+            nextTokenSkippingWhitespace();
             
             return new IfExpression(condition, trueStatements, falseStatements);
         }
@@ -790,7 +781,7 @@ public class SyntaxTree
             body.add(doStatement);
         } else
         {
-            nextToken();
+            nextTokenSkippingWhitespace();
             while (currentToken.getType() != TokenType.RSQUIGLY)
             {
                 Expression parsed = parseExpression();
@@ -798,7 +789,7 @@ public class SyntaxTree
                 
                 assertThenNext(TokenType.SEMICOLON);
             }
-            nextToken();
+            nextTokenSkippingWhitespace();
         }
         
         assertThenNext(TokenType.WHILE);
@@ -817,12 +808,12 @@ public class SyntaxTree
         {
             if (currentToken.getType() == TokenType.SEMICOLON)
             {
-                nextToken();
+                nextTokenSkippingWhitespace();
             }
             
             return new DoWhileExpression(condition, doStatements);
         }
-        nextToken();
+        nextTokenSkippingWhitespace();
         
         if (currentToken.getType() != TokenType.LSQUIGLY)
         {
@@ -832,7 +823,7 @@ public class SyntaxTree
             return new DoWhileThenExpression(condition, doStatements, List.of(thenStatements));
         } else
         {
-            nextToken();
+            nextTokenSkippingWhitespace();
             List<Expression> falseStatements = new ArrayList<>();
             while (currentToken.getType() != TokenType.RSQUIGLY)
             {
@@ -841,7 +832,7 @@ public class SyntaxTree
                 
                 assertThenNext(TokenType.SEMICOLON);
             }
-            nextToken();
+            nextTokenSkippingWhitespace();
             
             return new DoWhileThenExpression(condition, doStatements, falseStatements);
         }
@@ -857,7 +848,7 @@ public class SyntaxTree
         
         if (currentToken.getType() == TokenType.SEMICOLON)
         {
-            nextToken();
+            nextTokenSkippingWhitespace();
             return parseThenWhile(condition, List.of());
         }
         
@@ -879,7 +870,7 @@ public class SyntaxTree
             return parseThenWhile(condition, List.of(doStatement));
         } else
         {
-            nextToken();
+            nextTokenSkippingWhitespace();
             List<Expression> doStatements = new ArrayList<>();
             while (currentToken.getType() != TokenType.RSQUIGLY)
             {
@@ -888,7 +879,7 @@ public class SyntaxTree
                 
                 assertThenNext(TokenType.SEMICOLON);
             }
-            nextToken();
+            nextTokenSkippingWhitespace();
             
             return parseThenWhile(condition, doStatements);
         }
@@ -900,7 +891,7 @@ public class SyntaxTree
         {
             return new WhileExpression(condition, doStatements);
         }
-        nextToken();
+        nextTokenSkippingWhitespace();
         
         if (currentToken.getType() != TokenType.LSQUIGLY)
         {
@@ -911,7 +902,7 @@ public class SyntaxTree
             return new WhileThenExpression(condition, doStatements, List.of(thenStatements));
         } else
         {
-            nextToken();
+            nextTokenSkippingWhitespace();
             List<Expression> falseStatements = new ArrayList<>();
             while (currentToken.getType() != TokenType.RSQUIGLY)
             {
@@ -920,7 +911,7 @@ public class SyntaxTree
                 
                 assertThenNext(TokenType.SEMICOLON);
             }
-            nextToken();
+            nextTokenSkippingWhitespace();
             
             return new WhileThenExpression(condition, doStatements, falseStatements);
         }
@@ -944,7 +935,7 @@ public class SyntaxTree
         
         if (currentToken.getType() == TokenType.SEMICOLON)
         {
-            nextToken();
+            nextTokenSkippingWhitespace();
             return parseThenFor(init, condition, increment, new NullExpression());
         }
         
@@ -977,7 +968,7 @@ public class SyntaxTree
         
         if (currentToken.getType() == TokenType.SEMICOLON)
         {
-            nextToken();
+            nextTokenSkippingWhitespace();
             return parseThenForEach(init, collection, new NullExpression());
         }
         
@@ -1009,7 +1000,7 @@ public class SyntaxTree
         {
             return new ForEachExpression(init, collection, doStatements);
         }
-        nextToken();
+        nextTokenSkippingWhitespace();
         
         if (currentToken.getType() != TokenType.LSQUIGLY)
         {
@@ -1037,7 +1028,7 @@ public class SyntaxTree
             
             if (ending.contains(currentToken.getType()))
             {
-                nextToken();
+                nextTokenSkippingWhitespace();
                 return data;
             }
             
@@ -1046,10 +1037,10 @@ public class SyntaxTree
                 logParseError("Expected , in argument list");
             } else
             {
-                nextToken();
+                nextTokenSkippingWhitespace();
             }
         }
-        nextToken();
+        nextTokenSkippingWhitespace();
         return data;
     }
     
@@ -1059,7 +1050,7 @@ public class SyntaxTree
         {
             return new ForExpression(init, condition, increment, doStatement);
         }
-        nextToken();
+        nextTokenSkippingWhitespace();
         
         if (currentToken.getType() != TokenType.LSQUIGLY)
         {
@@ -1104,7 +1095,7 @@ public class SyntaxTree
             
             if (currentToken.getType() == TokenType.LPAREN)
             {
-                nextToken();
+                nextTokenSkippingWhitespace();
                 List<Expression> params = new ArrayList<>();
                 while (currentToken.getType() != TokenType.RPAREN)
                 {
@@ -1118,11 +1109,11 @@ public class SyntaxTree
                     
                     assertThenNext(TokenType.COMMA);
                 }
-                nextToken();
+                nextTokenSkippingWhitespace();
                 members.add(new EnumMemberExpression(name, params));
                 if (currentToken.getType() == TokenType.COMMA)
                 {
-                    nextToken();
+                    nextTokenSkippingWhitespace();
                     continue;
                 }
             }
@@ -1130,7 +1121,7 @@ public class SyntaxTree
             if (currentToken.getType() == TokenType.COMMA)
             {
                 members.add(new EnumMemberExpression(name, List.of()));
-                nextToken();
+                nextTokenSkippingWhitespace();
             }
         }
         
@@ -1140,7 +1131,7 @@ public class SyntaxTree
     
     private Expression parseAssert()
     {
-        nextToken();
+        nextTokenSkippingWhitespace();
         Expression condition = parseExpression();
         
         return new AssertExpression(condition);
@@ -1167,7 +1158,7 @@ public class SyntaxTree
                 }
                 
                 opb.append(currentToken.getContent());
-                nextToken();
+                nextTokenSkippingWhitespace();
             } while (!stopTypes.contains(currentToken.getType()) && opb.length() != 2);
             
             TokenType  useType = TokenType.from(opb.toString());
@@ -1188,7 +1179,7 @@ public class SyntaxTree
     {
         List<Expression> exps = new ArrayList<>();
         exps.add(left);
-        nextToken();
+        nextTokenSkippingWhitespace();
         
         while (true)
         {
@@ -1221,7 +1212,7 @@ public class SyntaxTree
             return new VariableExpression(id);
         }
         
-        nextToken();
+        nextTokenSkippingWhitespace();
         List<Expression> parameters = new ArrayList<>();
         if (currentToken.getType() != TokenType.RPAREN)
         {
@@ -1240,11 +1231,11 @@ public class SyntaxTree
                     logParseError("Expected , or ) in argument list");
                 }
                 
-                nextToken();
+                nextTokenSkippingWhitespace();
             }
         }
         
-        nextToken();
+        nextTokenSkippingWhitespace();
         
         return new CallExpression(id, parameters);
     }
@@ -1273,12 +1264,12 @@ public class SyntaxTree
             {
                 caseIndex++;
                 
-                nextToken();
+                nextTokenSkippingWhitespace();
                 Expression exp;
                 
                 if (currentToken.getType() == TokenType.LSQUIGLY)
                 {
-                    nextToken();
+                    nextTokenSkippingWhitespace();
                     List<Object> exps = new ArrayList<>();
                     while (currentToken.getType() != TokenType.RSQUIGLY)
                     {
@@ -1291,7 +1282,7 @@ public class SyntaxTree
                         assertThenNext(TokenType.COMMA);
                     }
                     
-                    nextToken();
+                    nextTokenSkippingWhitespace();
                     exp = new ArrayExpression(exps);
                 } else
                 {
@@ -1317,7 +1308,7 @@ public class SyntaxTree
             
             if (currentToken.getType() == TokenType.DEFAULT)
             {
-                nextToken();
+                nextTokenSkippingWhitespace();
                 
                 assertThenNext(TokenType.COLON);
                 assertThenNext(TokenType.LSQUIGLY);
@@ -1331,7 +1322,7 @@ public class SyntaxTree
             }
         }
         
-        nextToken();
+        nextTokenSkippingWhitespace();
         
         return new SwitchExpression(cases, defaultParam);
     }
@@ -1361,7 +1352,7 @@ public class SyntaxTree
         List<PrototypeParameter> params = new ArrayList<>();
         do
         {
-            nextToken();
+            nextTokenSkippingWhitespace();
             if (currentToken.getType() != TokenType.RPAREN)
             {
                 String clazz = assertGetThenNext(TokenType.IDENTIFIER);
@@ -1389,7 +1380,7 @@ public class SyntaxTree
         List<PrototypeParameter> params = new ArrayList<>();
         do
         {
-            nextToken();
+            nextTokenSkippingWhitespace();
             if (currentToken.getType() != TokenType.RPAREN)
             {
                 String clazz = assertGetThenNext(TokenType.IDENTIFIER);
@@ -1398,7 +1389,7 @@ public class SyntaxTree
                 params.add(new PrototypeParameter(clazz, name));
             }
         } while (currentToken.getType() == TokenType.COMMA);
-        nextToken();
+        nextTokenSkippingWhitespace();
         
         if (visibility.equals("constructor"))
         {
@@ -1420,7 +1411,7 @@ public class SyntaxTree
     
     private Expression parseImport()
     {
-        nextToken();
+        nextTokenSkippingWhitespace();
         
         String classname = assertGetThenNext(TokenType.IDENTIFIER);
         assertThenNext(TokenType.FROM);

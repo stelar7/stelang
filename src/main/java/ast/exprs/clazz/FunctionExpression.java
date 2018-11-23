@@ -60,11 +60,11 @@ public class FunctionExpression extends ControlExpression
         
         String functionName = prototype.getName();
         
-        LLVMTypeRef    returnType = UtilHander.getLLVMStruct(prototype.getReturnType(), null);
-        LLVMTypeRef[]  arguments  = prototype.getParametersAsTypeRefs();
-        PointerPointer args       = new PointerPointer(arguments);
-        LLVMTypeRef  functionPrototype = LLVMFunctionType(returnType, args, arguments.length, 0);
-        LLVMValueRef function          = UtilHander.addLLVMMethod(functionName, LLVMAddFunction(parent, functionName, functionPrototype));
+        LLVMTypeRef    returnType        = LLVMPointerType(UtilHander.getLLVMStruct(prototype.getReturnType(), null), 0);
+        LLVMTypeRef[]  arguments         = prototype.getParametersAsPointerTypeRefs();
+        PointerPointer args              = new PointerPointer(arguments);
+        LLVMTypeRef    functionPrototype = LLVMFunctionType(returnType, args, arguments.length, 0);
+        LLVMValueRef   function          = UtilHander.addLLVMMethod(functionName, LLVMAddFunction(parent, functionName, functionPrototype));
         LLVMSetFunctionCallConv(function, LLVMCCallConv);
         
         Map<String, LLVMValueRef> params = new HashMap<>();
@@ -89,5 +89,15 @@ public class FunctionExpression extends ControlExpression
         }
         
         return null;
+    }
+    
+    @Override
+    public String toString()
+    {
+        return "FunctionExpression{" +
+               "visibility='" + visibility + '\'' +
+               ", prototype=" + prototype +
+               ", body=" + body +
+               '}';
     }
 }

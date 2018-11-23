@@ -5,15 +5,15 @@ class num {
     num:value;
 
 
-    operator+(num:self, num:other): num {
+    operator+ (num:self, num:other): num {
         return ~add64(self, other);
     }
 
-    operator=(num:self, num:other): num {
+    operator= (num:self, num:other): num {
         return ~set64(self, other);
     }
 
-    operator<(num:self, num:other): num {
+    operator< (num:self, num:other): bool {
         return ~cmpLS64(self, other);
     }
 
