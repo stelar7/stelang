@@ -30,6 +30,7 @@ public class IntrinsicExpression implements Expression
         LLVMValueRef              LHS        = paramRefs.get(params.get(0));
         
         LLVMPrintModuleToFile((LLVMModuleRef) parent[0], "test", new BytePointer((Pointer) null));
+        //LLVMVerifyModule((LLVMModuleRef) parent[0], LLVMAbortProcessAction, new BytePointer((Pointer) null));
         
         switch (function)
         {
@@ -43,13 +44,13 @@ public class IntrinsicExpression implements Expression
             {
                 LLVMValueRef RHS = paramRefs.get(params.get(1));
                 LLVM.LLVMBuildStore(builderRef, RHS, LHS);
-                return RHS;
+                return LHS;
             }
             
             case "cmpLS64":
             {
-                LLVMValueRef RHS     = paramRefs.get(params.get(1));
-                LLVMTypeRef  numType = UtilHander.getLLVMStruct("num", null);
+                LLVMValueRef RHS  = paramRefs.get(params.get(1));
+                LLVMTypeRef numType = UtilHander.getLLVMStruct("num", null);
                 
                 PointerPointer valuePointer = new PointerPointer(new LLVMValueRef[]{LLVMConstInt(LLVMInt32Type(), 0, 0), LLVMConstInt(LLVMInt32Type(), 0, 0)});
                 LLVMValueRef   LHSPtr       = LLVMBuildInBoundsGEP(builderRef, LHS, valuePointer, 2, "LHSPtr");
