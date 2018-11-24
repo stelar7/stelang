@@ -55,9 +55,9 @@ public class FullTest
         // LLVMAddDemoteMemoryToRegisterPass(pass); // Demotes every possible value to memory
         LLVMAddGVNPass(pass);
         LLVMAddCFGSimplificationPass(pass);
-        //LLVMRunPassManager(pass, module);
-        //LLVMDumpModule(module);
-        LLVMPrintModuleToFile(module, "test", error);
+        LLVMRunPassManager(pass, module);
+        LLVMDumpModule(module);
+        LLVMPrintModuleToFile(module, "test_optimized", error);
         
         LLVMGenericValueRef exec_args = LLVMCreateGenericValueOfInt(LLVMInt32Type(), 10, 0);
         LLVMGenericValueRef exec_res  = LLVMRunFunction(engine, UtilHander.getMainMethod(), 0, exec_args);

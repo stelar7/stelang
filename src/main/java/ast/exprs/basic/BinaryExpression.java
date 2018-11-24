@@ -50,8 +50,10 @@ public class BinaryExpression implements Expression
         
         LLVMValueRef leftCode  = (LLVMValueRef) left.codegen(obj);
         LLVMValueRef rightCode = (LLVMValueRef) right.codegen(obj);
+    
+        LLVMPrintModuleToFile((LLVMModuleRef) obj[0], "test", new BytePointer((Pointer) null));
         
-        LLVMValueRef   method       = UtilHander.getLLVMMethod(left, op.getContent());
+        LLVMValueRef   method       = UtilHander.getLLVMMethod("STL1<24self3num5other3num4bool");
         LLVMValueRef[] call_op_args = {leftCode, rightCode};
         LLVMValueRef   call_op      = LLVMBuildCall(builder, method, new PointerPointer(call_op_args), 2, this.toString());
         

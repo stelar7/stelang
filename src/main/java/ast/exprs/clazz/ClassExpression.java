@@ -48,7 +48,7 @@ public class ClassExpression implements Expression
         LLVMBuilderRef builder = (LLVMBuilderRef) obj[1];
         
         LLVMTypeRef classRef = UtilHander.getLLVMStruct(classname, this);
-        body.codegen(module, builder, classRef);
+        body.codegen(module, builder, classname);
         FunctionExpression.bodies.forEach(Supplier::get);
         FunctionExpression.bodies.clear();
         

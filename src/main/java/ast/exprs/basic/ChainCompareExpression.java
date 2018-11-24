@@ -39,7 +39,6 @@ public class ChainCompareExpression implements Expression
         LLVMValueRef   parent  = (LLVMValueRef) obj[1];
         LLVMBuilderRef builder = (LLVMBuilderRef) obj[2];
         
-        LLVMBasicBlockRef entry   = LLVMAppendBasicBlock(parent, "entry");
         LLVMValueRef      current = null;
         for (int i = 0; i < exps.size() - 1; i++)
         {
@@ -49,11 +48,11 @@ public class ChainCompareExpression implements Expression
             LLVMValueRef leftCode  = (LLVMValueRef) left.codegen(obj);
             LLVMValueRef rightCode = (LLVMValueRef) right.codegen(obj);
             
-            LLVMValueRef   method       = UtilHander.getLLVMMethod(left, op.getContent());
+            LLVMValueRef   method       = UtilHander.getLLVMMethod("STL1<24self3num5other3num4bool");
             LLVMValueRef[] call_op_args = {leftCode, rightCode};
             LLVMValueRef   call_op      = LLVMBuildCall(builder, method, new PointerPointer(call_op_args), 2, String.format("a %s b", op.getContent()));
             
-            LLVMValueRef ifStmt = LLVMBuildICmp(builder, LLVMIntEQ, call_op, LLVMConstInt(LLVMInt1Type(), 1, 0), "value == 1");
+            LLVMValueRef ifStmt = LLVMBuildICmp(builder, LLVMIntEQ, call_op, LLVMConstInt(LLVMInt1Type(), 1, 0), "comparisonResult");
             
             if (current == null)
             {

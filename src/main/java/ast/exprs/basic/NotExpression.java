@@ -53,5 +53,4 @@ public class NotExpression implements Expression
         
         return null;
     }
-    
 }

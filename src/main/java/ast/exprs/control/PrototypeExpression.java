@@ -4,6 +4,7 @@ import ast.exprs.util.UtilHander;
 import org.bytedeco.javacpp.LLVM.LLVMTypeRef;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.bytedeco.javacpp.LLVM.*;
 
@@ -63,5 +64,17 @@ public class PrototypeExpression
                ", parameters=" + parameters +
                ", returnType='" + returnType + '\'' +
                '}';
+    }
+    
+    public String getMangledName()
+    {
+        return new StringBuilder().append("STL")
+                                  .append(name.length()).append(name)
+                                  .append(parameters.size())
+                                  .append(parameters.stream().map(p -> p.getName().length() + p.getName()
+                                                                       + p.getType().length() + p.getType())
+                                                    .collect(Collectors.joining("")))
+                                  .append(returnType.length())
+                                  .append(returnType).toString();
     }
 }

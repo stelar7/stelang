@@ -1183,13 +1183,26 @@ public class SyntaxTree
         
         while (true)
         {
-            exps.add(parseExpression());
+            Expression e = parseExpression();
+            if (e instanceof ChainCompareExpression)
+            {
+                ChainCompareExpression cc = (ChainCompareExpression) e;
+                if (cc.getOperator().getType() == op.getType())
+                {
+                    exps.addAll(cc.getExpressions());
+                } else
+                {
+                    exps.add(e);
+                }
+            } else
+            {
+                exps.add(e);
+            }
             
             if (currentToken.getType() != op.getType())
             {
                 break;
             }
-            
             assertThenNext(op.getType());
         }
         

@@ -56,37 +56,40 @@ public class FunctionExpression extends ControlExpression
     {
         LLVMModuleRef  parent  = (LLVMModuleRef) obj[0];
         LLVMBuilderRef builder = (LLVMBuilderRef) obj[1];
-        LLVMTypeRef    clazz   = (LLVMTypeRef) obj[2];
         
-        String functionName = prototype.getName();
-        
-        LLVMTypeRef    returnType        = LLVMPointerType(UtilHander.getLLVMStruct(prototype.getReturnType(), null), 0);
-        LLVMTypeRef[]  arguments         = prototype.getParametersAsPointerTypeRefs();
-        PointerPointer args              = new PointerPointer(arguments);
-        LLVMTypeRef    functionPrototype = LLVMFunctionType(returnType, args, arguments.length, 0);
-        LLVMValueRef   function          = UtilHander.addLLVMMethod(functionName, LLVMAddFunction(parent, functionName, functionPrototype));
-        LLVMSetFunctionCallConv(function, LLVMCCallConv);
-        
-        Map<String, LLVMValueRef> params = new HashMap<>();
-        for (int i = 0; i < arguments.length; i++)
-        {
-            LLVMValueRef ref = LLVMGetParam(function, i);
-            params.put(prototype.getParameters().get(i).getName(), ref);
-        }
-        
-        LLVMBasicBlockRef entry = LLVMAppendBasicBlock(function, functionName);
-        LLVMPositionBuilderAtEnd(builder, entry);
-        
-        bodies.add(() -> {
+        String mangledName = prototype.getMangledName();
+        UtilHander.getFunctions().computeIfAbsent(mangledName, (mn) -> {
+            
+            LLVMTypeRef    returnType        = LLVMPointerType(UtilHander.getLLVMStruct(prototype.getReturnType(), null), 0);
+            LLVMTypeRef[]  arguments         = prototype.getParametersAsPointerTypeRefs();
+            PointerPointer args              = new PointerPointer(arguments);
+            LLVMTypeRef    functionPrototype = LLVMFunctionType(returnType, args, arguments.length, 0);
+            LLVMValueRef   function          = UtilHander.addLLVMMethod(mangledName, LLVMAddFunction(parent, mangledName, functionPrototype));
+            LLVMSetFunctionCallConv(function, LLVMCCallConv);
+            
+            Map<String, LLVMValueRef> params = new HashMap<>();
+            for (int i = 0; i < arguments.length; i++)
+            {
+                LLVMValueRef ref = LLVMGetParam(function, i);
+                params.put(prototype.getParameters().get(i).getName(), ref);
+            }
+            
+            LLVMBasicBlockRef entry = LLVMAppendBasicBlock(function, prototype.getName());
             LLVMPositionBuilderAtEnd(builder, entry);
-            body.codegen(parent, function, builder, params);
-            return Optional.empty();
+            
+            bodies.add(() -> {
+                LLVMPositionBuilderAtEnd(builder, entry);
+                body.codegen(parent, function, builder, params);
+                return Optional.empty();
+            });
+            
+            if (prototype.getName().equals(UtilHander.mainMethodName))
+            {
+                UtilHander.setMainMethod(function);
+            }
+            
+            return function;
         });
-        
-        if (functionName.equals(UtilHander.mainMethodName))
-        {
-            UtilHander.setMainMethod(function);
-        }
         
         return null;
     }

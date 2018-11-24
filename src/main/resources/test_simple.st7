@@ -7,10 +7,11 @@ class test_simple
         num:z = x + y;
 
         testIf(x,y,z);
+        testIf(z,y,x);
     }
 
     function testIf(num:x, num:y, num:z):num {
-        if (x < y) {
+        if (x < y < z) {
             return 1;
         } else {
             return 0;

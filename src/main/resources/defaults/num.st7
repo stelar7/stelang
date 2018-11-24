@@ -5,16 +5,24 @@ class num {
     num:value;
 
 
-    operator+ (num:self, num:other): num {
+    operator + (num:self, num:other): num {
         return ~add64(self, other);
     }
 
-    operator= (num:self, num:other): num {
+    operator = (num:self, num:other): num {
         return ~set64(self, other);
     }
 
-    operator< (num:self, num:other): bool {
+    operator < (num:self, num:other): bool {
         return ~cmpLS64(self, other);
+    }
+
+    operator bool (num:self):bool {
+        return value > 0;
+    }
+
+    operator > (num:self, num:other): bool {
+        return ~cmpGT64(self, other);
     }
 
     /*

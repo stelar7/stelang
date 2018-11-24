@@ -39,12 +39,12 @@ public class CallExpression implements Expression
         LLVMValueRef   parent  = (LLVMValueRef) obj[1];
         LLVMBuilderRef builder = (LLVMBuilderRef) obj[2];
         
-        LLVMValueRef method = UtilHander.getLLVMMethod(null, methodName);
+        LLVMValueRef method = UtilHander.getLLVMMethod( "STL1<24self3num5other3num4bool");
         if (methodName.equals(UtilHander.externalCallName))
         {
             String methodName = ((TextExpression) arguments.get(0)).content;
             String returnType = ((TextExpression) arguments.get(1)).content;
-            method = UtilHander.getLLVMMethod(null, methodName);
+            method = UtilHander.getLLVMMethod( methodName);
             if (method == null)
             {
                 List<Expression> args = arguments.subList(2, arguments.size());
