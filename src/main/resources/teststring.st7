@@ -1,0 +1,8 @@
+class test_simple
+{
+    function application_start()
+    {
+        text:x = "hello world!";
+        ~print(x);
+    }
+}

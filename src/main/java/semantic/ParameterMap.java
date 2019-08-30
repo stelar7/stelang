@@ -1,7 +1,7 @@
 package semantic;
 
 import ast.exprs.control.PrototypeParameter;
-import javafx.util.Pair;
+import div.Pair;
 
 import java.util.*;
 

@@ -1,12 +1,11 @@
-import ast.*;
-import ast.exprs.Expression;
+import ast.SyntaxTree;
 import ast.exprs.util.UtilHander;
 import div.Utils;
 import lexer.*;
 import org.bytedeco.javacpp.*;
 import semantic.SemanticParser;
 
-import java.util.*;
+import java.util.List;
 
 import static org.bytedeco.javacpp.LLVM.*;
 
@@ -15,7 +14,7 @@ public class FullTest
     
     public static void main(String[] args)
     {
-        String filename = "test_simple.st7";
+        String filename = "teststring.st7";
         String data     = Utils.readFile(filename);
         
         Lexer          lexer      = new Lexer();

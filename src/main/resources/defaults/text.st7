@@ -1,4 +1,8 @@
 class text {
+
+    int8[]:bytes;
+    int64:length;
+
 /*
 
     operator.(text:self, text:other): num {

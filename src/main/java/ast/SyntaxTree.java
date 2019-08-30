@@ -522,10 +522,32 @@ public class SyntaxTree
         
         if (next.getType() == TokenType.LBRACKET)
         {
-            return parseArrayAccess();
+            if (peekToken(2).getType() != TokenType.RBRACKET)
+            {
+                return parseArrayAccess();
+            }
+            return parseArrayVariableDefinition();
         }
         
         return parseIdentifier();
+    }
+    
+    private Expression parseArrayVariableDefinition()
+    {
+        String    visibility = currentToken.getContent();
+        TokenType vType      = currentToken.getType();
+        nextTokenSkippingWhitespace();
+        
+        if (vType != TokenType.VAR && vType != TokenType.CONST)
+        {
+            assertThenNext(TokenType.LBRACKET);
+            assertThenNext(TokenType.RBRACKET);
+            assertThenNext(TokenType.COLON);
+        }
+        
+        String identifier = assertGetThenNext(TokenType.IDENTIFIER);
+        
+        return new ArrayVariableDefinitionExpression(identifier, visibility);
     }
     
     private Expression parseCreate()

@@ -1,9 +1,8 @@
 package ast.exprs.util;
 
-import ast.exprs.Expression;
 import ast.exprs.clazz.ClassExpression;
-import org.bytedeco.javacpp.*;
-import org.bytedeco.javacpp.LLVM.LLVMTypeRef;
+import org.bytedeco.javacpp.LLVM.*;
+import org.bytedeco.javacpp.PointerPointer;
 
 import java.util.*;
 
@@ -44,6 +43,7 @@ public class UtilHander
         LLVMStructSetBody(ref, types, elems.length, 0);
     }
     
+    
     public static void computeLLVMStructs()
     {
         generateLLVMStruct("num", new LLVMTypeRef[]{LLVMInt64Type()});
@@ -53,6 +53,15 @@ public class UtilHander
         generateLLVMStruct("void", new LLVMTypeRef[]{LLVMVoidType()});
         
         classPointerTable.forEach((key, value) -> NULLS.put(key, LLVMConstNull(value)));
+    }
+    
+    public static void generateCBindings(LLVMModuleRef module, LLVMBuilderRef builder)
+    {
+        LLVMTypeRef    returnType        = LLVMInt32Type();
+        PointerPointer args              = new PointerPointer(LLVMPointerType(LLVMInt8Type(), 0));
+        LLVMTypeRef    functionPrototype = LLVMFunctionType(returnType, args, 1, 0);
+        LLVMValueRef   method            = UtilHander.addLLVMMethod("puts", LLVMAddFunction(module, "puts", functionPrototype));
+        LLVMSetFunctionCallConv(method, LLVMCCallConv);
     }
     
     private static LLVMValueRef generateFunctionHeader(LLVMModuleRef module, LLVMBuilderRef builderRef, String name, String ret, LLVMTypeRef[] arguments)
@@ -73,8 +82,21 @@ public class UtilHander
     
     public static void generateIntrinsicFunctions(LLVMModuleRef moduleRef, LLVMBuilderRef builderRef)
     {
-        LLVMTypeRef   num    = UtilHander.getLLVMStruct("num", null);
-        LLVMTypeRef[] intint = new LLVMTypeRef[]{LLVMPointerType(num, 0), LLVMPointerType(num, 0)};
+        LLVMTypeRef   num     = UtilHander.getLLVMStruct("num", null);
+        LLVMTypeRef   text    = UtilHander.getLLVMStruct("text", null);
+        LLVMTypeRef[] intint  = new LLVMTypeRef[]{LLVMPointerType(num, 0), LLVMPointerType(num, 0)};
+        LLVMTypeRef[] textRef = new LLVMTypeRef[]{LLVMPointerType(text, 0)};
+        // print
+        {
+            PointerPointer bytes  = buildPointerPointer(0, 0);
+            PointerPointer length = buildPointerPointer(0, 1);
+            
+            LLVMValueRef method   = generateFunctionHeader(moduleRef, builderRef, "print", "void", textRef);
+            LLVMValueRef input    = LLVMGetParam(method, 0);
+            LLVMValueRef inputPtr = LLVMBuildInBoundsGEP(builderRef, input, bytes, 2, "bytesGEP");
+            LLVMBuildCall(builderRef, UtilHander.getLLVMMethod("puts"), new PointerPointer(inputPtr), 1, "puts");
+            LLVMBuildRet(builderRef, LLVMConstInt(LLVMInt32Type(), 0, 0));
+        }
         // add64
         {
             LLVMValueRef method = generateFunctionHeader(moduleRef, builderRef, "add64", "num", intint);
@@ -133,28 +155,33 @@ public class UtilHander
             
             LLVMBuildRet(builderRef, valueRef);
         }
-    
+        
         // >
         {
             LLVMValueRef method = generateFunctionHeader(moduleRef, builderRef, "cmpGT64", "bool", intint);
-        
+            
             LLVMValueRef LHS = LLVMGetParam(method, 0);
             LLVMValueRef RHS = LLVMGetParam(method, 1);
-        
+            
             LLVMValueRef LHSPtr = LLVMBuildInBoundsGEP(builderRef, LHS, UtilHander.firstElement, 2, "LHSPtr");
             LLVMValueRef RHSPtr = LLVMBuildInBoundsGEP(builderRef, RHS, UtilHander.firstElement, 2, "RHSPtr");
-        
+            
             LLVMValueRef LHSVal = LLVMBuildLoad(builderRef, LHSPtr, "LHSval");
             LLVMValueRef RHSVal = LLVMBuildLoad(builderRef, RHSPtr, "RHSval");
-        
+            
             LLVMValueRef resultVal = LLVMBuildICmp(builderRef, LLVMIntSGT, LHSVal, RHSVal, "cmpGT64");
-        
+            
             LLVMValueRef valueRef = LLVMBuildAlloca(builderRef, UtilHander.getLLVMStruct("bool", null), "result");
             LLVMValueRef elem     = LLVMBuildInBoundsGEP(builderRef, valueRef, UtilHander.firstElement, 2, "resultPtr");
             LLVMValueRef store    = LLVMBuildStore(builderRef, resultVal, elem);
-        
+            
             LLVMBuildRet(builderRef, valueRef);
         }
+    }
+    
+    private static PointerPointer buildPointerPointer(int arrayIndex, int parameterIndex)
+    {
+        return new PointerPointer(new LLVMValueRef[]{LLVMConstInt(LLVMInt32Type(), arrayIndex, 0), LLVMConstInt(LLVMInt32Type(), parameterIndex, 0)});
     }
     
     public static LLVMTypeRef getLLVMStruct(String clazz, ClassExpression exp)
@@ -227,4 +254,5 @@ public class UtilHander
     {
         return functionsTable;
     }
+    
 }

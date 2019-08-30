@@ -36,6 +36,7 @@ public class SemanticParser
     public void preInit(LLVMModuleRef module, LLVMBuilderRef builder)
     {
         UtilHander.computeLLVMStructs();
+        UtilHander.generateCBindings(module, builder);
         UtilHander.generateIntrinsicFunctions(module, builder);
         generateDefaultTypeAST().forEach(e -> e.codegen(module, builder));
     }
