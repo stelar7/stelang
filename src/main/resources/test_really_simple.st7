@@ -1,0 +1,9 @@
+class test_really_simple
+{
+    function application_start()
+    {
+        i64:x = 1;
+        i64:y = 10;
+        i64:z = x + y;
+    }
+}

@@ -1,19 +1,19 @@
 class text {
 
-    int8[]:bytes;
-    int64:length;
+    i8[]:bytes;
+    i64:length;
 
 /*
 
-    operator.(text:self, text:other): num {
+    operator.(text:self, text:other): i64 {
         return externCcall("access", "text", self, other);
     }
 
-    operator=(text:self, text:other): num {
+    operator=(text:self, text:other): i64 {
         return externCcall("set64", "text", self, other);
     }
 
-    operator+(text:self, text:other): num {
+    operator+(text:self, text:other): i64 {
         return externCcall("add64", "text", self, other);
     }
 

@@ -2,15 +2,15 @@ class test_simple
 {
     function application_start()
     {
-        num:x = 1;
-        num:y = 10;
-        num:z = x + y;
+        i32:x = 1;
+        i32:y = 10;
+        i32:z = x + y;
 
         testIf(x,y,z);
         testIf(z,y,x);
     }
 
-    function testIf(num:x, num:y, num:z):num {
+    function testIf(i32:x, i32:y, i32:z):i32 {
         if (x < y < z) {
             return 1;
         } else {

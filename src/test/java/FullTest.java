@@ -14,7 +14,7 @@ public class FullTest
     
     public static void main(String[] args)
     {
-        String filename = "teststring.st7";
+        String filename = "test_really_simple.st7";
         String data     = Utils.readFile(filename);
         
         Lexer          lexer      = new Lexer();
@@ -28,6 +28,7 @@ public class FullTest
         semantics.codegen(module, builder);
         
         BytePointer error = new BytePointer((Pointer) null); // Used to retrieve messages from functions
+        LLVMPrintModuleToFile(module, "test", error);
         LLVMLinkInMCJIT();
         LLVMInitializeNativeAsmPrinter();
         LLVMInitializeNativeAsmParser();

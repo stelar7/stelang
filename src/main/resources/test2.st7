@@ -9,7 +9,7 @@ class test2 {
         return (a < b < c) && (a > b > c) && (a != b != c) && (a == b == c) && (a <= b <= c) && (a >= b >= c);
     }
 
-    function testOperator(): float {
+    function testOperator(): f32 {
         test2: a = test2();
         test2: b = test2();
 

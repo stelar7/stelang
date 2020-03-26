@@ -77,7 +77,6 @@ public class SemanticParser
         List<ImportExpression> imports = new ArrayList<>();
         for (Expression e : ast)
         {
-            //noinspection StatementWithEmptyBody
             if (e instanceof ImportExpression)
             {
                 imports.add((ImportExpression) e);

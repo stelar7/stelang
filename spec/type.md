@@ -24,10 +24,7 @@ that only end after the quotes
 
 ### Int  
 ```
-Ints are signed one's compliment 64bit numbers
-They have the following limits:  
-max value:  9,223,372,036,854,775,807
-min value: -9,223,372,036,854,775,807
+Ints are signed two's compliment numbers based on their prefix
 ```
 
 ```
@@ -56,8 +53,7 @@ min value: -9,223,372,036,854,775,807
 
 ### Float  
 ```
-Floats are 64bit floating point numbers (commonly known as the double-precision floating-point format)
-They are accurate to 15 decimals
+Floats are ints with decimals
 ```
 
 ```

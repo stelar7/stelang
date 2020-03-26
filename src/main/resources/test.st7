@@ -3,14 +3,14 @@ import test3 from "/test3.st7";
 
 enum myenum2 {
     A(1), B(1), C(1), D(1);
-    constructor myenum2(num:value);
+    constructor myenum2(i32:value);
 }
 
 
 class test {
 
-    num:n;
-    num: j = 5;
+    i32:n;
+    i32: j = 5;
     const k = 5;
     var l = 5;
     const m = switch(a) {
@@ -46,8 +46,8 @@ class test {
     }
 
 
-    function testCast(num:a, num:b):num {
-        cast (num:c = b) {
+    function testCast(i32:a, i32:b):i32 {
+        cast (i32:c = b) {
             return b + c;
         }
 
@@ -57,14 +57,14 @@ class test {
         return a;
     }
 
-    function testAssert(num:a, num:b):num {
+    function testAssert(i32:a, i32:b):i32 {
         assert a;
         assert b;
 
         return a + b;
     }
     
-    function testIf(num:a, num:b):num {
+    function testIf(i32:a, i32:b):i32 {
         if (a) return b; else return c;
         if (d) return e; else { return f; }
         if (g) { return h; } else return i;
@@ -74,13 +74,13 @@ class test {
         return 0;
     }
 
-    function testTernary(num:a, num:b):num {
+    function testTernary(i32:a, i32:b):i32 {
         const h = a ? b ? c : d : e ? f : g;
         const i = a ? a : b;
         return h ?: i;
     }
 
-    function testBinaryOps(num:a, num:b):num {
+    function testBinaryOps(i32:a, i32:b):i32 {
         var x = 1;
         var y = 10;
         const z = 3.50;
@@ -95,18 +95,18 @@ class test {
         return x + y;
     }
 
-    function testBlocks(num:t, num:y):num {
-        num:a = 0;
-        {num:b = 0;}
-        {num:b = 0;}
+    function testBlocks(i32:t, i32:y):i32 {
+        i32:a = 0;
+        {i32:b = 0;}
+        {i32:b = 0;}
         {
-            {num:c = 0;}
-            {num:c = 0;}
+            {i32:c = 0;}
+            {i32:c = 0;}
         }
         return 0;
     }
 
-    function testWhile(num:a, num:b):num {
+    function testWhile(i32:a, i32:b):i32 {
         var x = 1;
         var y = 10;
         while(x < y);
@@ -121,7 +121,7 @@ class test {
         return 0;
     }
 
-    function testDo(num:a, num:b):num {
+    function testDo(i32:a, i32:b):i32 {
         var x = 1;
         var y = 10;
         do x++; while(x < y);
@@ -131,7 +131,7 @@ class test {
         return 0;
     }
     
-    function testFor(num:a, num:b):num {
+    function testFor(i32:a, i32:b):i32 {
         var x = 1;
         var y = 10;
         for (;;);
@@ -140,40 +140,40 @@ class test {
         for (;;){} then return x;
         for (;;){} then {return x;}
         for (;;){x++;} then {return x;}
-        for (num: z;;);
-        for (num:z = 0;;);
+        for (i32: z;;);
+        for (i32:z = 0;;);
         for (;x < y;);
         for (;; x++);
-        for (num:z = 0; z < x;);
-        for (num:z = 0; z < x; z++);
-        for (num:z = 0, num:a = 12; z < a; z++);
+        for (i32:z = 0; z < x;);
+        for (i32:z = 0; z < x; z++);
+        for (i32:z = 0, i32:a = 12; z < a; z++);
         return 0;
     }
     
-    function testForeach(num:a, num:b):num {
+    function testForeach(i32:a, i32:b):i32 {
         var x = 0..3;
         var y = List.of(a,b);
         var z = Stream.of(a,b);
         var w = Map.of(a,b);
-        for (num:v : x);
+        for (i32:v : x);
         for (const v : y);
         for (var v : y);
-        for (num:v : z);
-        for (num:v, num:v2 : w);
-        for (num:v : 0..3);
-        for (num:v : List.of(w,b));
-        for (num:v : Stream.of(w,b));
-        for (num:v, num:v2 : Map.of(w, b));
-        for (num:v : z) {} then {}
-        for (num:v : 0..3) {} then {}
+        for (i32:v : z);
+        for (i32:v, i32:v2 : w);
+        for (i32:v : 0..3);
+        for (i32:v : List.of(w,b));
+        for (i32:v : Stream.of(w,b));
+        for (i32:v, i32:v2 : Map.of(w, b));
+        for (i32:v : z) {} then {}
+        for (i32:v : 0..3) {} then {}
         return 0;
     }
 
-    pure testPure(num:a, num:b):num {
+    pure testPure(i32:a, i32:b):i32 {
         return a + b;
     }
 
-    global testGlobal(num:a, num:b):num {
+    global testGlobal(i32:a, i32:b):i32 {
         return a + b;
     }
 
@@ -184,9 +184,9 @@ class test {
         // blank const
     }
 
-    constructor test(num:a);
+    constructor test(i32:a);
 
-    constructor test(num:a, num:b) {
+    constructor test(i32:a, i32:b) {
         j = a;
         l = b;
     }
@@ -200,6 +200,6 @@ enum myenum3 {
     A(3542, 1), B(1, 2), C("asd", 1), D("""asd
     some long text
     """, 1);
-    constructor myenum3(object:val1, num:val2);
+    constructor myenum3(object:val1, i32:val2);
 }
 

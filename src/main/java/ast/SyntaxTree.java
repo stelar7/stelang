@@ -7,6 +7,7 @@ import ast.exprs.control.*;
 import ast.exprs.div.*;
 import lexer.*;
 
+import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -685,7 +686,7 @@ public class SyntaxTree
         {
             String content = assertGetThenNext(TokenType.NUMBER);
             long   num     = Long.parseUnsignedLong(content, 10);
-            return new NumberExpression(num);
+            return new NumberExpression(BigInteger.valueOf(num), 64);
         }
         
         String content = assertGetThenNext(TokenType.FLOAT);

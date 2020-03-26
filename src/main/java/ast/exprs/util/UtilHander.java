@@ -46,8 +46,19 @@ public class UtilHander
     
     public static void computeLLVMStructs()
     {
-        generateLLVMStruct("num", new LLVMTypeRef[]{LLVMInt64Type()});
-        generateLLVMStruct("float", new LLVMTypeRef[]{LLVMFloatType()});
+        generateLLVMStruct("i1", new LLVMTypeRef[]{LLVMInt8Type()});
+        generateLLVMStruct("i8", new LLVMTypeRef[]{LLVMInt8Type()});
+        generateLLVMStruct("i16", new LLVMTypeRef[]{LLVMInt16Type()});
+        generateLLVMStruct("i32", new LLVMTypeRef[]{LLVMInt32Type()});
+        generateLLVMStruct("i64", new LLVMTypeRef[]{LLVMInt64Type()});
+        generateLLVMStruct("i128", new LLVMTypeRef[]{LLVMInt128Type()});
+        
+        generateLLVMStruct("f16", new LLVMTypeRef[]{LLVMHalfType()});
+        generateLLVMStruct("f32", new LLVMTypeRef[]{LLVMFloatType()});
+        generateLLVMStruct("f64", new LLVMTypeRef[]{LLVMDoubleType()});
+        generateLLVMStruct("f80", new LLVMTypeRef[]{LLVMX86FP80Type()});
+        generateLLVMStruct("f128", new LLVMTypeRef[]{LLVMFP128Type()});
+        
         generateLLVMStruct("object", new LLVMTypeRef[]{});
         generateLLVMStruct("bool", new LLVMTypeRef[]{LLVMInt1Type()});
         generateLLVMStruct("void", new LLVMTypeRef[]{LLVMVoidType()});
@@ -87,6 +98,7 @@ public class UtilHander
         LLVMTypeRef[] intint  = new LLVMTypeRef[]{LLVMPointerType(num, 0), LLVMPointerType(num, 0)};
         LLVMTypeRef[] textRef = new LLVMTypeRef[]{LLVMPointerType(text, 0)};
         // print
+        /*
         {
             PointerPointer bytes  = buildPointerPointer(0, 0);
             PointerPointer length = buildPointerPointer(0, 1);
@@ -97,6 +109,8 @@ public class UtilHander
             LLVMBuildCall(builderRef, UtilHander.getLLVMMethod("puts"), new PointerPointer(inputPtr), 1, "puts");
             LLVMBuildRet(builderRef, LLVMConstInt(LLVMInt32Type(), 0, 0));
         }
+         */
+        /*
         // add64
         {
             LLVMValueRef method = generateFunctionHeader(moduleRef, builderRef, "add64", "num", intint);
@@ -118,6 +132,9 @@ public class UtilHander
             
             LLVMBuildRet(builderRef, valueRef);
         }
+        
+         */
+        /*
         // set64
         {
             LLVMValueRef method = generateFunctionHeader(moduleRef, builderRef, "set64", "num", intint);
@@ -135,6 +152,9 @@ public class UtilHander
             LLVMBuildRet(builderRef, LHS);
         }
         // <
+        
+         */
+        /*
         {
             LLVMValueRef method = generateFunctionHeader(moduleRef, builderRef, "cmpLS64", "bool", intint);
             
@@ -156,7 +176,10 @@ public class UtilHander
             LLVMBuildRet(builderRef, valueRef);
         }
         
+        
+         */
         // >
+        /*
         {
             LLVMValueRef method = generateFunctionHeader(moduleRef, builderRef, "cmpGT64", "bool", intint);
             
@@ -177,6 +200,8 @@ public class UtilHander
             
             LLVMBuildRet(builderRef, valueRef);
         }
+        
+         */
     }
     
     private static PointerPointer buildPointerPointer(int arrayIndex, int parameterIndex)

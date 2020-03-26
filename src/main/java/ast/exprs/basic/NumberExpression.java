@@ -5,15 +5,19 @@ import ast.exprs.util.UtilHander;
 import org.bytedeco.javacpp.*;
 import org.bytedeco.javacpp.LLVM.*;
 
+import java.math.BigInteger;
+
 import static org.bytedeco.javacpp.LLVM.*;
 
 public class NumberExpression implements Expression
 {
-    private long val;
+    private BigInteger val;
+    private int        bits;
     
-    public NumberExpression(long val)
+    public NumberExpression(BigInteger val, int bits)
     {
         this.val = val;
+        this.bits = bits;
     }
     
     @Override
@@ -28,11 +32,11 @@ public class NumberExpression implements Expression
             builder = (LLVMBuilderRef) obj[2];
         }
         
-        LLVMTypeRef typeRef = UtilHander.getLLVMStruct("num", null);
+        LLVMTypeRef    typeRef      = UtilHander.getLLVMStruct("i" + bits, null);
         LLVMValueRef   valueRef     = LLVMBuildAlloca(builder, typeRef, "numberVal");
         PointerPointer valuePointer = new PointerPointer(new LLVMValueRef[]{LLVMConstInt(LLVMInt32Type(), 0, 0), LLVMConstInt(LLVMInt32Type(), 0, 0)});
         LLVMValueRef   elem         = LLVMBuildInBoundsGEP(builder, valueRef, valuePointer, 2, "numberPtr");
-        LLVMValueRef   store        = LLVMBuildStore(builder, LLVMConstInt(LLVMInt64Type(), val, 0), elem);
+        LLVMValueRef   store        = LLVMBuildStore(builder, LLVMConstInt(LLVMInt64Type(), val.longValue(), 0), elem);
         
         return store;
     }

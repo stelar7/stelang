@@ -1,0 +1,179 @@
+class i64 {
+
+    //i64:MAX =  0x7FFFFFFFFFFFFFFF;
+    //i64:MIN = -0x7FFFFFFFFFFFFFFF;
+    i64:value;
+
+
+    operator + (i64:self, i64:other): i64 {
+        return ~add64(self, other);
+    }
+
+    operator = (i64:self, i64:other): i64 {
+        return ~set64(self, other);
+    }
+
+    operator < (i64:self, i64:other): bool {
+        return ~cmpLS64(self, other);
+    }
+
+    operator bool (i64:self):bool {
+        return value > 0;
+    }
+
+    operator > (i64:self, i64:other): bool {
+        return ~cmpGT64(self, other);
+    }
+
+    /*
+
+    operator.(i64:self, i64:other): i64 {
+        return externCcall("access", "i64", self, other);
+    }
+
+    operator-(i64:self, i64:other): i64 {
+        return externCcall("sub64", "i64", self, other);
+    }
+
+    operator=-(i64:self, i64:other): i64 {
+        self = self - other;
+        return self;
+    }
+
+    operator*(i64:self, i64:other): i64 {
+        return externCcall("mul64", "i64", self, other);
+    }
+
+    operator/(i64:self, i64:other): i64 {
+        return externCcall("div64", "i64", self, other);
+    }
+
+    operator%(i64:self, i64:other): i64 {
+        return externCcall("mod64", "i64", self, other);
+    }
+
+    operator~(i64:self, i64:other): i64 {
+        return externCcall("negate64", "i64", self, other);
+    }
+
+    operator&(i64:self, i64:other): i64 {
+        return externCcall("and64", "i64", self, other);
+    }
+
+    operator|(i64:self, i64:other): i64 {
+       return externCcall("or64", "i64", self, other);
+    }
+
+    operator>(i64:self, i64:other): i64 {
+        return externCcall("cmpGT64", "i64", self, other);
+    }
+
+    operator>>(i64:self, i64:other): i64 {
+        return externCcall("shiftRight64", "i64", self, other);
+    }
+
+    operator<<(i64:self, i64:other): i64 {
+        return externCcall("shiftLeft64", "i64", self, other);
+    }
+
+    function highestOneBit():i64 {
+        return externCcall("_BitScanForward()", "i64");
+    }
+
+    function oneBits():i64 {
+        i64:clone = value;
+        i64:count;
+
+        while(clone) {
+            count =+ clone & 1;
+            clone =>> 1;
+        }
+
+        return count;
+    }
+
+    function leadingZeroBits():i64 {
+        i64:clone = value;
+        i64:count;
+
+        for (i64:i = 1; i < 64; i++) {
+            if (clone < 0) break;
+            count++;
+            clone =<< 1;
+        }
+
+        return count;
+    }
+
+    function trailingZeroBits():i64 {
+        i64:clone = value;
+        i64:count;
+
+        while(!(clone & 1)) {
+            clone =>> 1;
+            count++;
+        }
+
+        return count;
+    }
+
+    function sign():i64 {
+        if(value > 0) return 1;
+        if(value < 0) return -1;
+        return 0;
+    }
+
+    function rotateLeft(i64:n):i64 {
+        i64:clone = value;
+        return (clone << n) | (clone >> (32 - n)) & (~((-1 >> n) << n));
+    }
+
+
+    function rotateRight(i64:n):i64 {
+        i64:clone = value;
+        return ((clone >> n) % 32) | (clone << (64 - n) % 64);
+    }
+
+    function toHex():text {
+        i64:clone = value;
+        text:result;
+        i64:index;
+
+        while(clone) {
+            result[i] =  text(clone % 16) + "0";
+            clone =/ 16;
+        }
+
+        return result.reverse();
+    }
+
+    function toOctal():text {
+         i64:clone = value;
+         i64:counter = 0;
+         text:result = 0;
+
+         while(clone) {
+             i64:temp = (clone % 8) * (10).pow(counter);
+
+             counter++;
+             result =+ text(temp);
+
+             clone =/ 8;
+         }
+
+         return result;
+    }
+
+    function toBinary():text {
+        i64:clone = value;
+        text:result;
+
+        while(clone) {
+            result = text(clone & 1);
+            clone =>> 1;
+        }
+
+        return result.reverse();
+    }
+*/
+}
